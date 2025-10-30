@@ -22,7 +22,7 @@ export function SolutionSection() {
       icon: <Zap className="w-12 h-12 text-indigo-200" />,
       title: "Instant Payouts",
       description:
-        "Stablecoin rails deliver cleared milestones in seconds &mdash; no banking delays or FX fees.",
+        "Stablecoin rails deliver cleared milestones in seconds — no banking delays or FX fees.",
       benefits: [
         "Same-day settlements",
         "Programmable stablecoins",
