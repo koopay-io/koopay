@@ -23,7 +23,7 @@ interface Milestone {
 
 export default function CreateProjectPage() {
   const router = useRouter();
-  const { createProject, isLoading, error } = useProjectCreation();
+  const { createProjectWithEscrow, isLoading, error } = useProjectCreation();
 
   // Project form state
   const [projectTitle, setProjectTitle] = useState("");
@@ -144,7 +144,7 @@ export default function CreateProjectPage() {
     console.log("Publishing project with data:", projectData);
     console.log("Milestones:", milestones);
 
-    const result = await createProject(projectData);
+    const result = await createProjectWithEscrow(projectData);
 
     console.log("Project creation result:", result);
 
@@ -223,7 +223,7 @@ export default function CreateProjectPage() {
                 <div className="space-y-4">
                   <div className="text-center">
                     <span className="text-2xl font-bold text-foreground">
-                      ${totalAmount.toLocaleString()} USD
+                      ${totalAmount.toLocaleString('en-US')} USD
                     </span>
                   </div>
                   <div className="space-y-2">
