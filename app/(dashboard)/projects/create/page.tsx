@@ -1,4 +1,3 @@
-// app/(dashboard)/projects/create/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -6,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
-import { ArrowLeft, Plus, Check, Edit, User, Loader2 } from "lucide-react";
-import { useFullProjectCreation } from "@/lib/hooks/useFullProjectCreation"; // New Hook
+import { ArrowLeft, Plus, Check, Edit, User } from "lucide-react";
+import { useProjectCreation } from "@/lib/hooks/useProjectCreation";
 import { MilestoneEditModal } from "@/components/milestone-edit-modal";
 import { CollaboratorAssignmentModal } from "@/components/collaborator-assignment-modal";
 
@@ -24,37 +23,49 @@ interface Milestone {
 
 export default function CreateProjectPage() {
   const router = useRouter();
-  // Use our new hook
-  const { createAndFundProject, isLoading, error } = useFullProjectCreation();
+  const { createProjectWithEscrow, isLoading, error } = useProjectCreation();
 
-  // Add a step state to manage the UI
-  const [step, setStep] = useState<"form" | "processing" | "complete">("form");
-
-  // All other existing states remain the same...
+  // Project form state
   const [projectTitle, setProjectTitle] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [totalAmount, setTotalAmount] = useState(8000);
   const [expectedDeliveryDate, setExpectedDeliveryDate] = useState("");
-  const [assignedCollaborator, setAssignedCollaborator] = useState<string | null>(null);
+  const [assignedCollaborator, setAssignedCollaborator] = useState<
+    string | null
+  >(null);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [isMilestoneModalOpen, setIsMilestoneModalOpen] = useState(false);
-  const [editingMilestone, setEditingMilestone] = useState<Milestone | null>(null);
+  const [editingMilestone, setEditingMilestone] = useState<Milestone | null>(
+    null
+  );
   const [isCollaboratorModalOpen, setIsCollaboratorModalOpen] = useState(false);
-  const [selectedCollaborator, setSelectedCollaborator] = useState<{ id: string; full_name: string; position: string; } | null>(null);
-  const [milestones, setMilestones] = useState<Milestone[]>([{
-    id: "1",
-    title: "Hero section",
-    description: "Create the wireframes and high quality mockup design of the hero section...",
-    deadline: "2025-05-14",
-    percentage: 50,
-  }]);
+  const [selectedCollaborator, setSelectedCollaborator] = useState<{
+    id: string;
+    full_name: string;
+    position: string;
+  } | null>(null);
 
-  const handleBack = () => router.back();
+  // Milestones state
+  const [milestones, setMilestones] = useState<Milestone[]>([
+    {
+      id: "1",
+      title: "Hero section",
+      description:
+        "Create the wireframes and high quality mockup design of the hero section...",
+      deadline: "2025-05-14",
+      percentage: 50,
+    },
+  ]);
 
-  // ... (handleAddMilestone, handleEditMilestone, handleSaveMilestone, handleDeleteMilestone, handleSelectCollaborator functions remain unchanged)
+  const handleBack = () => {
+    router.back();
+  };
+
   const handleAddMilestone = () => {
+    console.log("handleAddMilestone called");
     setEditingMilestone(null);
     setIsMilestoneModalOpen(true);
+    console.log("Modal should open for new milestone");
   };
 
   const handleEditMilestone = (id: string) => {
@@ -64,10 +75,26 @@ export default function CreateProjectPage() {
   };
 
   const handleSaveMilestone = (milestone: Milestone) => {
+    console.log("handleSaveMilestone called with:", milestone);
+    console.log("editingMilestone:", editingMilestone);
+    console.log("current milestones:", milestones);
+
     if (editingMilestone) {
-      setMilestones(milestones.map((m) => (m.id === milestone.id ? milestone : m)));
+      // Update existing milestone
+      console.log("Updating existing milestone");
+      setMilestones(
+        milestones.map((m) => (m.id === milestone.id ? milestone : m))
+      );
     } else {
-      setMilestones([...milestones, { ...milestone, id: Date.now().toString() }]);
+      // Add new milestone
+      console.log("Adding new milestone");
+      const newMilestone = {
+        ...milestone,
+        id: Date.now().toString(),
+      };
+      console.log("New milestone to add:", newMilestone);
+      setMilestones([...milestones, newMilestone]);
+      console.log("Milestones after adding:", [...milestones, newMilestone]);
     }
   };
 
@@ -75,27 +102,30 @@ export default function CreateProjectPage() {
     setMilestones(milestones.filter((m) => m.id !== id));
   };
 
-  const handleSelectCollaborator = (freelancer: { id: string; full_name: string; position: string; }) => {
+  const handleSelectCollaborator = (freelancer: {
+    id: string;
+    full_name: string;
+    position: string;
+  }) => {
     setSelectedCollaborator(freelancer);
     setAssignedCollaborator(freelancer.id);
   };
-  
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("es-ES", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "2-digit",
-    });
-  };
 
-  // This is the new function that triggers the blockchain + DB flow
   const handlePublishProject = async () => {
-    if (!projectTitle || !projectDescription || !expectedDeliveryDate || !acceptTerms) {
+    if (
+      !projectTitle ||
+      !projectDescription ||
+      !expectedDeliveryDate ||
+      !acceptTerms
+    ) {
+      console.log("Validation failed:", {
+        projectTitle: !!projectTitle,
+        projectDescription: !!projectDescription,
+        expectedDeliveryDate: !!expectedDeliveryDate,
+        acceptTerms,
+      });
       return;
     }
-    setStep("processing");
 
     const projectData = {
       title: projectTitle,
@@ -111,68 +141,51 @@ export default function CreateProjectPage() {
       })),
     };
 
-    const result = await createAndFundProject(projectData);
+    console.log("Publishing project with data:", projectData);
+    console.log("Milestones:", milestones);
+
+    const result = await createProjectWithEscrow(projectData);
+
+    console.log("Project creation result:", result);
 
     if (result.success && result.project) {
-        setStep("complete");
-        // Optionally redirect after a delay
-        setTimeout(() => router.push(`/projects/${result.project.id}`), 3000);
-    } else {
-        // If it fails, go back to the form to show the error
-        setStep("form");
+      router.push(`/projects/${result.project.id}`);
     }
   };
 
-  // Conditional Rendering based on the step
-  if (step === "processing") {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="w-full max-w-2xl">
-          <CardHeader className="text-center">
-            <CardTitle>Processing Project</CardTitle>
-            <CardDescription>Your project is being created and funded on the blockchain. Please wait.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex justify-center items-center p-8">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+    });
+  };
 
-  if (step === "complete") {
-     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="w-full max-w-2xl">
-            <CardHeader className="text-center">
-            <CardTitle>🎉 Project Created & Funded! 🎉</CardTitle>
-            <CardDescription>You will be redirected to your new project shortly.</CardDescription>
-            </CardHeader>
-             <CardContent className="flex justify-center items-center p-8">
-                <Check className="h-16 w-16 text-green-500" />
-            </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // The original form is rendered when step === 'form'
   return (
     <div className="min-h-screen bg-background">
+      {/* Main Content */}
       <div className="container mx-auto px-6 py-8">
-        <Button variant="ghost" onClick={handleBack} className="mb-8 text-foreground hover:bg-muted/50 gap-2">
+        {/* Back Button */}
+        <Button
+          variant="ghost"
+          onClick={handleBack}
+          className="mb-8 text-foreground hover:bg-muted/50 gap-2"
+        >
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Section - New Project (No changes here) */}
+          {/* Left Section - New Project */}
           <div className="space-y-6">
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2">
                 New Project
               </h1>
             </div>
+
             {/* Project Details */}
             <div className="space-y-4">
               <div>
@@ -186,6 +199,7 @@ export default function CreateProjectPage() {
                   className="bg-muted/50 border-border text-foreground"
                 />
               </div>
+
               <div>
                 <label className="text-sm font-medium text-foreground mb-2 block">
                   Brief Description
@@ -199,6 +213,7 @@ export default function CreateProjectPage() {
                 />
               </div>
             </div>
+
             {/* Budget Allocation */}
             <div className="space-y-4">
               <div>
@@ -208,7 +223,7 @@ export default function CreateProjectPage() {
                 <div className="space-y-4">
                   <div className="text-center">
                     <span className="text-2xl font-bold text-foreground">
-                      ${totalAmount.toLocaleString()} USD
+                      ${totalAmount.toLocaleString('en-US')} USD
                     </span>
                   </div>
                   <div className="space-y-2">
@@ -228,6 +243,7 @@ export default function CreateProjectPage() {
                 </div>
               </div>
             </div>
+
             {/* Expected Delivery Date */}
             <div>
               <label className="text-sm font-medium text-foreground mb-2 block">
@@ -240,6 +256,7 @@ export default function CreateProjectPage() {
                 className="bg-muted/50 border-border text-foreground"
               />
             </div>
+
             {/* Assign Collaborator */}
             <div>
               {selectedCollaborator ? (
@@ -286,13 +303,14 @@ export default function CreateProjectPage() {
             </div>
           </div>
 
-          {/* Right Section - Define Milestones (No changes here) */}
+          {/* Right Section - Define Milestones */}
           <div className="space-y-6">
             <div>
               <h2 className="text-2xl font-bold text-foreground mb-2">
                 Define Milestones
               </h2>
             </div>
+
             {/* Milestones List */}
             <div className="space-y-4">
               {milestones.map((milestone) => (
@@ -324,6 +342,7 @@ export default function CreateProjectPage() {
                 </Card>
               ))}
             </div>
+
             {/* Add Milestone Button */}
             <Button
               variant="outline"
@@ -358,6 +377,7 @@ export default function CreateProjectPage() {
               I accept the terms and conditions of the established contract
             </label>
           </div>
+
           <Button
             onClick={handlePublishProject}
             disabled={
@@ -375,6 +395,7 @@ export default function CreateProjectPage() {
         </div>
       </div>
 
+      {/* Milestone Edit Modal */}
       <MilestoneEditModal
         isOpen={isMilestoneModalOpen}
         onClose={() => setIsMilestoneModalOpen(false)}
@@ -382,6 +403,8 @@ export default function CreateProjectPage() {
         onSave={handleSaveMilestone}
         onDelete={handleDeleteMilestone}
       />
+
+      {/* Collaborator Assignment Modal */}
       <CollaboratorAssignmentModal
         isOpen={isCollaboratorModalOpen}
         onClose={() => setIsCollaboratorModalOpen(false)}
