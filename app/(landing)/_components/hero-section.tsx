@@ -1,12 +1,13 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 const primaryButtonClasses =
-  "px-8 py-4 text-sm font-semibold uppercase tracking-wide rounded-full bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 hover:brightness-110 text-white shadow-[0_20px_45px_-15px_rgba(99,102,241,0.7)]";
+  'px-8 py-4 text-sm font-semibold uppercase tracking-wide rounded-full bg-gradient-1 hover:brightness-110 text-white shadow-[0_20px_45px_-15px_rgba(99,102,241,0.7)]';
 
 const secondaryButtonClasses =
-  "px-8 py-4 text-sm font-semibold uppercase tracking-wide rounded-full border border-white/20 text-zinc-200/90 hover:bg-white/10 backdrop-blur";
+  'px-8 py-4 text-sm font-semibold uppercase tracking-wide rounded-full border border-white/20 text-zinc-200/90 hover:bg-white/10 backdrop-blur';
 
 export function HeroSection() {
   return (
@@ -24,28 +25,23 @@ export function HeroSection() {
             Future of freelance payments
           </span>
           <h1 className="text-5xl md:text-7xl font-bold text-zinc-50 leading-tight drop-shadow-[0_25px_60px_rgba(37,99,235,0.25)]">
-            <span className="text-gradient bg-gradient-to-r from-sky-300 via-indigo-200 to-purple-300">
-              Secure payments
-            </span>{" "}
-            for freelancers
+            <span className="bg-gradient-2 text-transparent bg-clip-text">Secure payments</span> for
+            freelancers
           </h1>
           <p className="text-lg md:text-2xl text-zinc-300/90 max-w-3xl mx-auto leading-relaxed">
-            Koopay locks every project inside secure escrow, pushes instant
-            stablecoin payouts, and keeps your reputation portable across the
-            web.
+            Koopay locks every project inside secure escrow, pushes instant stablecoin payouts, and
+            keeps your reputation portable across the web.
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-          <Button size="lg" className={primaryButtonClasses}>
-            Join the Waitlist
-            <ArrowRight className="ml-2 h-5 w-5" />
+          <Button size="lg" className={primaryButtonClasses} asChild>
+            <Link href="/auth/login">
+              Start your journey
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className={secondaryButtonClasses}
-          >
+          <Button variant="outline" size="lg" className={secondaryButtonClasses}>
             Learn More
           </Button>
         </div>
@@ -55,11 +51,11 @@ export function HeroSection() {
             <div className="relative aspect-video overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0f172a]/90 via-[#0b1120]/80 to-[#111827]/90 backdrop-blur">
               <video
                 className="h-full w-full object-cover"
-                src="/video/pitch-demo.mp4"
+                src="/landing/pitch-demo.mp4"
                 preload="metadata"
                 controls
                 playsInline
-                poster="/video/pitch-demo-thumbnail.svg"
+                poster="/landing/pitch-demo-thumbnail.png"
               >
                 Your browser does not support the Koopay product demo video.
               </video>
@@ -68,8 +64,7 @@ export function HeroSection() {
               </div>
             </div>
             <p className="mt-4 text-sm text-zinc-400/80 text-center">
-              Watch the Koopay walkthrough recorded from our latest internal
-              beta build.
+              Watch the Koopay walkthrough recorded from our latest internal beta build.
             </p>
           </div>
           <div className="pointer-events-none absolute inset-x-10 -bottom-10 h-28 rounded-full bg-gradient-to-r from-sky-500/25 via-indigo-500/20 to-purple-500/25 blur-3xl" />

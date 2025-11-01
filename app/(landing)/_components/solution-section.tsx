@@ -1,44 +1,37 @@
-import React from "react";
-import { Shield, Zap, Star, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import { Shield, Zap, Star, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 const primaryButtonClasses =
-  "bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 hover:brightness-110 text-white px-8 py-3 text-sm font-semibold uppercase tracking-wide rounded-full shadow-[0_22px_55px_-20px_rgba(79,70,229,0.85)]";
+  'bg-gradient-1 hover:brightness-110 text-white px-8 py-3 text-sm font-semibold uppercase tracking-wide rounded-full shadow-[0_22px_55px_-20px_rgba(79,70,229,0.85)]';
 
 export function SolutionSection() {
   const features = [
     {
       icon: <Shield className="w-12 h-12 text-sky-300" />,
-      title: "Smart Escrow",
+      title: 'Smart Escrow',
       description:
-        "Milestone-based smart contracts lock funds until both sides sign off on deliverables.",
+        'Milestone-based smart contracts lock funds until both sides sign off on deliverables.',
       benefits: [
-        "Escrow created automatically",
-        "Shared balance visibility",
-        "On-chain dispute automation",
+        'Escrow created automatically',
+        'Shared balance visibility',
+        'On-chain dispute automation',
       ],
     },
     {
       icon: <Zap className="w-12 h-12 text-indigo-200" />,
-      title: "Instant Payouts",
+      title: 'Instant Payouts',
       description:
-        "Stablecoin rails deliver cleared milestones in seconds — no banking delays or FX fees.",
-      benefits: [
-        "Same-day settlements",
-        "Programmable stablecoins",
-        "Compliance-ready ledger",
-      ],
+        'Stablecoin rails deliver cleared milestones in seconds — no banking delays or FX fees.',
+      benefits: ['Same-day settlements', 'Programmable stablecoins', 'Compliance-ready ledger'],
     },
     {
       icon: <Star className="w-12 h-12 text-purple-200" />,
-      title: "Portable Reputation",
+      title: 'Portable Reputation',
       description:
-        "Every milestone writes verifiable reputation to a portable Koopay profile you own.",
-      benefits: [
-        "On-chain proof of work",
-        "Shareable profile",
-        "Cross-platform trust",
-      ],
+        'Every milestone writes verifiable reputation to a portable Koopay profile you own.',
+      benefits: ['On-chain proof of work', 'Shareable profile', 'Cross-platform trust'],
     },
   ];
 
@@ -55,10 +48,10 @@ export function SolutionSection() {
             Koopay is the Trust Layer for Freelance Teams
           </h2>
           <p className="mt-4 text-xl text-zinc-300/85 max-w-3xl mx-auto">
-            Escrow, instant payouts, and verifiable reputation converge in one
-            workflow, giving both sides a dashboard-level view of every project.
+            Escrow, instant payouts, and verifiable reputation converge in one workflow, giving both
+            sides a dashboard-level view of every project.
           </p>
-          <div className="mt-8 w-24 h-1 bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 mx-auto rounded-full" />
+          <div className="mt-8 w-24 h-1 bg-gradient-1 mx-auto rounded-full" />
         </div>
 
         <div className="grid md:grid-cols-3 gap-8 mb-16">
@@ -72,9 +65,7 @@ export function SolutionSection() {
                 <div className="w-20 h-20 bg-slate-900/70 rounded-2xl flex items-center justify-center border border-white/15 backdrop-blur-sm">
                   {feature.icon}
                 </div>
-                <h3 className="text-2xl font-semibold text-zinc-100">
-                  {feature.title}
-                </h3>
+                <h3 className="text-2xl font-semibold text-zinc-100">{feature.title}</h3>
                 <p
                   className="text-zinc-300/90 leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: feature.description }}
@@ -85,7 +76,7 @@ export function SolutionSection() {
                       key={benefitIndex}
                       className="flex items-center gap-3 text-sm text-zinc-200/90"
                     >
-                      <div className="size-1.5 rounded-full bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600" />
+                      <div className="size-1.5 rounded-full bg-gradient-1" />
                       <span dangerouslySetInnerHTML={{ __html: benefit }} />
                     </div>
                   ))}
@@ -102,21 +93,17 @@ export function SolutionSection() {
                 One Command Center for Secure Collaborations
               </h3>
               <p className="text-lg text-zinc-300/85 leading-relaxed">
-                Koopay packages audited smart contracts, instant payouts, and
-                transparent reporting without the crypto overwhelm. Spin up
-                escrow accounts, automate releases, and keep every stakeholder
-                informed.
+                Koopay packages audited smart contracts, instant payouts, and transparent reporting
+                without the crypto overwhelm. Spin up escrow accounts, automate releases, and keep
+                every stakeholder informed.
               </p>
               <div className="space-y-4 text-zinc-200/90">
                 <div className="flex items-start gap-3">
                   <div className="mt-1 size-2 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 shadow-[0_0_10px_rgba(56,189,248,0.6)]" />
                   <div>
-                    <h4 className="font-semibold text-zinc-100">
-                      For Freelancers
-                    </h4>
+                    <h4 className="font-semibold text-zinc-100">For Freelancers</h4>
                     <p className="text-sm text-zinc-400/90">
-                      Guaranteed funds, payout alerts, and reputation that
-                      travels with every win.
+                      Guaranteed funds, payout alerts, and reputation that travels with every win.
                     </p>
                   </div>
                 </div>
@@ -125,15 +112,17 @@ export function SolutionSection() {
                   <div>
                     <h4 className="font-semibold text-zinc-100">For Clients</h4>
                     <p className="text-sm text-zinc-400/90">
-                      Milestones stay accountable with escrow-backed approvals
-                      and dispute automation.
+                      Milestones stay accountable with escrow-backed approvals and dispute
+                      automation.
                     </p>
                   </div>
                 </div>
               </div>
-              <Button className={primaryButtonClasses}>
-                Join the Waitlist
-                <ArrowRight className="ml-2 h-5 w-5" />
+              <Button className={primaryButtonClasses} asChild>
+                <Link href="/auth/login">
+                  Begin now
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
             </div>
 
@@ -142,26 +131,24 @@ export function SolutionSection() {
                 <div className="w-24 h-24 mx-auto bg-slate-900/70 rounded-full flex items-center justify-center border border-white/15 backdrop-blur">
                   <Shield className="w-10 h-10 text-sky-300" />
                 </div>
-                <h4 className="text-xl font-semibold text-zinc-100">
-                  Audit-Ready Infrastructure
-                </h4>
+                <h4 className="text-xl font-semibold text-zinc-100">Audit-Ready Infrastructure</h4>
                 <p className="text-zinc-300/80">
-                  Every contract ships with logs, permissions, and risk controls
-                  aligned to fintech standards.
+                  Every contract ships with logs, permissions, and risk controls aligned to fintech
+                  standards.
                 </p>
                 <div className="grid grid-cols-1 gap-4 text-left lg:grid-cols-3">
                   {[
                     {
-                      title: "Reliability",
-                      copy: "Redundant infrastructure and audits are in progress for beta launch.",
+                      title: 'Reliability',
+                      copy: 'Redundant infrastructure and audits are in progress for beta launch.',
                     },
                     {
-                      title: "Pricing",
-                      copy: "Pricing experiments are underway; final fee structure will be shared pre-launch.",
+                      title: 'Pricing',
+                      copy: 'Pricing experiments are underway; final fee structure will be shared pre-launch.',
                     },
                     {
-                      title: "Payouts",
-                      copy: "Instant stablecoin payouts are planned; settlement timing will be validated with beta users.",
+                      title: 'Payouts',
+                      copy: 'Instant stablecoin payouts are planned; settlement timing will be validated with beta users.',
                     },
                   ].map((item) => (
                     <div
@@ -171,9 +158,7 @@ export function SolutionSection() {
                       <div className="text-xs font-semibold text-sky-200 uppercase tracking-wide">
                         {item.title}
                       </div>
-                      <p className="text-[13px] text-zinc-300/80 mt-2">
-                        {item.copy}
-                      </p>
+                      <p className="text-[13px] text-zinc-300/80 mt-2">{item.copy}</p>
                     </div>
                   ))}
                 </div>

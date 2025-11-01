@@ -1,35 +1,35 @@
-import React from "react";
-import { FileText, Shield, CheckCircle, Star } from "lucide-react";
+import React from 'react';
+import { FileText, Shield, CheckCircle, Star } from 'lucide-react';
 
 export function HowItWorksSection() {
   const steps = [
     {
       icon: <FileText className="w-8 h-8 text-sky-300" />,
-      title: "Client Posts Brief",
+      title: 'Client Posts Brief',
       description:
-        "Scope the project, lock funds in escrow, and outline milestone checkpoints in minutes.",
-      details: "Balances stay visible to both parties from day one.",
+        'Scope the project, lock funds in escrow, and outline milestone checkpoints in minutes.',
+      details: 'Balances stay visible to both parties from day one.',
     },
     {
       icon: <Shield className="w-8 h-8 text-indigo-300" />,
-      title: "Freelancer Accepts",
+      title: 'Freelancer Accepts',
       description:
-        "Verified talent accepts work knowing budgets are secured and timelines are agreed upfront.",
-      details: "Productized milestones keep everyone aligned.",
+        'Verified talent accepts work knowing budgets are secured and timelines are agreed upfront.',
+      details: 'Productized milestones keep everyone aligned.',
     },
     {
       icon: <CheckCircle className="w-8 h-8 text-emerald-300" />,
-      title: "Deliver & Review",
+      title: 'Deliver & Review',
       description:
-        "Upload deliverables, collect feedback, and trigger automated approvals inside Koopay.",
-      details: "Approvals release payouts instantly.",
+        'Upload deliverables, collect feedback, and trigger automated approvals inside Koopay.',
+      details: 'Approvals release payouts instantly.',
     },
     {
       icon: <Star className="w-8 h-8 text-purple-300" />,
-      title: "Payout & Reputation",
+      title: 'Payout & Reputation',
       description:
-        "Funds land in wallets while both sides earn verifiable reputation that travels everywhere.",
-      details: "Profiles update the moment milestones close.",
+        'Funds land in wallets while both sides earn verifiable reputation that travels everywhere.',
+      details: 'Profiles update the moment milestones close.',
     },
   ];
 
@@ -49,7 +49,8 @@ export function HowItWorksSection() {
             Four Steps from Brief to Payout
           </h2>
           <p className="mt-4 text-xl text-zinc-300/85 max-w-3xl mx-auto">
-            Koopay keeps the flow intuitive while the infrastructure quietly guarantees trust, compliance, and payouts.
+            Koopay keeps the flow intuitive while the infrastructure quietly guarantees trust,
+            compliance, and payouts.
           </p>
         </div>
 
@@ -80,7 +81,10 @@ export function HowItWorksSection() {
         <div className="lg:hidden">
           <div className="space-y-8">
             {steps.map((step, index) => (
-              <div key={index} className="flex items-start gap-4 rounded-2xl border border-white/12 bg-slate-900/60 p-5 backdrop-blur shadow-[0_20px_60px_-45px_rgba(79,70,229,0.7)]">
+              <div
+                key={index}
+                className="flex items-start gap-4 rounded-2xl border border-white/12 bg-slate-900/60 p-5 backdrop-blur shadow-[0_20px_60px_-45px_rgba(79,70,229,0.7)]"
+              >
                 <div className="relative flex-shrink-0">
                   <div className="w-16 h-16 bg-slate-900/70 rounded-full border border-white/15 flex items-center justify-center backdrop-blur-sm">
                     {step.icon}
@@ -103,19 +107,20 @@ export function HowItWorksSection() {
         </div>
 
         <div className="mt-16 text-center">
-            <div className="rounded-3xl border border-white/12 bg-gradient-to-br from-slate-900/80 via-[#0b1120]/70 to-slate-900/60 p-8 md:p-12 shadow-[0_40px_120px_-60px_rgba(59,130,246,0.85)] backdrop-blur-2xl">
+          <div className="rounded-3xl border border-white/12 bg-gradient-to-br from-slate-900/80 via-[#0b1120]/70 to-slate-900/60 p-8 md:p-12 shadow-[0_40px_120px_-60px_rgba(59,130,246,0.85)] backdrop-blur-2xl">
             <h3 className="text-2xl md:text-3xl font-semibold text-zinc-100 mb-4">
               Ready to Ship Confident Projects?
             </h3>
             <p className="text-lg text-zinc-300/85 mb-8 max-w-2xl mx-auto">
-              Join builders already managing escrow, payouts, and reputation with Koopay&apos;s all-in-one dashboard.
+              Join builders already managing escrow, payouts, and reputation with Koopay&apos;s
+              all-in-one dashboard.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-4 bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 text-white text-sm font-semibold uppercase tracking-wide rounded-full shadow-[0_22px_55px_-20px_rgba(79,70,229,0.85)] transition-all duration-200 hover:brightness-110">
+              <button className="px-8 py-4 bg-gradient-1 text-white text-sm font-semibold uppercase tracking-wide rounded-full shadow-[0_22px_55px_-20px_rgba(79,70,229,0.85)] transition-all duration-200 hover:brightness-110">
                 Get Started Today
               </button>
               <a
-                href="/video/pitch-demo.mp4"
+                href="/landing/pitch-demo.mp4"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-8 py-4 border border-white/15 text-zinc-200/90 text-sm font-semibold uppercase tracking-wide rounded-full hover:bg-slate-900/60 transition-all duration-200 backdrop-blur"

@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { ThemeProvider } from 'next-themes';
 import { aeonik } from '@/lib/fonts';
-import { TrustlessWorkProvider } from '@/components/providers/TrustlessWorkProvider';
 
 import './globals.css';
 
@@ -23,17 +22,15 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" style={{ colorScheme: 'dark' }}>
       <body className={`${aeonik.className} antialiased`}>
-        <TrustlessWorkProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            forcedTheme="dark"
-            enableSystem={false}
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
-        </TrustlessWorkProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          forcedTheme="dark"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

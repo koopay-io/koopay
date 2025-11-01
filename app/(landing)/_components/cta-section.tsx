@@ -1,19 +1,16 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Mail, Bell } from "lucide-react";
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { ArrowRight, Mail, Bell } from 'lucide-react';
 
 const primaryButtonClasses =
-  "px-8 py-4 text-sm font-semibold uppercase tracking-wide rounded-full bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 hover:brightness-110 text-white shadow-[0_24px_60px_-25px_rgba(79,70,229,0.9)]";
+  'px-8 py-4 text-sm font-semibold uppercase tracking-wide rounded-full bg-gradient-1 hover:brightness-110 text-white shadow-[0_24px_60px_-25px_rgba(79,70,229,0.9)]';
 
 const secondaryButtonClasses =
-  "px-8 py-4 text-sm font-semibold uppercase tracking-wide rounded-full border border-white/15 text-zinc-200/90 hover:bg-slate-900/60 backdrop-blur";
+  'px-8 py-4 text-sm font-semibold uppercase tracking-wide rounded-full border border-white/15 text-zinc-200/90 hover:bg-slate-900/60 backdrop-blur';
 
 export function CTASection() {
   return (
-    <section
-      id="waitlist-beta"
-      className="relative py-24 border-t border-white/10"
-    >
+    <section id="waitlist-beta" className="relative py-24 border-t border-white/10">
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-white/12 via-transparent to-transparent blur-3xl" />
         <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-white/10 via-transparent to-transparent blur-3xl" />
@@ -28,10 +25,10 @@ export function CTASection() {
             Secure Work. Instant Pay. Verified Reputation.
           </h2>
           <p className="text-xl md:text-2xl text-zinc-300/85 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Koopay gives freelancers and clients fintech-grade rails without the
-            complexity of building it in-house.
+            Koopay gives freelancers and clients fintech-grade rails without the complexity of
+            building it in-house.
           </p>
-          <div className="w-24 h-1 bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 mx-auto rounded-full" />
+          <div className="w-24 h-1 bg-gradient-1 mx-auto rounded-full" />
         </div>
 
         <div className="bg-gradient-to-br from-slate-900/80 via-[#0b1120]/70 to-slate-900/60 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-white/12 shadow-[0_45px_140px_-80px_rgba(79,70,229,0.85)] mb-10">
@@ -49,7 +46,7 @@ export function CTASection() {
                 placeholder="Enter your email"
                 className="flex-1 w-full px-4 py-3 bg-transparent text-sm text-zinc-200 placeholder-zinc-500 outline-none"
               />
-              <Button className="w-full sm:w-auto rounded-full bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 hover:brightness-110 text-white text-xs font-semibold uppercase tracking-wide px-6">
+              <Button className="w-full sm:w-auto rounded-full bg-gradient-1 hover:brightness-110 text-white text-xs font-semibold uppercase tracking-wide px-6">
                 <Mail className="w-4 h-4 mr-2" />
                 Join Waitlist
               </Button>
@@ -61,17 +58,8 @@ export function CTASection() {
               Request Beta Invite
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className={secondaryButtonClasses}
-              asChild
-            >
-              <a
-                href="/video/pitch-demo.mp4"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+            <Button variant="outline" size="lg" className={secondaryButtonClasses} asChild>
+              <a href="/landing/pitch-demo.mp4" target="_blank" rel="noopener noreferrer">
                 Watch Demo
               </a>
             </Button>
@@ -81,16 +69,16 @@ export function CTASection() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
           {[
             {
-              title: "Waitlist",
-              copy: "Public waitlist opens after private beta validation.",
+              title: 'Waitlist',
+              copy: 'Public waitlist opens after private beta validation.',
             },
             {
-              title: "Beta",
-              copy: "We&apos;re onboarding a small group of freelancers and clients now.",
+              title: 'Beta',
+              copy: 'We&apos;re onboarding a small group of freelancers and clients now.',
             },
             {
-              title: "Roadmap",
-              copy: "Status updates land in your inbox once milestones clear.",
+              title: 'Roadmap',
+              copy: 'Status updates land in your inbox once milestones clear.',
             },
           ].map((item) => (
             <div
@@ -110,8 +98,7 @@ export function CTASection() {
 
         <div className="mt-12 pt-8 border-t border-white/10">
           <p className="text-zinc-400/80 text-sm">
-            Join the revolution. No spam, just release notes and roadmap
-            invites.
+            Join the revolution. No spam, just release notes and roadmap invites.
           </p>
         </div>
       </div>

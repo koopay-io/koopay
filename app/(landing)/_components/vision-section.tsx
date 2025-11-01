@@ -1,31 +1,31 @@
-import React from "react";
-import { TrendingUp, Globe, Users, Zap } from "lucide-react";
+import React from 'react';
+import { TrendingUp, Globe, Users, Zap } from 'lucide-react';
 
 export function VisionSection() {
   const stats = [
     {
       icon: <Users className="w-8 h-8 text-sky-300" />,
-      number: "57M",
-      label: "Freelancers in US",
-      description: "Growing 3× faster than the traditional workforce.",
+      number: '57M',
+      label: 'Freelancers in US',
+      description: 'Growing 3× faster than the traditional workforce.',
     },
     {
       icon: <TrendingUp className="w-8 h-8 text-emerald-300" />,
-      number: "$1.3T",
-      label: "Global Market",
-      description: "Projected volume by 2027 across remote services.",
+      number: '$1.3T',
+      label: 'Global Market',
+      description: 'Projected volume by 2027 across remote services.',
     },
     {
       icon: <Globe className="w-8 h-8 text-indigo-300" />,
-      number: "50%",
-      label: "Remote Adoption",
-      description: "Teams keeping hybrid/remote policies in place.",
+      number: '50%',
+      label: 'Remote Adoption',
+      description: 'Teams keeping hybrid/remote policies in place.',
     },
     {
       icon: <Zap className="w-8 h-8 text-purple-300" />,
-      number: "86%",
-      label: "Want Better Payments",
-      description: "Freelancers demanding secure, instant payouts.",
+      number: '86%',
+      label: 'Want Better Payments',
+      description: 'Freelancers demanding secure, instant payouts.',
     },
   ];
 
@@ -45,9 +45,11 @@ export function VisionSection() {
           </h2>
           <div className="max-w-4xl mx-auto">
             <p className="text-xl md:text-2xl text-zinc-300/85 leading-relaxed mb-8">
-              The independent economy is booming, yet payouts and trust lag behind. Koopay blends fintech rigour with Web3 rails so every project feels like a tier-one payment experience.
+              The independent economy is booming, yet payouts and trust lag behind. Koopay blends
+              fintech rigour with Web3 rails so every project feels like a tier-one payment
+              experience.
             </p>
-            <div className="w-24 h-1 bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 mx-auto rounded-full" />
+            <div className="w-24 h-1 bg-gradient-1 mx-auto rounded-full" />
           </div>
         </div>
 
@@ -75,7 +77,8 @@ export function VisionSection() {
             </div>
             <h3 className="text-2xl font-semibold text-zinc-100 mb-4">Global Workforce</h3>
             <p className="text-zinc-300/85 leading-relaxed">
-              Koopay makes geography irrelevant. Stablecoins, smart contracts, and identity let freelancers and clients collaborate without banking lock-in.
+              Koopay makes geography irrelevant. Stablecoins, smart contracts, and identity let
+              freelancers and clients collaborate without banking lock-in.
             </p>
           </div>
 
@@ -85,7 +88,8 @@ export function VisionSection() {
             </div>
             <h3 className="text-2xl font-semibold text-zinc-100 mb-4">Instant Economy</h3>
             <p className="text-zinc-300/85 leading-relaxed">
-              Teams expect immediate outcomes. Koopay synchronises approvals, releases funds instantly, and records success for portable credibility.
+              Teams expect immediate outcomes. Koopay synchronises approvals, releases funds
+              instantly, and records success for portable credibility.
             </p>
           </div>
         </div>
@@ -134,7 +138,8 @@ export function VisionSection() {
                 <div className="w-1/2 pl-8">
                   <h4 className="text-xl font-semibold text-zinc-100 mb-2">New Workforce</h4>
                   <p className="text-zinc-300/85">
-                    Digital natives expect transparent, always-on systems that feel trustworthy by default.
+                    Digital natives expect transparent, always-on systems that feel trustworthy by
+                    default.
                   </p>
                 </div>
               </div>
@@ -148,10 +153,11 @@ export function VisionSection() {
               Be Part of the Future of Work
             </h3>
             <p className="text-lg text-zinc-300/85 mb-8">
-              Help us onboard the next million independent builders with trust-first payments and reputation.
+              Help us onboard the next million independent builders with trust-first payments and
+              reputation.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-4 bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 text-white text-sm font-semibold uppercase tracking-wide rounded-full shadow-[0_22px_55px_-20px_rgba(79,70,229,0.85)] transition-all duration-200 hover:brightness-110">
+              <button className="px-8 py-4 bg-gradient-1 text-white text-sm font-semibold uppercase tracking-wide rounded-full shadow-[0_22px_55px_-20px_rgba(79,70,229,0.85)] transition-all duration-200 hover:brightness-110">
                 Join the Movement
               </button>
               <button className="px-8 py-4 border border-white/15 text-zinc-200/90 text-sm font-semibold uppercase tracking-wide rounded-full hover:bg-slate-900/60 transition-all duration-200 backdrop-blur">

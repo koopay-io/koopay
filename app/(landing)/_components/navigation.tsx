@@ -17,7 +17,7 @@ export function Navigation() {
   ];
 
   const primaryCtaClasses =
-    'bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-600 hover:brightness-110 text-white uppercase tracking-wide text-xs font-semibold rounded-full shadow-[0_18px_45px_-20px_rgba(79,70,229,0.85)]';
+    'bg-gradient-1 hover:brightness-110 text-white uppercase tracking-wide text-xs font-semibold rounded-full shadow-[0_18px_45px_-20px_rgba(79,70,229,0.85)]';
 
   return (
     <nav className="fixed inset-x-0 top-4 z-50 flex justify-center px-4">
@@ -53,10 +53,10 @@ export function Navigation() {
 
           <div className="hidden md:flex items-center">
             <Button className={primaryCtaClasses} asChild>
-              <a href="#waitlist-beta">
-                Join Waitlist
+              <Link href="/auth/login">
+                Log in
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
+              </Link>
             </Button>
           </div>
 
