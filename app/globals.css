@@ -31,7 +31,7 @@
     --radius: 0.5rem;
   }
   .dark {
-    --background: 270, 100%, 4%;
+    --background: #ff0000 ;
     --foreground: 0 0% 98%;
     --card: 0 0 0, 10%;
     --card-foreground: 0 0% 98%;
@@ -64,6 +64,10 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-aeonik), system-ui, -apple-system, sans-serif;
+    font-family:
+      var(--font-aeonik),
+      system-ui,
+      -apple-system,
+      sans-serif;
   }
 }
