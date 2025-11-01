@@ -100,10 +100,10 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
   return (
     <OptimizedBackground>
-      <div className="min-h-screen md:h-screen flex flex-col lg:flex-row overflow-hidden items-end justify-end">
-        <div className="w-full lg:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[2000px] mx-auto flex flex-col lg:flex-row lg:items-center">
+      <div className="w-full min-h-screen lg:h-screen flex flex-col lg:flex-row overflow-hidden lg:pr-16">
+        <div className="w-full lg:max-w-[1600px] xl:max-w-[1800px] 2xl:max-w-[2000px] mx-auto flex flex-col lg:flex-row lg:gap-20 lg:h-full lg:items-center lg:justify-center lg:mr-30">
           <motion.div
-            className="w-full lg:w-1/2 flex items-center justify-end lg:justify-end p-4 sm:p-6 md:p-8"
+            className="w-full lg:w-fit flex items-center justify-center lg:justify-end p-4 sm:p-6 md:p-8 lg:h-full "
             initial={{ opacity: 0, x: -50, y: -20 }}
             animate={{ opacity: 1, x: 0, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
@@ -112,17 +112,18 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           </motion.div>
 
           <motion.div
-            className="w-full lg:w-1/2 hidden lg:flex items-center justify-start flex-col"
+            className="w-fit hidden lg:flex items-center justify-start lg:h-full"
             initial={{ opacity: 0, x: 50, y: -20 }}
             animate={{ opacity: 1, x: 0, y: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
           >
-            <div className="w-full max-w-xl xl:max-w-2xl 2xl:max-w-3xl 3xl:max-w-4xl pr-0 py-4">
-              <div className="space-y-4 lg:space-y-5 xl:space-y-6 3xl:space-y-8 flex flex-col h-full justify-center items-start">
+            <div className="w-fit xl:max-w-2xl 2xl:max-w-3xl 3xl:max-w-4xl px-0 lg:h-full flex items-center">
+              <div className="w-fit space-y-4 lg:space-y-5 xl:space-y-6 3xl:space-y-8 flex flex-col justify-center items-start">
                 <motion.div
                   initial={{ opacity: 0, y: -30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
+                  className="w-fit"
                 >
                   <Image
                     src="/logo.svg"
@@ -135,13 +136,16 @@ export function AuthLayout({ children }: AuthLayoutProps) {
                 </motion.div>
 
                 <motion.div
-                  className="space-y-1 lg:space-y-2 3xl:space-y-3"
+                  className="w-fit space-y-1 lg:space-y-2 3xl:space-y-3"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.6, delay: TEXT_DELAY_MS / 1000 }}
                 >
-                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl font-bold text-white leading-tight text-left">
-                    Secure payments for{' '}
+                  <h1>
+                    <span className="text-2xl w-fit sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl font-bold text-white leading-tight text-left">
+                      Secure payments for{' '}
+                    </span>
+                    <br />
                     <motion.span
                       key={displayWord}
                       initial={{ opacity: 0, y: 10 }}
@@ -150,7 +154,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
                         y: hasWordAppeared && !isFading ? 0 : 10,
                       }}
                       transition={{ duration: 0.3, ease: 'easeOut' }}
-                      className="inline-block"
+                      className="text-2xl w-fit sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl 2xl:text-6xl 3xl:text-7xl font-bold text-white leading-tight text-left"
                     >
                       {displayWord}
                     </motion.span>

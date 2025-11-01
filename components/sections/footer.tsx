@@ -1,40 +1,40 @@
-import Image from "next/image";
-import React from "react";
-import { Github, Twitter, Linkedin, Mail } from "lucide-react";
+import Image from 'next/image';
+import React from 'react';
+import { Github, Twitter, Linkedin, Mail } from 'lucide-react';
 
 export function Footer() {
   const footerLinks = {
     product: [
-      { name: "How it Works", href: "#how-it-works" },
-      { name: "Pricing", href: "#pricing" },
-      { name: "Security", href: "#security" },
-      { name: "API", href: "#api" },
+      { name: 'How it Works', href: '#how-it-works' },
+      { name: 'Pricing', href: '#pricing' },
+      { name: 'Security', href: '#security' },
+      { name: 'API', href: '#api' },
     ],
     company: [
-      { name: "About", href: "#about" },
-      { name: "Blog", href: "#blog" },
-      { name: "Careers", href: "#careers" },
-      { name: "Press", href: "#press" },
+      { name: 'About', href: '#about' },
+      { name: 'Blog', href: '#blog' },
+      { name: 'Careers', href: '#careers' },
+      { name: 'Press', href: '#press' },
     ],
     resources: [
-      { name: "Whitepaper", href: "#whitepaper" },
-      { name: "Documentation", href: "#docs" },
-      { name: "Help Center", href: "#help" },
-      { name: "Community", href: "#community" },
+      { name: 'Whitepaper', href: '#whitepaper' },
+      { name: 'Documentation', href: '#docs' },
+      { name: 'Help Center', href: '#help' },
+      { name: 'Community', href: '#community' },
     ],
     legal: [
-      { name: "Privacy Policy", href: "#privacy" },
-      { name: "Terms of Service", href: "#terms" },
-      { name: "Cookie Policy", href: "#cookies" },
-      { name: "Compliance", href: "#compliance" },
+      { name: 'Privacy Policy', href: '#privacy' },
+      { name: 'Terms of Service', href: '#terms' },
+      { name: 'Cookie Policy', href: '#cookies' },
+      { name: 'Compliance', href: '#compliance' },
     ],
   };
 
   const socialLinks = [
-    { icon: <Twitter className="w-5 h-5" />, href: "#", label: "Twitter" },
-    { icon: <Github className="w-5 h-5" />, href: "#", label: "GitHub" },
-    { icon: <Linkedin className="w-5 h-5" />, href: "#", label: "LinkedIn" },
-    { icon: <Mail className="w-5 h-5" />, href: "#", label: "Email" },
+    { icon: <Twitter className="w-5 h-5" />, href: '#', label: 'Twitter' },
+    { icon: <Github className="w-5 h-5" />, href: '#', label: 'GitHub' },
+    { icon: <Linkedin className="w-5 h-5" />, href: '#', label: 'LinkedIn' },
+    { icon: <Mail className="w-5 h-5" />, href: '#', label: 'Email' },
   ];
 
   return (
@@ -51,7 +51,7 @@ export function Footer() {
               <div className="flex items-center gap-3 mb-4">
                 <div className="relative h-9 w-9">
                   <Image
-                    src="/vector-logo.png"
+                    src="/mini-logo.svg"
                     alt="Koopay logo"
                     fill
                     className="object-contain drop-shadow-lg"

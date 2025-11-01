@@ -15,34 +15,35 @@ export async function GET(request: Request) {
   // Handle OAuth errors
   if (error) {
     console.error('OAuth error:', error, errorDescription);
-    return NextResponse.redirect(`${origin}/auth/auth-code-error?error=${error}&error_description=${errorDescription}`);
+    return NextResponse.redirect(`${origin}/auth/login?error=${encodeURIComponent(errorDescription || error)}`);
   }
 
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      // Create Stellar wallet for Google users
+      // Create Stellar wallet for OAuth users (Google, Microsoft, etc.)
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (user && user.app_metadata?.provider === 'google') {
+        if (user && user.app_metadata?.provider) {
+          const provider = user.app_metadata.provider; // 'google' or 'azure' (Microsoft)
           // Check if wallet already exists
           const existingWallet = user.user_metadata?.stellar_wallet;
           
           if (!existingWallet) {
-            console.log('🌟 Creating invisible Stellar wallet for Google user...');
+            console.log(`🌟 Creating invisible Stellar wallet for ${provider} user...`);
             const walletManager = new StellarWalletManager('testnet');
             
-            // Get Google user ID from identity data or use email as fallback
-            const googleIdentity = user.identities?.find(identity => identity.provider === 'google');
-            const googleUserId = googleIdentity?.id || user.email || user.id;
+            // Get user ID from identity data or use email as fallback
+            const identity = user.identities?.find(i => i.provider === provider);
+            const userId = identity?.id || user.email || user.id;
             
-            console.log('🔍 Using identifier:', googleUserId);
+            console.log('🔍 Using identifier:', userId);
             
-            // Create wallet from Google user ID
+            // Create wallet from user ID
             const wallet = await walletManager.createAndFundWallet(
-              googleUserId,
-              'google'
+              userId,
+              provider
             );
             
             // Save wallet to user metadata
@@ -73,6 +74,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/auth/auth-code-error`);
+  // return the user to login page with error
+  return NextResponse.redirect(`${origin}/auth/login?error=${encodeURIComponent('Authentication failed')}`);
 }

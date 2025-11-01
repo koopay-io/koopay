@@ -4,7 +4,6 @@ import { aeonik } from '@/lib/fonts';
 import { TrustlessWorkProvider } from '@/components/providers/TrustlessWorkProvider';
 
 import './globals.css';
-import './background-optimizations.css';
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
