@@ -167,6 +167,90 @@ export class StellarWalletManager {
   }
 
   /**
+   * Establish a trustline to a custom asset
+   */
+  async establishTrustline(
+    secretKey: string,
+    assetCode: string,
+    assetIssuer: string
+  ): Promise<boolean> {
+    try {
+      const keypair = Keypair.fromSecret(secretKey);
+      const account = await this.server.loadAccount(keypair.publicKey());
+
+      const asset = new Asset(assetCode, assetIssuer);
+
+      const transaction = new TransactionBuilder(account, {
+        fee: "100",
+        networkPassphrase:
+          this.network === "testnet" ? Networks.TESTNET : Networks.PUBLIC,
+      })
+        .addOperation(
+          Operation.changeTrust({
+            asset: asset,
+            limit: "100000000", // Large limit
+          })
+        )
+        .setTimeout(30)
+        .build();
+
+      transaction.sign(keypair);
+
+      await this.server.submitTransaction(transaction);
+      console.log(`✅ Trustline established for ${assetCode}`);
+      return true;
+    } catch (error) {
+      console.error("Trustline establishment failed:", error);
+      return false;
+    }
+  }
+
+  /**
+   * Swap XLM for USDC using path payment (testnet)
+   * This converts native XLM to USDC through Stellar's DEX
+   */
+  async swapXLMtoUSDC(
+    secretKey: string,
+    xlmAmount: string,
+    usdcIssuer: string
+  ): Promise<boolean> {
+    try {
+      const keypair = Keypair.fromSecret(secretKey);
+      const account = await this.server.loadAccount(keypair.publicKey());
+
+      const usdcAsset = new Asset("USDC", usdcIssuer);
+
+      // Use path payment strict send to convert XLM to USDC
+      const transaction = new TransactionBuilder(account, {
+        fee: "100000", // Higher fee for path payment
+        networkPassphrase:
+          this.network === "testnet" ? Networks.TESTNET : Networks.PUBLIC,
+      })
+        .addOperation(
+          Operation.pathPaymentStrictSend({
+            sendAsset: Asset.native(),
+            sendAmount: xlmAmount,
+            destination: keypair.publicKey(), // Send to self
+            destAsset: usdcAsset,
+            destMin: "0.1", // Minimum amount to receive (allows for slippage)
+          })
+        )
+        .setTimeout(30)
+        .build();
+
+      transaction.sign(keypair);
+
+      await this.server.submitTransaction(transaction);
+      console.log(`✅ Swapped ${xlmAmount} XLM for USDC`);
+      return true;
+    } catch (error) {
+      console.error("XLM to USDC swap failed:", error);
+      console.error("⚠️ This might fail if there's no liquidity in the testnet DEX");
+      return false;
+    }
+  }
+
+  /**
    * Send payment (simplified version)
    */
   async sendPayment(
