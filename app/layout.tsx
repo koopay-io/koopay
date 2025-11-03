@@ -10,8 +10,9 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: 'Next.js and Supabase Starter Kit',
-  description: 'The fastest way to build apps with Next.js and Supabase',
+  title: 'Koopay: Secure payments for freelancers',
+  description:
+    'Koopay is a decentralized freelancing platform that allows freelancers to get paid securely and efficiently.',
 };
 
 export default function RootLayout({
