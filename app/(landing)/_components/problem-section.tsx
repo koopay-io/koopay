@@ -12,7 +12,7 @@ export function ProblemSection() {
   const fadeInUp = {
     initial: { opacity: 0, y: 40 },
     animate: isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 },
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }
   };
 
   const staggerContainer = {
@@ -28,7 +28,7 @@ export function ProblemSection() {
   const itemAnimation = {
     initial: { opacity: 0, y: 30, scale: 0.95 },
     animate: isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 30, scale: 0.95 },
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] }
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const }
   };
   const problems = [
     {

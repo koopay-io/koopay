@@ -119,26 +119,31 @@ export const useProjectCreation = () => {
         }
 
         // Save project directly to database without escrow
+        const projectInsert = {
+          contractor_id: user.id,
+          freelancer_id: data.freelancer_id,
+          title: data.title,
+          description: data.description,
+          total_amount: data.total_amount,
+          expected_delivery_date: data.expected_delivery_date,
+          status: "pending",
+          contract_id: `mock-contract-${Date.now()}`, // Mock contract ID
+        } as const;
+
         const { data: project, error: projectError } = await supabase
           .from("projects")
-          .insert({
-            contractor_id: user.id,
-            freelancer_id: data.freelancer_id,
-            title: data.title,
-            description: data.description,
-            total_amount: data.total_amount,
-            expected_delivery_date: data.expected_delivery_date,
-            status: "pending",
-            contract_id: `mock-contract-${Date.now()}`, // Mock contract ID
-          })
+          .insert(projectInsert as unknown as never)
           .select()
           .single();
 
         if (projectError) throw projectError;
+        if (!project || !('id' in project)) throw new Error('Project creation failed');
+        
+        const projectId = (project as { id: string }).id;
 
         // Save milestones
         const milestonesToInsert = data.milestones.map((milestone) => ({
-          project_id: project.id,
+          project_id: projectId,
           title: milestone.title,
           description: milestone.description,
           percentage: milestone.percentage,
@@ -148,7 +153,7 @@ export const useProjectCreation = () => {
 
         const { error: milestonesError } = await supabase
           .from("milestones")
-          .insert(milestonesToInsert);
+          .insert(milestonesToInsert as unknown as never[]);
 
         if (milestonesError) throw milestonesError;
 
@@ -300,27 +305,32 @@ export const useProjectCreation = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
+      const projectInsert = {
+        contractor_id: user.id,
+        freelancer_id: data.freelancer_id,
+        title: data.title,
+        description: data.description,
+        total_amount: data.total_amount,
+        expected_delivery_date: data.expected_delivery_date,
+        status: "active",
+        contact_id: contractId, // Save the contract ID
+      } as const;
+
       const { data: project, error: projectError } = await supabase
         .from("projects")
-        .insert({
-          contractor_id: user.id,
-          freelancer_id: data.freelancer_id,
-          title: data.title,
-          description: data.description,
-          total_amount: data.total_amount,
-          expected_delivery_date: data.expected_delivery_date,
-          status: "active",
-          contact_id: contractId, // Save the contract ID
-        })
+        .insert(projectInsert as unknown as never)
         .select()
         .single();
 
       if (projectError) throw projectError;
+      if (!project || !('id' in project)) throw new Error('Project creation failed');
+      
+      const projectId = (project as { id: string }).id;
 
       // 8. Save milestones
       console.log("📝 Step 6: Saving milestones...");
       const milestonesData = data.milestones.map((m, index) => ({
-        project_id: project.id,
+        project_id: projectId,
         title: m.title,
         description: m.description,
         percentage: m.percentage,
@@ -331,7 +341,7 @@ export const useProjectCreation = () => {
 
       const { error: milestonesError } = await supabase
         .from("milestones")
-        .insert(milestonesData);
+        .insert(milestonesData as unknown as never[]);
 
       if (milestonesError) throw milestonesError;
 

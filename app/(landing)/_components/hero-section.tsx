@@ -13,14 +13,7 @@ const primaryButtonClasses =
 const secondaryButtonClasses =
   'px-8 py-4 text-sm font-semibold uppercase tracking-wide rounded-full border border-white/20 text-zinc-200/90 hover:bg-white/10 backdrop-blur';
 
-const rotatingWords = [
-  'agencies',
-  'consultants',
-  'creators',
-  'teams',
-  'companies',
-  'everyone',
-];
+const rotatingWords = ['agencies', 'consultants', 'creators', 'teams', 'companies', 'everyone'];
 
 const WORD_DISPLAY_DURATION_MS = 1800;
 const FINAL_WORD = 'everyone';
@@ -50,7 +43,7 @@ export function HeroSection({ hasUser, hasOrganization }: HeroSectionProps) {
       setTimeout(() => {
         setCurrentWordIndex((prev) => {
           const nextIndex = prev + 1;
-          
+
           if (nextIndex >= rotatingWords.length) {
             setIsAnimating(false);
             setDisplayWord(FINAL_WORD);
@@ -160,7 +153,8 @@ export function HeroSection({ hasUser, hasOrganization }: HeroSectionProps) {
             transition={{ duration: 0.8, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="text-lg md:text-2xl text-zinc-300/90 max-w-3xl mx-auto leading-relaxed"
           >
-            A secure payment method for project-based work — no delays, no ghosting, no complications.{' '}
+            A secure payment method for project-based work — no delays, no ghosting, no
+            complications.{' '}
             <motion.span
               initial={{ opacity: 0 }}
               animate={mounted ? { opacity: 1 } : { opacity: 0 }}
@@ -179,7 +173,6 @@ export function HeroSection({ hasUser, hasOrganization }: HeroSectionProps) {
           className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
         >
           <MagnetizeButton
-            size="lg"
             className={primaryButtonClasses}
             particleCount={14}
             attractRadius={60}
@@ -192,7 +185,6 @@ export function HeroSection({ hasUser, hasOrganization }: HeroSectionProps) {
           </MagnetizeButton>
           <MagnetizeButton
             variant="outline"
-            size="lg"
             className={secondaryButtonClasses}
             particleCount={12}
             attractRadius={50}

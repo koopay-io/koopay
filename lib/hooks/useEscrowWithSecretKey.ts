@@ -50,7 +50,12 @@ export const useEscrowWithSecretKey = () => {
       console.log("🔧 [Deploy Step 1/3] Calling deployEscrow API...");
       
       // 1. Deploy escrow (generates unsigned transaction)
-      const unsignedTx = await deployEscrow(payload, "multi-release");
+      const unsignedTxResponse = await deployEscrow(payload, "multi-release");
+      const unsignedTx = typeof unsignedTxResponse === 'string' 
+        ? unsignedTxResponse 
+        : (unsignedTxResponse as { unsignedTx?: string; transaction?: string }).unsignedTx || 
+          (unsignedTxResponse as { transaction?: string }).transaction || 
+          String(unsignedTxResponse);
       console.log("✅ [Deploy Step 1/3] Unsigned transaction received");
       console.log("📄 Unsigned TX length:", unsignedTx.length);
       
@@ -84,7 +89,12 @@ export const useEscrowWithSecretKey = () => {
     payload: FundEscrowPayload,
     contractorSecretKey: string
   ) => {
-    const unsignedTx = await fundEscrow(payload, "multi-release");
+    const unsignedTxResponse = await fundEscrow(payload, "multi-release");
+    const unsignedTx = typeof unsignedTxResponse === 'string' 
+      ? unsignedTxResponse 
+      : (unsignedTxResponse as { unsignedTx?: string; transaction?: string }).unsignedTx || 
+        (unsignedTxResponse as { transaction?: string }).transaction || 
+        String(unsignedTxResponse);
     const signedTx = signTransactionWithSecretKey(unsignedTx, contractorSecretKey);
     const result = await sendTransaction(signedTx);
     return result;

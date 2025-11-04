@@ -155,7 +155,7 @@ export function useProjectMilestones(projectId: string) {
     try {
       const { data, error } = await supabase
         .from("milestones")
-        .update({ status })
+        .update({ status } as unknown as never)
         .eq("id", milestoneId)
         .select()
         .single();
@@ -192,15 +192,17 @@ export function useProjectMilestones(projectId: string) {
     setError(null);
 
     try {
+      const milestoneInsert = {
+        project_id: projectId,
+        title: milestoneData.title,
+        description: milestoneData.description || null,
+        percentage: milestoneData.percentage,
+        status: "pending",
+      } as const;
+
       const { data, error } = await supabase
         .from("milestones")
-        .insert({
-          project_id: projectId,
-          title: milestoneData.title,
-          description: milestoneData.description || null,
-          percentage: milestoneData.percentage,
-          status: "pending",
-        })
+        .insert(milestoneInsert as unknown as never)
         .select()
         .single();
 
