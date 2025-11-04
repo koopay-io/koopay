@@ -6,14 +6,25 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function MyProjectPage() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState(50);
+  const [title, setTitle] = useState("Simple Test Project");
+  const [description, setDescription] = useState(
+    "One milestone, 100% payment.",
+  );
+  const [totalAmount, setTotalAmount] = useState(50);
+  const [collaboratorPublicKey, setCollaboratorPublicKey] = useState("");
 
   const projectData = {
     title,
     description,
-    amount,
+    total_amount: totalAmount,
+    milestones: [
+      {
+        title: "Project Completion",
+        description: "Full payment upon completion",
+        percentage: 100,
+        deadline: "2025-12-31", // Placeholder deadline
+      },
+    ],
   };
 
   return (
@@ -44,16 +55,29 @@ export default function MyProjectPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="amount">Amount (USDC)</Label>
+          <Label htmlFor="amount">Total Amount (USDC)</Label>
           <Input
             id="amount"
             type="number"
-            value={amount}
-            onChange={(e) => setAmount(Number(e.target.value))}
+            value={totalAmount}
+            onChange={(e) => setTotalAmount(Number(e.target.value))}
           />
         </div>
-        {/* Pass the state to the button component */}
-        <CreateProjectButton projectData={projectData} />
+
+        <div className="space-y-2">
+          <Label htmlFor="collaborator">Collaborator Public Key</Label>
+          <Input
+            id="collaborator"
+            placeholder="G..."
+            value={collaboratorPublicKey}
+            onChange={(e) => setCollaboratorPublicKey(e.target.value)}
+          />
+        </div>
+
+        <CreateProjectButton
+          projectData={projectData}
+          collaboratorPublicKey={collaboratorPublicKey}
+        />
       </div>
     </div>
   );

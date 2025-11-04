@@ -11,8 +11,10 @@ import { http } from "@/lib/stellar/http";
 
 export default function CreateProjectButton({
   projectData,
+  collaboratorPublicKey,
 }: {
   projectData: ProjectData;
+  collaboratorPublicKey: string;
 }) {
   const { wallet } = useStellarWallet();
   const [isLoading, setIsLoading] = useState(false);
@@ -21,7 +23,11 @@ export default function CreateProjectButton({
     if (!wallet) return;
     setIsLoading(true);
 
-    const result = await createEscrow(wallet, projectData);
+    const result = await createEscrow(
+      wallet,
+      projectData,
+      collaboratorPublicKey,
+    );
     const unsignedTx = result.unsignedTransaction;
 
     console.log("Escrow created successfully:", unsignedTx);
