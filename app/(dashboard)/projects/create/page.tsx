@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Check } from "lucide-react";
-import { useProjectCreation } from "@/lib/hooks/useProjectCreation";
+import { useProjectCreation } from "@/lib/hooks/useProjectCreationNew";
 import { MilestoneEditModal } from "@/components/milestone-edit-modal";
 import { CollaboratorAssignmentModal } from "@/components/collaborator-assignment-modal";
 import { ProjectDetailsForm } from "./_components/project-details-form";
@@ -105,7 +105,6 @@ export default function CreateProjectPage() {
       !acceptTerms ||
       !selectedCollaborator
     ) {
-      // You can add more specific error handling here
       console.error("Validation failed");
       return;
     }
@@ -217,7 +216,7 @@ export default function CreateProjectPage() {
         </div>
       </div>
 
-      {/* Modals remain here */}
+      {/* Modals */}
       <MilestoneEditModal
         isOpen={isMilestoneModalOpen}
         onClose={() => setIsMilestoneModalOpen(false)}
