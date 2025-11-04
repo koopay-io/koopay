@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
+import { MagnetizeButton } from '@/components/ui/magnetize-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -316,14 +317,16 @@ export default function LoginPage() {
                 </div>
                 {error && <p className="text-sm text-destructive break-words">{error}</p>}
                 <div className="flex flex-col gap-3">
-                  <Button
+                  <MagnetizeButton
                     type="submit"
                     variant="default"
                     disabled={isLoading}
                     className="w-full bg-gradient-1"
+                    particleCount={14}
+                    attractRadius={60}
                   >
                     {isLoading ? 'Sending code...' : 'Continue'}
-                  </Button>
+                  </MagnetizeButton>
                   <OAuthButtons />
                 </div>
               </div>
@@ -368,14 +371,16 @@ export default function LoginPage() {
                   )}
                 </div>
                 <div className="flex flex-col gap-3">
-                  <Button
+                  <MagnetizeButton
                     type="submit"
                     variant="default"
                     disabled={isLoading || otp.length !== 6}
                     className="w-full"
+                    particleCount={14}
+                    attractRadius={60}
                   >
                     {isLoading ? 'Verifying...' : 'Verify code'}
-                  </Button>
+                  </MagnetizeButton>
                 </div>
                 <OAuthButtons />
               </div>

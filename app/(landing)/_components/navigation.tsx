@@ -17,7 +17,6 @@ export function Navigation({ hasUser, hasOrganization }: NavigationProps) {
   const navItems = [
     { name: 'How it Works', href: '#how-it-works' },
     { name: 'Features', href: '#features' },
-    { name: 'Team', href: '#team' },
     { name: 'Vision', href: '#vision' },
   ];
 

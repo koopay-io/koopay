@@ -57,8 +57,6 @@ export async function updateSession(request: NextRequest) {
     .eq('user_id', user?.sub)
     .single();
 
-  console.log({ data });
-
   // If user is authenticated and does not have a user organization, redirect to onboarding
   if (
     user &&

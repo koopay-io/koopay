@@ -3,7 +3,6 @@ import { HeroSection } from '@/app/(landing)/_components/hero-section';
 import { ProblemSection } from '@/app/(landing)/_components/problem-section';
 import { SolutionSection } from '@/app/(landing)/_components/solution-section';
 import { HowItWorksSection } from '@/app/(landing)/_components/how-it-works';
-import { TeamSection } from '@/app/(landing)/_components/team-section';
 import { VisionSection } from '@/app/(landing)/_components/vision-section';
 import { CTASection } from '@/app/(landing)/_components/cta-section';
 import { Footer } from '@/app/(landing)/_components/footer';
@@ -41,7 +40,6 @@ export default async function Home() {
       <ProblemSection />
       <SolutionSection hasUser={hasUser} hasOrganization={hasOrganization} />
       <HowItWorksSection hasUser={hasUser} hasOrganization={hasOrganization} />
-      <TeamSection />
       <VisionSection hasUser={hasUser} hasOrganization={hasOrganization} />
       <CTASection />
       <Footer />

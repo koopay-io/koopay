@@ -1,4 +1,8 @@
+'use client';
+
 import React from 'react';
+import { motion } from 'framer-motion';
+import { useInView } from 'framer-motion';
 import { Shield, Zap, Star, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -12,6 +16,31 @@ interface SolutionSectionProps {
 }
 
 export function SolutionSection({ hasUser, hasOrganization }: SolutionSectionProps) {
+  const containerRef = React.useRef(null);
+  const isInView = useInView(containerRef, { once: true, amount: 0.2 });
+  
+  const fadeInUp = {
+    initial: { opacity: 0, y: 40 },
+    animate: isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 },
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+  };
+
+  const staggerContainer = {
+    initial: {},
+    animate: isInView ? {
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.2
+      }
+    } : {}
+  };
+
+  const itemAnimation = {
+    initial: { opacity: 0, y: 40, scale: 0.95 },
+    animate: isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 40, scale: 0.95 },
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+  };
+
   const getButtonText = () => {
     if (!hasUser) return 'Begin now';
     if (!hasOrganization) return 'Go to onboarding';
@@ -26,54 +55,54 @@ export function SolutionSection({ hasUser, hasOrganization }: SolutionSectionPro
   const features = [
     {
       icon: <Shield className="w-12 h-12 text-sky-300" />,
-      title: 'Smart Escrow',
+      title: 'Secure Contracts',
       description:
-        'Milestone-based smart contracts lock funds until both sides sign off on deliverables.',
+        'The client creates a contract with milestones, dates, and deliverables, and deposits funds upfront in a secure account. The freelancer works in peace, knowing the money is already reserved.',
       benefits: [
-        'Escrow created automatically',
+        'Contracts created automatically',
         'Shared balance visibility',
-        'On-chain dispute automation',
+        'Automated dispute resolution',
       ],
     },
     {
       icon: <Zap className="w-12 h-12 text-indigo-200" />,
-      title: 'Instant Payouts',
+      title: 'Automatic Payments',
       description:
-        'Stablecoin rails deliver cleared milestones in seconds — no banking delays or FX fees.',
-      benefits: ['Same-day settlements', 'Programmable stablecoins', 'Compliance-ready ledger'],
+        'When a milestone is completed, Koopay automatically releases payment, ensuring fairness and avoiding delays. Built on Stellar for global reach, near-zero fees, and instant payments.',
+      benefits: ['Same-day settlements', 'Low fees', 'Global reach'],
     },
     {
       icon: <Star className="w-12 h-12 text-purple-200" />,
-      title: 'Portable Reputation',
+      title: 'Real-Time Tracking',
       description:
-        'Every milestone writes verifiable reputation to a portable Koopay profile you own.',
-      benefits: ['On-chain proof of work', 'Shareable profile', 'Cross-platform trust'],
+        'Both parties see the status of payments, deadlines, deliveries, and reviews in one dashboard. If a conflict arises, the rules are programmed in the smart contract, protecting both sides.',
+      benefits: ['Clear visibility', 'Transparent process', 'Protected payments'],
     },
   ];
 
   return (
-    <section className="relative py-24" id="features">
+    <section ref={containerRef} className="relative py-24" id="features">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
       <div className="absolute inset-x-0 -top-32 h-64 bg-gradient-to-b from-white/10 via-transparent to-transparent blur-3xl" />
       <div className="relative max-w-6xl mx-auto px-4">
-        <div className="text-center mb-16">
+        <motion.div {...fadeInUp} className="text-center mb-16">
           <span className="inline-flex items-center justify-center rounded-full border border-white/15 bg-slate-900/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-zinc-200/80 backdrop-blur">
             Why Koopay wins
           </span>
           <h2 className="mt-6 text-4xl md:text-5xl font-bold text-zinc-50">
-            Koopay is the Trust Layer for Freelance Teams
+            A Secure Payment Method for When There's Distrust
           </h2>
           <p className="mt-4 text-xl text-zinc-300/85 max-w-3xl mx-auto">
-            Escrow, instant payouts, and verifiable reputation converge in one workflow, giving both
-            sides a dashboard-level view of every project.
+            Koopay is a decentralized, transparent payment management platform that lets freelancers and clients collaborate with complete confidence. No crypto knowledge needed — just simple, secure payments.
           </p>
           <div className="mt-8 w-24 h-1 bg-gradient-1 mx-auto rounded-full" />
-        </div>
+        </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
+        <motion.div {...staggerContainer} className="grid md:grid-cols-3 gap-8 mb-16">
           {features.map((feature, index) => (
-            <div
+            <motion.div
               key={index}
+              {...itemAnimation}
               className="group relative overflow-hidden rounded-3xl border border-white/12 bg-slate-900/60 p-8 shadow-[0_25px_75px_-50px_rgba(79,70,229,0.85)] backdrop-blur-xl transition-transform duration-300 hover:-translate-y-1"
             >
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-br from-white/15 via-transparent to-transparent" />
@@ -98,38 +127,45 @@ export function SolutionSection({ hasUser, hasOrganization }: SolutionSectionPro
                   ))}
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
-        <div className="rounded-3xl border border-white/12 bg-gradient-to-br from-slate-900/80 via-[#0b1120]/70 to-slate-900/60 p-8 md:p-12 shadow-[0_40px_130px_-65px_rgba(59,130,246,0.9)] backdrop-blur-2xl">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+        <motion.div
+          initial={{ opacity: 0, y: 60, scale: 0.98 }}
+          animate={isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 60, scale: 0.98 }}
+          transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="rounded-3xl border border-white/12 bg-gradient-to-br from-slate-900/80 via-[#0b1120]/70 to-slate-900/60 p-8 md:p-12 shadow-[0_40px_130px_-65px_rgba(59,130,246,0.9)] backdrop-blur-2xl"
+        >
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={isInView ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ duration: 0.7, delay: 0.7 }}
+            className="grid md:grid-cols-2 gap-12 items-center"
+          >
             <div className="space-y-6">
               <h3 className="text-3xl font-semibold text-zinc-100">
-                One Command Center for Secure Collaborations
+                How Koopay Works
               </h3>
               <p className="text-lg text-zinc-300/85 leading-relaxed">
-                Koopay packages audited smart contracts, instant payouts, and transparent reporting
-                without the crypto overwhelm. Spin up escrow accounts, automate releases, and keep
-                every stakeholder informed.
+                Instead of relying on chat agreements or manual transfers, Koopay uses smart escrow contracts to automate every stage of the project: from the initial agreement to delivery and payment.
               </p>
               <div className="space-y-4 text-zinc-200/90">
                 <div className="flex items-start gap-3">
                   <div className="mt-1 size-2 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 shadow-[0_0_10px_rgba(56,189,248,0.6)]" />
                   <div>
-                    <h4 className="font-semibold text-zinc-100">For Freelancers</h4>
+                    <h4 className="font-semibold text-zinc-100">Client Creates Contract</h4>
                     <p className="text-sm text-zinc-400/90">
-                      Guaranteed funds, payout alerts, and reputation that travels with every win.
+                      Define scope, deliverables, deadlines, and milestones. Deposit funds upfront in a secure account.
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="mt-1 size-2 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 shadow-[0_0_10px_rgba(167,139,250,0.6)]" />
                   <div>
-                    <h4 className="font-semibold text-zinc-100">For Clients</h4>
+                    <h4 className="font-semibold text-zinc-100">Freelancer Works Securely</h4>
                     <p className="text-sm text-zinc-400/90">
-                      Milestones stay accountable with escrow-backed approvals and dispute
-                      automation.
+                      Work with peace of mind knowing the money is already reserved. When milestones are completed, payments release automatically.
                     </p>
                   </div>
                 </div>
@@ -147,24 +183,23 @@ export function SolutionSection({ hasUser, hasOrganization }: SolutionSectionPro
                 <div className="w-24 h-24 mx-auto bg-slate-900/70 rounded-full flex items-center justify-center border border-white/15 backdrop-blur">
                   <Shield className="w-10 h-10 text-sky-300" />
                 </div>
-                <h4 className="text-xl font-semibold text-zinc-100">Audit-Ready Infrastructure</h4>
+                <h4 className="text-xl font-semibold text-zinc-100">Simple & Secure</h4>
                 <p className="text-zinc-300/80">
-                  Every contract ships with logs, permissions, and risk controls aligned to fintech
-                  standards.
+                  Built on Stellar, Koopay combines global reach, near-zero fees, and instant payments with a simple, intuitive experience. No crypto knowledge required.
                 </p>
                 <div className="grid grid-cols-1 gap-4 text-left lg:grid-cols-3">
                   {[
                     {
-                      title: 'Reliability',
-                      copy: 'Redundant infrastructure and audits are in progress for beta launch.',
+                      title: 'Global',
+                      copy: 'Send and receive payments anywhere in the world, instantly.',
                     },
                     {
-                      title: 'Pricing',
-                      copy: 'Pricing experiments are underway; final fee structure will be shared pre-launch.',
+                      title: 'Low Fees',
+                      copy: 'Minimal transaction fees — no hidden costs or surprise charges.',
                     },
                     {
-                      title: 'Payouts',
-                      copy: 'Instant stablecoin payouts are planned; settlement timing will be validated with beta users.',
+                      title: 'Instant',
+                      copy: 'Payments clear immediately when milestones are completed.',
                     },
                   ].map((item) => (
                     <div
@@ -180,8 +215,8 @@ export function SolutionSection({ hasUser, hasOrganization }: SolutionSectionPro
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );
