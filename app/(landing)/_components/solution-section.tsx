@@ -6,7 +6,23 @@ import Link from 'next/link';
 const primaryButtonClasses =
   'bg-gradient-1 hover:brightness-110 text-white px-8 py-3 text-sm font-semibold uppercase tracking-wide rounded-full shadow-[0_22px_55px_-20px_rgba(79,70,229,0.85)]';
 
-export function SolutionSection() {
+interface SolutionSectionProps {
+  hasUser: boolean;
+  hasOrganization: boolean;
+}
+
+export function SolutionSection({ hasUser, hasOrganization }: SolutionSectionProps) {
+  const getButtonText = () => {
+    if (!hasUser) return 'Begin now';
+    if (!hasOrganization) return 'Go to onboarding';
+    return 'Go to platform';
+  };
+
+  const getButtonHref = () => {
+    if (!hasUser) return '/auth/login';
+    if (!hasOrganization) return '/onboarding';
+    return '/platform';
+  };
   const features = [
     {
       icon: <Shield className="w-12 h-12 text-sky-300" />,
@@ -119,8 +135,8 @@ export function SolutionSection() {
                 </div>
               </div>
               <Button className={primaryButtonClasses} asChild>
-                <Link href="/auth/login">
-                  Begin now
+                <Link href={getButtonHref()}>
+                  {getButtonText()}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>

@@ -1,7 +1,24 @@
 import React from 'react';
 import { TrendingUp, Globe, Users, Zap } from 'lucide-react';
+import Link from 'next/link';
 
-export function VisionSection() {
+interface VisionSectionProps {
+  hasUser: boolean;
+  hasOrganization: boolean;
+}
+
+export function VisionSection({ hasUser, hasOrganization }: VisionSectionProps) {
+  const getButtonText = () => {
+    if (!hasUser) return 'Join the Movement';
+    if (!hasOrganization) return 'Go to onboarding';
+    return 'Go to platform';
+  };
+
+  const getButtonHref = () => {
+    if (!hasUser) return '/auth/login';
+    if (!hasOrganization) return '/onboarding';
+    return '/platform';
+  };
   const stats = [
     {
       icon: <Users className="w-8 h-8 text-sky-300" />,
@@ -157,9 +174,12 @@ export function VisionSection() {
               reputation.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-4 bg-gradient-1 text-white text-sm font-semibold uppercase tracking-wide rounded-full shadow-[0_22px_55px_-20px_rgba(79,70,229,0.85)] transition-all duration-200 hover:brightness-110">
-                Join the Movement
-              </button>
+              <Link
+                href={getButtonHref()}
+                className="px-8 py-4 bg-gradient-1 text-white text-sm font-semibold uppercase tracking-wide rounded-full shadow-[0_22px_55px_-20px_rgba(79,70,229,0.85)] transition-all duration-200 hover:brightness-110 text-center"
+              >
+                {getButtonText()}
+              </Link>
               <button className="px-8 py-4 border border-white/15 text-zinc-200/90 text-sm font-semibold uppercase tracking-wide rounded-full hover:bg-slate-900/60 transition-all duration-200 backdrop-blur">
                 Read Whitepaper
               </button>

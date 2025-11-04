@@ -69,8 +69,8 @@
     --accent: #ffffff;
     --accent-foreground: #16132c;
 
-    --muted: #a3a3a3;
-    --muted-foreground: #ffffff;
+    --muted: #16132c;
+    --muted-foreground: #a3a3a3;
 
     --success: #00b87c;
     --success-foreground: #ffffff;
@@ -94,7 +94,7 @@
 
     --gradient-2: linear-gradient(45deg, #3945eb 0%, #1989fa 100%);
 
-    --gradient-3: linear-gradient(90deg, #5755ff 0%, #0e3cff 100%);
+    --gradient-3: linear-gradient(90deg, rgba(87, 85, 255, 0.2) 0%, rgba(14, 60, 255, 0.2) 100%);
 
     --radius: 0.5rem;
   }

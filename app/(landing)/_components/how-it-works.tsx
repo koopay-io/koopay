@@ -1,7 +1,24 @@
 import React from 'react';
 import { FileText, Shield, CheckCircle, Star } from 'lucide-react';
+import Link from 'next/link';
 
-export function HowItWorksSection() {
+interface HowItWorksSectionProps {
+  hasUser: boolean;
+  hasOrganization: boolean;
+}
+
+export function HowItWorksSection({ hasUser, hasOrganization }: HowItWorksSectionProps) {
+  const getButtonText = () => {
+    if (!hasUser) return 'Get Started Today';
+    if (!hasOrganization) return 'Go to onboarding';
+    return 'Go to platform';
+  };
+
+  const getButtonHref = () => {
+    if (!hasUser) return '/auth/login';
+    if (!hasOrganization) return '/onboarding';
+    return '/platform';
+  };
   const steps = [
     {
       icon: <FileText className="w-8 h-8 text-sky-300" />,
@@ -116,9 +133,12 @@ export function HowItWorksSection() {
               all-in-one dashboard.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-4 bg-gradient-1 text-white text-sm font-semibold uppercase tracking-wide rounded-full shadow-[0_22px_55px_-20px_rgba(79,70,229,0.85)] transition-all duration-200 hover:brightness-110">
-                Get Started Today
-              </button>
+              <Link
+                href={getButtonHref()}
+                className="px-8 py-4 bg-gradient-1 text-white text-sm font-semibold uppercase tracking-wide rounded-full shadow-[0_22px_55px_-20px_rgba(79,70,229,0.85)] transition-all duration-200 hover:brightness-110 text-center"
+              >
+                {getButtonText()}
+              </Link>
               <a
                 href="/landing/pitch-demo.mp4"
                 target="_blank"

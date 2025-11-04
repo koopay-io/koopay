@@ -6,7 +6,12 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Menu, X, ArrowRight } from 'lucide-react';
 
-export function Navigation() {
+interface NavigationProps {
+  hasUser: boolean;
+  hasOrganization: boolean;
+}
+
+export function Navigation({ hasUser, hasOrganization }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   const navItems = [
@@ -18,6 +23,18 @@ export function Navigation() {
 
   const primaryCtaClasses =
     'bg-gradient-1 hover:brightness-110 text-white uppercase tracking-wide text-xs font-semibold rounded-full shadow-[0_18px_45px_-20px_rgba(79,70,229,0.85)]';
+
+  const getButtonText = () => {
+    if (!hasUser) return 'Log in';
+    if (!hasOrganization) return 'Go to onboarding';
+    return 'Go to platform';
+  };
+
+  const getButtonHref = () => {
+    if (!hasUser) return '/auth/login';
+    if (!hasOrganization) return '/onboarding';
+    return '/platform';
+  };
 
   return (
     <nav className="fixed inset-x-0 top-4 z-50 flex justify-center px-4">
@@ -53,8 +70,8 @@ export function Navigation() {
 
           <div className="hidden md:flex items-center">
             <Button className={primaryCtaClasses} asChild>
-              <Link href="/auth/login">
-                Log in
+              <Link href={getButtonHref()}>
+                {getButtonText()}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>

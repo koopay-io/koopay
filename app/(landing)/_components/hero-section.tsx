@@ -9,7 +9,23 @@ const primaryButtonClasses =
 const secondaryButtonClasses =
   'px-8 py-4 text-sm font-semibold uppercase tracking-wide rounded-full border border-white/20 text-zinc-200/90 hover:bg-white/10 backdrop-blur';
 
-export function HeroSection() {
+interface HeroSectionProps {
+  hasUser: boolean;
+  hasOrganization: boolean;
+}
+
+export function HeroSection({ hasUser, hasOrganization }: HeroSectionProps) {
+  const getButtonText = () => {
+    if (!hasUser) return 'Start your journey';
+    if (!hasOrganization) return 'Go to onboarding';
+    return 'Go to platform';
+  };
+
+  const getButtonHref = () => {
+    if (!hasUser) return '/auth/login';
+    if (!hasOrganization) return '/onboarding';
+    return '/platform';
+  };
   return (
     <section className="relative overflow-hidden min-h-screen flex items-center justify-center px-4 pt-28 pb-24">
       <div className="absolute inset-0 -z-10">
@@ -36,8 +52,8 @@ export function HeroSection() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
           <Button size="lg" className={primaryButtonClasses} asChild>
-            <Link href="/auth/login">
-              Start your journey
+            <Link href={getButtonHref()}>
+              {getButtonText()}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>

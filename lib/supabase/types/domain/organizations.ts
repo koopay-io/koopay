@@ -16,7 +16,6 @@ export const zOrganizationRow = zBaseRow.extend({
   legal_name: z.string(),
   legal_id: z.string(),
   legal_phone: z.string().nullable(),
-  bio: z.string(),
   avatar_url: z.string().nullable(),
 
   legal_country_id: zSupabaseId,
@@ -28,6 +27,7 @@ export const zOrganizationRow = zBaseRow.extend({
   legal_suite: z.string().nullable(),
   legal_floor: z.string().nullable(),
 
+  bio: z.string(),
   business_type: zOrganizationBusinessTypeEnum,
   custom_business_type: z.string().nullable(),
   industry_type: zOrganizationIndustryTypeEnum,
@@ -43,7 +43,6 @@ export const zOrganizationInsert = zBaseInsert.extend({
   legal_name: z.string(),
   legal_id: z.string(),
   legal_phone: z.string().optional().nullable(),
-  bio: z.string(),
   avatar_url: z.string().optional().nullable(),
 
   legal_country_id: zSupabaseId,
@@ -55,6 +54,7 @@ export const zOrganizationInsert = zBaseInsert.extend({
   legal_suite: z.string().optional().nullable(),
   legal_floor: z.string().optional().nullable(),
 
+  bio: z.string(),
   business_type: zOrganizationBusinessTypeEnum,
   custom_business_type: z.string().optional().nullable(),
   industry_type: zOrganizationIndustryTypeEnum,
