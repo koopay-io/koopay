@@ -147,117 +147,129 @@ export const useProjectCreation = () => {
       // Step 6: Generate and upload contract
       console.log("Step 6: Generating and uploading contract...");
       try {
+        // Type for profile data
+        interface ProfileData {
+          full_name: string;
+          country: string;
+          address: string;
+          email: string;
+        }
+
         // Fetch contractor profile data
         const { data: contractorProfile, error: contractorError } = await supabase
           .from("freelancer_profiles")
           .select("full_name, country, address, email")
           .eq("id", user.id)
-          .single() as { 
-            data: { full_name: string; country: string; address: string; email: string } | null; 
-            error: any 
-          };
+          .single();
 
         // Fetch freelancer profile data
         const { data: freelancerProfile, error: freelancerError } = await supabase
           .from("freelancer_profiles")
           .select("full_name, country, address, email")
           .eq("id", data.freelancer_id)
-          .single() as { 
-            data: { full_name: string; country: string; address: string; email: string } | null; 
-            error: any 
-          };
+          .single();
 
-        if (contractorError || !contractorProfile) {
+        const typedContractorProfile = contractorProfile as ProfileData | null;
+        const typedFreelancerProfile = freelancerProfile as ProfileData | null;
+
+        if (contractorError || !typedContractorProfile) {
           console.error("Error fetching contractor profile:", contractorError);
           console.warn("⚠️ Contract generation skipped: contractor profile not found");
-        } else if (freelancerError || !freelancerProfile) {
+        } else if (freelancerError || !typedFreelancerProfile) {
           console.error("Error fetching freelancer profile:", freelancerError);
           console.warn("⚠️ Contract generation skipped: freelancer profile not found");
         } else {
-          // Generate unique contract ID
-          // @ts-ignore
-          const legalContractId = `CONTRACT-${project.id}-${Date.now()}`;
-
-          // Prepare contract data
-          const contractorData = {
-            fullName: contractorProfile.full_name || "N/A",
-            individualId: user.id,
-            country: contractorProfile.country || "N/A",
-            address: contractorProfile.address || "N/A",
-            email: contractorProfile.email || user.email || "N/A",
-          };
-
-          const freelancerData = {
-            fullName: freelancerProfile.full_name || "N/A",
-            freelancerId: data.freelancer_id || "N/A",
-            country: freelancerProfile.country || "N/A",
-            address: freelancerProfile.address || "N/A",
-            email: freelancerProfile.email || "N/A",
-          };
-
-          const projectData = {
-            // @ts-ignore
-            id: project.id,
-            title: data.title,
-            description: data.description,
-            totalAmount: data.total_amount,
-            expectedDeliveryDate: data.expected_delivery_date,
-            milestones: data.milestones.map((m) => ({
-              title: m.title,
-              description: m.description,
-              percentage: m.percentage,
-            })),
-          };
-
-          // Generate PDF blob
-          const pdfBlob = await pdf(
-            <ContractPDF
-              contractor={contractorData}
-              freelancer={freelancerData}
-              project={projectData}
-              contractId={legalContractId}
-            />
-          ).toBlob();
-
-          console.log("PDF generated, uploading to storage...");
-          console.log("PDF blob size:", pdfBlob.size, "bytes");
-
-          // Upload to Supabase storage
-          const bucketName = "contracts";
-          const fileName = `${user.id}/${legalContractId}.pdf`;
-
-          const { error: uploadError } = await supabase.storage
-            .from(bucketName)
-            .upload(fileName, pdfBlob, {
-              contentType: "application/pdf",
-              upsert: true,
-            });
-
-          if (uploadError) {
-            console.error("Error uploading contract:", uploadError);
-            console.warn("⚠️ Contract upload failed, continuing without contract URL");
+          // Ensure project has an id before proceeding
+          const projectId = (project as any)?.id;
+          if (!projectId) {
+            console.error("Project ID not available");
+            console.warn("⚠️ Contract generation skipped: project ID missing");
           } else {
-            // Get public URL
-            const { data: urlData } = supabase.storage
+            // Generate unique contract ID
+            const legalContractId = `CONTRACT-${projectId}-${Date.now()}`;
+
+            // Prepare contract data
+            const contractorData = {
+              fullName: typedContractorProfile.full_name || "N/A",
+              individualId: user.id,
+              country: typedContractorProfile.country || "N/A",
+              address: typedContractorProfile.address || "N/A",
+              email: typedContractorProfile.email || user.email || "N/A",
+            };
+
+            const freelancerData = {
+              fullName: typedFreelancerProfile.full_name || "N/A",
+              freelancerId: data.freelancer_id || "N/A",
+              country: typedFreelancerProfile.country || "N/A",
+              address: typedFreelancerProfile.address || "N/A",
+              email: typedFreelancerProfile.email || "N/A",
+            };
+
+            const projectData = {
+              id: projectId,
+              title: data.title,
+              description: data.description,
+              totalAmount: data.total_amount,
+              expectedDeliveryDate: data.expected_delivery_date,
+              milestones: data.milestones.map((m) => ({
+                title: m.title,
+                description: m.description,
+                percentage: m.percentage,
+              })),
+            };
+
+            // Generate PDF blob
+            const pdfBlob = await pdf(
+              <ContractPDF
+                contractor={contractorData}
+                freelancer={freelancerData}
+                project={projectData}
+                contractId={legalContractId}
+              />
+            ).toBlob();
+
+            console.log("PDF generated, uploading to storage...");
+            console.log("PDF blob size:", pdfBlob.size, "bytes");
+
+            // Upload to Supabase storage
+            const bucketName = "contracts";
+            const fileName = `${user.id}/${legalContractId}.pdf`;
+
+            const { error: uploadError } = await supabase.storage
               .from(bucketName)
-              .getPublicUrl(fileName);
+              .upload(fileName, pdfBlob, {
+                contentType: "application/pdf",
+                upsert: true,
+              });
 
-            console.log("Contract uploaded successfully:", urlData.publicUrl);
-
-            // Update project with contract URL
-            // @ts-ignore - Supabase type inference issue
-            const { error: updateError } = await supabase
-              .from("projects")
-              // @ts-ignore - Supabase type inference issue
-              .update({ contract_url: urlData.publicUrl })
-              // @ts-ignore - Supabase type inference issue
-              .eq("id", project.id);
-
-            if (updateError) {
-              console.error("Error updating project with contract URL:", updateError);
-              console.warn("⚠️ Failed to link contract to project");
+            if (uploadError) {
+              console.error("Error uploading contract:", uploadError);
+              console.warn("⚠️ Contract upload failed, continuing without contract URL");
             } else {
-              console.log("✅ Contract linked to project successfully");
+              // Get public URL
+              const { data: urlData } = supabase.storage
+                .from(bucketName)
+                .getPublicUrl(fileName);
+
+              console.log("Contract uploaded successfully:", urlData.publicUrl);
+
+              // Update project with contract URL
+              // @ts-ignore - Supabase type inference issue with dynamic schemas
+              const updateResult = await supabase
+                .from("projects")
+                // @ts-ignore
+                .update({ contract_url: urlData.publicUrl })
+                // @ts-ignore
+                .eq("id", projectId);
+              
+              const updateError = updateResult.error;
+
+              if (updateError) {
+                console.error("Error updating project with contract URL:", updateError);
+                console.warn("⚠️ Failed to link contract to project");
+              } else {
+                console.log("✅ Contract linked to project successfully");
+              }
             }
           }
         }
