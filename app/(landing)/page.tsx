@@ -25,6 +25,8 @@ export default async function Home() {
       .from('user_organization')
       .select('*')
       .eq('user_id', user.id)
+      .is('deleted_at', null)
+      .is('deleted_by', null)
       .single();
 
     hasOrganization = !!userOrganization;

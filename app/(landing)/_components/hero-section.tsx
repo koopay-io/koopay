@@ -127,7 +127,6 @@ export function HeroSection({ hasUser, hasOrganization }: HeroSectionProps) {
               initial={{ opacity: 0, x: -30 }}
               animate={mounted ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
               transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="bg-gradient-2 text-transparent bg-clip-text"
             >
               Secure payments
             </motion.span>{' '}

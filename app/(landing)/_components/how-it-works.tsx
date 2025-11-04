@@ -14,27 +14,29 @@ interface HowItWorksSectionProps {
 export function HowItWorksSection({ hasUser, hasOrganization }: HowItWorksSectionProps) {
   const containerRef = React.useRef(null);
   const isInView = useInView(containerRef, { once: true, amount: 0.2 });
-  
+
   const fadeInUp = {
     initial: { opacity: 0, y: 40 },
     animate: isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 },
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
   };
 
   const staggerContainer = {
     initial: {},
-    animate: isInView ? {
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.3
-      }
-    } : {}
+    animate: isInView
+      ? {
+          transition: {
+            staggerChildren: 0.2,
+            delayChildren: 0.3,
+          },
+        }
+      : {},
   };
 
   const stepAnimation = {
     initial: { opacity: 0, y: 50, scale: 0.95 },
     animate: isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 50, scale: 0.95 },
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
   };
 
   const getButtonText = () => {
@@ -59,15 +61,13 @@ export function HowItWorksSection({ hasUser, hasOrganization }: HowItWorksSectio
     {
       icon: <Shield className="w-8 h-8 text-indigo-300" />,
       title: 'Accept & Align',
-      description:
-        'Freelancer accepts knowing the budget is secured and expectations are clear.',
+      description: 'Freelancer accepts knowing the budget is secured and expectations are clear.',
       details: 'Both parties see everything in one dashboard.',
     },
     {
       icon: <CheckCircle className="w-8 h-8 text-emerald-300" />,
       title: 'Deliver & Approve',
-      description:
-        'Upload work, collect feedback, and approve releases in real time.',
+      description: 'Upload work, collect feedback, and approve releases in real time.',
       details: 'Approvals release payments automatically.',
     },
     {
@@ -95,7 +95,8 @@ export function HowItWorksSection({ hasUser, hasOrganization }: HowItWorksSectio
             Four Steps from Agreement to Payment
           </h2>
           <p className="mt-4 text-xl text-zinc-300/85 max-w-3xl mx-auto">
-            Koopay keeps the flow simple while ensuring trust, transparency, and on-time payments every step of the way.
+            Koopay keeps the flow simple while ensuring trust, transparency, and on-time payments
+            every step of the way.
           </p>
         </motion.div>
 
@@ -168,7 +169,8 @@ export function HowItWorksSection({ hasUser, hasOrganization }: HowItWorksSectio
               Ready to Get Paid on Time, Every Time?
             </h3>
             <p className="text-lg text-zinc-300/85 mb-8 max-w-2xl mx-auto">
-              Join freelancers and clients already using Koopay to manage contracts, milestones, and payments with complete confidence.
+              Join freelancers and clients already using Koopay to manage contracts, milestones, and
+              payments with complete confidence.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -178,7 +180,7 @@ export function HowItWorksSection({ hasUser, hasOrganization }: HowItWorksSectio
                 {getButtonText()}
               </Link>
               <a
-                href="/landing/pitch-demo.mp4"
+                href="https://youtu.be/RwTcHQS54K4"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-8 py-4 border border-white/15 text-zinc-200/90 text-sm font-semibold uppercase tracking-wide rounded-full hover:bg-slate-900/60 transition-all duration-200 backdrop-blur"

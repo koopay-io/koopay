@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, User } from 'lucide-react';
 import { useOnboardingContext } from '@/lib/contexts/OnboardingContext';
 import { TOrganizationInsert } from '@/lib/supabase/types/domain/organizations';
-import Image from 'next/image';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Stepper } from './stepper';
 
 const createStep2Schema = (isIndividual: boolean) => {
@@ -203,19 +203,12 @@ export function Step2() {
               className="hidden"
             />
             <label htmlFor="avatar" className="cursor-pointer block mt-2 touch-manipulation">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-border bg-card flex items-center justify-center overflow-hidden hover:border-primary active:border-primary/70 transition-colors">
-                {avatarPreview ? (
-                  <Image
-                    src={avatarPreview}
-                    alt="Avatar preview"
-                    width={96}
-                    height={96}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
+              <Avatar className="w-20 h-20 sm:w-24 sm:h-24 border-2 border-border hover:border-primary active:border-primary/70 transition-colors rounded-full">
+                {avatarPreview ? <AvatarImage src={avatarPreview} alt="Avatar preview" /> : null}
+                <AvatarFallback className="bg-card">
                   <User className="w-10 h-10 sm:w-12 sm:h-12 text-foreground/40" />
-                )}
-              </div>
+                </AvatarFallback>
+              </Avatar>
             </label>
           </div>
 

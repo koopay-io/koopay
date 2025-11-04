@@ -15,31 +15,37 @@ const secondaryButtonClasses =
 export function CTASection() {
   const containerRef = React.useRef(null);
   const isInView = useInView(containerRef, { once: true, amount: 0.2 });
-  
+
   const fadeInUp = {
     initial: { opacity: 0, y: 40 },
     animate: isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 },
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
   };
 
   const staggerContainer = {
     initial: {},
-    animate: isInView ? {
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.2
-      }
-    } : {}
+    animate: isInView
+      ? {
+          transition: {
+            staggerChildren: 0.15,
+            delayChildren: 0.2,
+          },
+        }
+      : {},
   };
 
   const itemAnimation = {
     initial: { opacity: 0, y: 30, scale: 0.95 },
     animate: isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 30, scale: 0.95 },
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const }
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
   };
 
   return (
-    <section ref={containerRef} id="waitlist-beta" className="relative py-24 border-t border-white/10">
+    <section
+      ref={containerRef}
+      id="waitlist-beta"
+      className="relative py-24 border-t border-white/10"
+    >
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-white/12 via-transparent to-transparent blur-3xl" />
         <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-white/10 via-transparent to-transparent blur-3xl" />
@@ -54,7 +60,8 @@ export function CTASection() {
             Get Paid on Time, Every Time
           </h2>
           <p className="text-xl md:text-2xl text-zinc-300/85 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Koopay delivers secure contracts, automatic payments, and transparent tracking — all in one simple platform.
+            Koopay delivers secure contracts, automatic payments, and transparent tracking — all in
+            one simple platform.
           </p>
           <div className="w-24 h-1 bg-gradient-1 mx-auto rounded-full" />
         </motion.div>
@@ -92,14 +99,17 @@ export function CTASection() {
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
             <Button variant="outline" size="lg" className={secondaryButtonClasses} asChild>
-              <a href="/landing/pitch-demo.mp4" target="_blank" rel="noopener noreferrer">
+              <a href="https://youtu.be/RwTcHQS54K4" target="_blank" rel="noopener noreferrer">
                 Watch Demo
               </a>
             </Button>
           </div>
         </motion.div>
 
-        <motion.div {...staggerContainer} className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+        <motion.div
+          {...staggerContainer}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center"
+        >
           {[
             {
               title: 'Waitlist',

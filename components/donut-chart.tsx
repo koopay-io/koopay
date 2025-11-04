@@ -44,7 +44,7 @@ export function DonutChart() {
 
   return (
     <div
-      className="p-8 text-white relative h-full"
+      className="p-6 sm:p-6 lg:p-8 text-white relative h-full flex items-center justify-center lg:min-h-[336px]"
       style={{
         borderRadius: "30px",
         background: "rgba(22, 19, 44, 0.6)",
@@ -52,10 +52,10 @@ export function DonutChart() {
     >
       <div className="absolute inset-0 backdrop-blur-sm rounded-[30px] -z-10" />
 
-      <div className="w-full flex items-center justify-center gap-16 relative z-10">
+      <div className="w-full flex flex-col lg:flex-row items-center justify-center gap-6 sm:gap-4 lg:gap-16 relative z-10">
         {/* Simple Donut Chart */}
         <div className="relative flex-shrink-0">
-          <div className="w-48 h-48">
+          <div className="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48">
             {/* Individual segments for hover effects */}
             <div
               className="relative w-full h-full"
@@ -161,11 +161,10 @@ export function DonutChart() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 w-full ">
-          {/* Graphs section */}
-          <div className="flex flex-col w-full max-w-sm justify-between h-48 bg-[#16132C] rounded-3xl px-8 py-6">
+        {/* Desktop: Graphs section with legend */}
+        <div className="hidden lg:flex flex-col w-full max-w-sm justify-between min-h-[192px] bg-[#16132C] rounded-3xl px-8 py-6">
             {/* Total balance section */}
-            <div className="flex justify-between">
+          <div className="flex justify-between mb-4">
               <div className="w-8/12 text-2xl font-bold">Total balance</div>
               <div className="w-4/12 text-2xl font-bold text-white">
                 ${totalBalance.toLocaleString("en-US")}
@@ -194,12 +193,41 @@ export function DonutChart() {
             </div>
           </div>
 
-          {/* Total projects section */}
-          <div className="w-fit bg-[#16132C] flex items-center space-x-2 relative z-10 rounded-full px-6 py-3">
+        {/* Mobile: Total balance, projects, and legend */}
+        <div className="flex flex-col gap-4 w-full lg:hidden">
+          <div className="flex flex-col gap-3 w-full bg-[#16132C] rounded-2xl px-6 py-4">
+            <div className="text-lg font-bold">Total balance</div>
+            <div className="text-xl font-bold text-white">
+              ${totalBalance.toLocaleString("en-US")}
+            </div>
+          </div>
+
+          <div className="w-full bg-[#16132C] flex items-center justify-center space-x-2 relative z-10 rounded-full px-6 py-3">
             <div className="w-2 h-2 rounded-full bg-blue-400" />
-            <span className="text-white/80">
-              {completedProjects} proyectos realizados
+            <span className="text-white/80 text-base">
+              {completedProjects} projects
             </span>
+          </div>
+
+          {/* Mobile Legend */}
+          <div className="flex flex-col gap-3 w-full bg-[#16132C] rounded-2xl px-6 py-4">
+            {data.map((item, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between w-full"
+              >
+                <div className="flex items-center space-x-3">
+                  <div
+                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className="text-white/80 text-sm">{item.label}</span>
+                </div>
+                <span className="text-white font-semibold text-sm">
+                  {item.value}%
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

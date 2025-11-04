@@ -55,6 +55,8 @@ export async function updateSession(request: NextRequest) {
     .from('user_organization')
     .select('*')
     .eq('user_id', user?.sub)
+    .is('deleted_at', null)
+    .is('deleted_by', null)
     .single();
 
   // If user is authenticated and does not have a user organization, redirect to onboarding
