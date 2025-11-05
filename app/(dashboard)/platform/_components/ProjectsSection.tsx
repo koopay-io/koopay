@@ -12,7 +12,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
-import { ProjectCard } from './project-card';
+import { ProjectCard } from './ProjectCard';
 import Link from 'next/link';
 import { Filter, Plus, X } from 'lucide-react';
 

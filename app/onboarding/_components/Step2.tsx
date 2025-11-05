@@ -12,7 +12,7 @@ import { ArrowLeft, User } from 'lucide-react';
 import { useOnboardingContext } from '@/lib/contexts/OnboardingContext';
 import { TOrganizationInsert } from '@/lib/supabase/types/domain/organizations';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Stepper } from './stepper';
+import { Stepper } from './Stepper';
 
 const createStep2Schema = (isIndividual: boolean) => {
   if (isIndividual) {

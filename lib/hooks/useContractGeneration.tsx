@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { pdf } from "@react-pdf/renderer";
-import { ContractPDF } from "@/components/contract-pdf";
+import { ContractPDF } from "@/components/ContractPdf";
 
 interface ContractorData {
   fullName?: string;

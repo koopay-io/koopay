@@ -21,7 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { useGlobalStore } from '@/lib/stores/global-store';
+import { useGlobalStore } from '@/lib/stores/globalStore';
 import { createClient } from '@/lib/supabase/client';
 import { useStellarWallet } from '@/lib/hooks/useStellarWallet';
 import {
@@ -43,7 +43,7 @@ import Image from 'next/image';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { TeamSwitcher } from '../_components/team-switcher';
+import { TeamSwitcher } from '../_components/TeamSwitcher';
 import { TOrganizationUpdate, TOrganizationRow } from '@/lib/supabase/types/domain/organizations';
 import {
   zOrganizationBusinessTypeEnum,

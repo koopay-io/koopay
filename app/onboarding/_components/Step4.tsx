@@ -18,7 +18,7 @@ import {
 } from '@/lib/supabase/types/enums';
 import { TOrganizationInsert } from '@/lib/supabase/types/domain/organizations';
 import { Spinner } from '@/components/ui/spinner';
-import { Stepper } from './stepper';
+import { Stepper } from './Stepper';
 
 const step4Schema = z.object({
   bio: z

@@ -18,7 +18,7 @@ import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search, Menu } from 'lucide-react';
-import { TeamSwitcher } from './team-switcher';
+import { TeamSwitcher } from './TeamSwitcher';
 
 const mockNotifications = [
   {

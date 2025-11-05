@@ -7,7 +7,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useOnboardingContext } from '@/lib/contexts/OnboardingContext';
 import { EOrganizationLegalType } from '@/lib/supabase/types/enums';
 import { cn } from '@/lib/utils';
-import { Stepper } from './stepper';
+import { Stepper } from './Stepper';
 
 export function Step1() {
   const router = useRouter();

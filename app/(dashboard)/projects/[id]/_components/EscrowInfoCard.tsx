@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { truncateContractId } from "@/lib/utils/project-helpers";
+import { truncateContractId } from "@/lib/utils/projectHelpers";
 
 interface EscrowInfoCardProps {
   contractId: string;

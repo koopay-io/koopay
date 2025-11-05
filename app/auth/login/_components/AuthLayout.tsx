@@ -2,7 +2,7 @@
 
 import { ReactNode, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { OptimizedBackground } from './optimized-background';
+import { OptimizedBackground } from './OptimizedBackground';
 import Image from 'next/image';
 
 interface AuthLayoutProps {

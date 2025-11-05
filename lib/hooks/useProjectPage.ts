@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useProjectMilestones } from "./useProjectMilestones";
-import { getEscrowContractId } from "@/lib/utils/project-helpers";
+import { getEscrowContractId } from "@/lib/utils/projectHelpers";
 
 /**
  * Custom hook to manage project page state and handlers

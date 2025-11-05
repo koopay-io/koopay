@@ -1,4 +1,4 @@
-import { AuthLayout } from './_components/auth-layout';
+import { AuthLayout } from './_components/AuthLayout';
 
 export default function LoginLayout({ children }: { children: React.ReactNode }) {
   return (

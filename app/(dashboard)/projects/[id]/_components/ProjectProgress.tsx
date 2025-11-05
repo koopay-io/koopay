@@ -1,4 +1,4 @@
-import { calculateProgress } from "@/lib/utils/project-helpers";
+import { calculateProgress } from "@/lib/utils/projectHelpers";
 
 interface Milestone {
   status: string;

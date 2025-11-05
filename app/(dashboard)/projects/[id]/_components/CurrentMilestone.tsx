@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Settings, Upload } from "lucide-react";
-import { formatDate, getDaysLeft, getMilestoneAmount } from "@/lib/utils/project-helpers";
+import { formatDate, getDaysLeft, getMilestoneAmount } from "@/lib/utils/projectHelpers";
 
 interface Milestone {
   id: string;

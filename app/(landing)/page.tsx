@@ -1,12 +1,12 @@
-import { Navigation } from '@/app/(landing)/_components/navigation';
-import { HeroSection } from '@/app/(landing)/_components/hero-section';
-import { ProblemSection } from '@/app/(landing)/_components/problem-section';
-import { SolutionSection } from '@/app/(landing)/_components/solution-section';
-import { HowItWorksSection } from '@/app/(landing)/_components/how-it-works';
-import { VisionSection } from '@/app/(landing)/_components/vision-section';
-import { CTASection } from '@/app/(landing)/_components/cta-section';
-import { Footer } from '@/app/(landing)/_components/footer';
-import { BackgroundAurora } from '@/app/(landing)/_components/background-aurora';
+import { Navigation } from '@/app/(landing)/_components/Navigation';
+import { HeroSection } from '@/app/(landing)/_components/HeroSection';
+import { ProblemSection } from '@/app/(landing)/_components/ProblemSection';
+import { SolutionSection } from '@/app/(landing)/_components/SolutionSection';
+import { HowItWorksSection } from '@/app/(landing)/_components/HowItWorks';
+import { VisionSection } from '@/app/(landing)/_components/VisionSection';
+import { CTASection } from '@/app/(landing)/_components/CTASection';
+import { Footer } from '@/app/(landing)/_components/Footer';
+import { BackgroundAurora } from '@/app/(landing)/_components/BackgroundAurora';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function Home() {

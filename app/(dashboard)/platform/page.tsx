@@ -1,10 +1,10 @@
 'use client';
 
-import { DonutChart } from '@/components/donut-chart';
-import { useGlobalStore } from '@/lib/stores/global-store';
-import { ProfileCard } from './_components/profile-card';
-import { CreateProjectCard } from './_components/create-project-card';
-import { ProjectsSection } from './_components/projects-section';
+import { DonutChart } from '@/components/DonutChart';
+import { useGlobalStore } from '@/lib/stores/globalStore';
+import { ProfileCard } from './_components/ProfileCard';
+import { CreateProjectCard } from './_components/CreateProjectCard';
+import { ProjectsSection } from './_components/ProjectsSection';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 

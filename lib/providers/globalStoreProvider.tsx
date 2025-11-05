@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { TOrganizationRow } from '@/lib/supabase/types/domain/organizations';
-import { useGlobalStore } from '@/lib/stores/global-store';
+import { useGlobalStore } from '@/lib/stores/globalStore';
 
 interface GlobalStoreProviderProps {
   children: React.ReactNode;

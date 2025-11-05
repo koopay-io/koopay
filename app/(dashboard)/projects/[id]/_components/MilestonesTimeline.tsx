@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { CompletedMilestoneIcon } from "@/components/milestone-icons/completed-milestone-icon";
-import { PendingMilestoneIcon } from "@/components/milestone-icons/pending-milestone-icon";
-import { getMilestoneAmount, formatCurrency } from "@/lib/utils/project-helpers";
+import { CompletedMilestoneIcon } from "@/components/milestone-icons/CompletedMilestoneIcon";
+import { PendingMilestoneIcon } from "@/components/milestone-icons/PendingMilestoneIcon";
+import { getMilestoneAmount, formatCurrency } from "@/lib/utils/projectHelpers";
 
 interface Milestone {
   id: string;

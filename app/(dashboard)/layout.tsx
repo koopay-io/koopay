@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { TrustlessWorkProvider } from '@/components/providers/TrustlessWorkProvider';
-import { GlobalStoreProvider } from '@/lib/providers/global-store-provider';
-import { DashboardNavbar } from './_components/dashboard-navbar';
+import { GlobalStoreProvider } from '@/lib/providers/globalStoreProvider';
+import { DashboardNavbar } from './_components/DashboardNavbar';
 import { Breadcrumb } from './_components/Breadcrumb';
 import { redirect } from 'next/navigation';
 import {

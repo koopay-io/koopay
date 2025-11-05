@@ -7,11 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Check } from "lucide-react";
 import { useProjectCreation } from "@/lib/hooks/useProjectCreationNew";
-import { MilestoneEditModal } from "@/components/milestone-edit-modal";
-import { CollaboratorAssignmentModal } from "@/components/collaborator-assignment-modal";
-import { ProjectDetailsForm } from "./_components/project-details-form";
-import { ProjectCollaborator } from "./_components/project-collaborator";
-import { ProjectMilestones } from "./_components/project-milestones";
+import { MilestoneEditModal } from "@/components/MilestoneEditModal";
+import { CollaboratorAssignmentModal } from "@/components/CollaboratorAssignmentModal";
+import { ProjectDetailsForm } from "./_components/ProjectDetailsForm";
+import { ProjectCollaborator } from "./_components/ProjectCollaborator";
+import { ProjectMilestones } from "./_components/ProjectMilestones";
 
 // Define Milestone types (can be moved to a types file)
 interface Milestone {

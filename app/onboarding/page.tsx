@@ -2,11 +2,11 @@
 
 import { Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { OrganizationTypeSelector } from './_components/organization-type-selector';
-import { Step1 } from './_components/step-1';
-import { Step2 } from './_components/step-2';
-import { Step3 } from './_components/step-3';
-import { Step4 } from './_components/step-4';
+import { OrganizationTypeSelector } from './_components/OrganizationTypeSelector';
+import { Step1 } from './_components/Step1';
+import { Step2 } from './_components/Step2';
+import { Step3 } from './_components/Step3';
+import { Step4 } from './_components/Step4';
 import { OnboardingError } from './_components/onboarding-error';
 import { useOnboardingContext } from '@/lib/contexts/OnboardingContext';
 

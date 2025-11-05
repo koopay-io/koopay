@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency } from "@/lib/utils/project-helpers";
+import { formatCurrency } from "@/lib/utils/projectHelpers";
 
 interface ProjectOverviewProps {
   title: string;

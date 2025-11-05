@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { useGlobalStore } from '@/lib/stores/global-store';
+import { useGlobalStore } from '@/lib/stores/globalStore';
 
 interface TeamSwitcherProps {
   variant?: 'icon' | 'full';

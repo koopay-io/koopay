@@ -12,7 +12,7 @@ import { Select } from '@/components/ui/select';
 import { ArrowLeft } from 'lucide-react';
 import { useOnboardingContext } from '@/lib/contexts/OnboardingContext';
 import { zSupabaseId } from '@/lib/supabase/types/base';
-import { Stepper } from './stepper';
+import { Stepper } from './Stepper';
 
 const step3Schema = z.object({
   legal_country_id: z.number().int().positive('You must select a country'),
