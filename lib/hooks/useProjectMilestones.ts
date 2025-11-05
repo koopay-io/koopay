@@ -25,6 +25,7 @@ interface Project {
   expected_delivery_date: string;
   status: "draft" | "active" | "completed" | "cancelled";
   contract_url: string | null;
+  contract_id: string | null; // Escrow contract ID (Stellar escrow account address)
   created_at: string;
   updated_at: string;
 }
