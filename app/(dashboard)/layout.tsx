@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { TrustlessWorkProvider } from '@/components/providers/TrustlessWorkProvider';
 import { GlobalStoreProvider } from '@/lib/providers/global-store-provider';
 import { DashboardNavbar } from './_components/dashboard-navbar';
+import { Breadcrumb } from './_components/Breadcrumb';
 import { redirect } from 'next/navigation';
 import {
   TGetUserOrganizationsResponse,
@@ -54,7 +55,10 @@ export default async function HomeLayout({ children }: { children: React.ReactNo
       >
         <div className="min-h-screen bg-background">
           <DashboardNavbar />
-          <main>{children}</main>
+          <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+            <Breadcrumb />
+            {children}
+          </main>
         </div>
       </GlobalStoreProvider>
     </TrustlessWorkProvider>

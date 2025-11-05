@@ -55,7 +55,7 @@ export default function Home() {
   const { currentOrganization } = useGlobalStore();
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+    <div>
       {/* Mobile Search Bar */}
       <div className="lg:hidden mb-4">
         <div className="relative">
