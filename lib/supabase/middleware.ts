@@ -47,8 +47,10 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  if (!user && !PUBLIC_ROUTES.includes(request.nextUrl.pathname))
-    return NextResponse.redirect(new URL('/', request.url));
+  // Protect all routes except public ones
+  if (!user && !PUBLIC_ROUTES.includes(request.nextUrl.pathname)) {
+    return NextResponse.redirect(new URL('/auth/login', request.url));
+  }
 
   // Fetch user organization
   const { data: userOrganization, error: userOrganizationError } = await supabase
