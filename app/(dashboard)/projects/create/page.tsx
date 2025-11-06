@@ -26,7 +26,7 @@ interface Collaborator {
   id: string;
   full_name: string;
   position: string;
-  avatar_url?: string;
+  avatar_url: string | null;
 }
 
 export default function CreateProjectPage() {

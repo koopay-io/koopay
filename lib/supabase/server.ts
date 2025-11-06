@@ -1,16 +1,20 @@
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { IDatabase } from './types';
+import { Database } from './types/database.gen';
 
 /**
+ * Creates a Supabase client for server-side usage (Server Components, Server Actions).
+ * Uses Database type from database.gen.ts which includes all tables from your DB.
+ * 
  * Especially important if using Fluid compute: Don't put this client in a
- * global variable. Always create a new client within each function when using
- * it.
+ * global variable. Always create a new client within each function when using it.
+ * 
+ * @returns Supabase client with full type safety for all database tables
  */
 export async function createClient() {
   const cookieStore = await cookies();
 
-  return createServerClient<IDatabase>(
+  return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
     {

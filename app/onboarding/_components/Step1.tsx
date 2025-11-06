@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useOnboardingContext } from '@/lib/contexts/OnboardingContext';
-import { EOrganizationLegalType } from '@/lib/supabase/types/enums';
+import { EOrganizationLegalType } from '@/lib/validations/shared/enums';
 import { cn } from '@/lib/utils';
 import { Stepper } from './Stepper';
 

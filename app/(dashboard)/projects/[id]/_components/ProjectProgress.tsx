@@ -1,8 +1,7 @@
 import { calculateProgress } from "@/lib/utils/projectHelpers";
+import { Database } from "@/lib/supabase/types/database.gen";
 
-interface Milestone {
-  status: string;
-}
+type Milestone = Database['public']['Tables']['milestones']['Row'];
 
 interface ProjectProgressProps {
   milestones: Milestone[];

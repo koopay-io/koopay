@@ -5,7 +5,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "db:types": "node scripts/generate-types.js",
+    "db:types:local": "node scripts/generate-types.js --local",
+    "db:types:remote": "node scripts/generate-types.js --remote"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

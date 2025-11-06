@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { zOrganizationRow } from '../domain/organizations';
-import { zSupabaseUUID } from '../base';
+import { zOrganizationRow } from '../organizations';
+import { zSupabaseUUID } from './base';
 
 export const zGetUserOrganizationsParams = z.object({
   p_user_id: zSupabaseUUID,

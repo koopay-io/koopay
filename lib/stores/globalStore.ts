@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { User } from '@supabase/supabase-js';
-import { TOrganizationRow } from '@/lib/supabase/types/domain/organizations';
+import { TOrganizationRow } from '@/lib/validations/organizations';
 
 interface GlobalState {
   user: User | null;

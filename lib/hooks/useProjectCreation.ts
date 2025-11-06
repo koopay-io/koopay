@@ -22,19 +22,13 @@ interface ProjectData {
   milestones: Milestone[];
 }
 
+import { Database } from "@/lib/supabase/types/database.gen";
+
+type Project = Database['public']['Tables']['projects']['Row'];
+
 interface CreateProjectResult {
   success: boolean;
-  project?: {
-    id: string;
-    contractor_id: string;
-    freelancer_id: string | null;
-    title: string;
-    description: string;
-    total_amount: number;
-    expected_delivery_date: string;
-    status: string;
-    contract_id: string;
-  };
+  project?: Project;
   contractId?: string;
   error?: string;
 }

@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { zBaseRow, zBaseInsert, zBaseUpdate, zSupabaseId } from '../base';
+import { zBaseRow, zBaseInsert, zBaseUpdate, zSupabaseId } from '../shared/base';
 import {
   zOrganizationTypeEnum,
   zOrganizationLegalTypeEnum,
   zOrganizationBusinessTypeEnum,
   zOrganizationIndustryTypeEnum,
-} from '../enums';
+} from '../shared/enums';
 
 export const zOrganizationRow = zBaseRow.extend({
   type: zOrganizationTypeEnum,
@@ -89,3 +89,4 @@ export const zOrganizationUpdate = zBaseUpdate.extend({
 export type TOrganizationRow = z.infer<typeof zOrganizationRow>;
 export type TOrganizationInsert = z.infer<typeof zOrganizationInsert>;
 export type TOrganizationUpdate = z.infer<typeof zOrganizationUpdate>;
+

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { User, Building2 } from 'lucide-react';
-import { TOrganizationRow } from '@/lib/supabase/types/domain/organizations';
+import { TOrganizationRow } from '@/lib/validations/organizations';
 
 interface ProfileCardProps {
   organization: TOrganizationRow | null;

@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { zSupabaseId, zSupabaseTimestamp } from '../base';
-import { zCurrencyCodeEnum } from '../enums';
+import { zSupabaseId, zSupabaseTimestamp } from '../shared/base';
+import { zCurrencyCodeEnum } from '../shared/enums';
 
 export const zCountryRow = z.object({
   id: zSupabaseId,
@@ -67,3 +67,4 @@ export const zCountryUpdate = z.object({
 export type TCountryRow = z.infer<typeof zCountryRow>;
 export type TCountryInsert = z.infer<typeof zCountryInsert>;
 export type TCountryUpdate = z.infer<typeof zCountryUpdate>;
+

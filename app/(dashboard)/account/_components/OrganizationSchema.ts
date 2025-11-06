@@ -2,7 +2,7 @@ import { z } from 'zod';
 import {
   zOrganizationBusinessTypeEnum,
   zOrganizationIndustryTypeEnum,
-} from '@/lib/supabase/types/enums';
+} from '@/lib/validations/shared/enums';
 
 export const createOrganizationSchema = (isIndividual: boolean) =>
   z.object({

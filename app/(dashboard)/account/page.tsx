@@ -44,20 +44,19 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { TeamSwitcher } from '../_components/TeamSwitcher';
-import { TOrganizationUpdate, TOrganizationRow } from '@/lib/supabase/types/domain/organizations';
+import { TOrganizationUpdate, TOrganizationRow } from '@/lib/validations/organizations';
 import {
   zOrganizationBusinessTypeEnum,
   zOrganizationIndustryTypeEnum,
   EOrganizationBusinessType,
   EOrganizationIndustryType,
-} from '@/lib/supabase/types/enums';
-import { TCountryRow } from '@/lib/supabase/types/domain/countries';
+} from '@/lib/validations/shared/enums';
+import { TCountryRow } from '@/lib/validations/countries';
 import {
   TGetUserOrganizationsResponse,
   zGetUserOrganizationsResponse,
   TGetUserOrganizationsParams,
-} from '@/lib/supabase/types/functions/get_user_organizations';
-import { IDatabase } from '@/lib/supabase/types';
+} from '@/lib/validations/shared/functions';
 
 const createOrganizationSchema = (isIndividual: boolean) =>
   z.object({

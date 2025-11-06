@@ -2,33 +2,11 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { useState, useEffect } from "react";
+import { Database } from "@/lib/supabase/types/database.gen";
 
-interface Milestone {
-  id: string;
-  project_id: string;
-  title: string;
-  description: string | null;
-  percentage: number;
-  status: "pending" | "in_progress" | "completed";
-  created_at: string;
-  updated_at: string;
-}
-
-interface Project {
-  id: string;
-  contractor_id: string;
-  freelancer_id: string | null;
-  title: string;
-  description: string;
-  image_url: string | null;
-  total_amount: number;
-  expected_delivery_date: string;
-  status: "draft" | "active" | "completed" | "cancelled";
-  contract_url: string | null;
-  contract_id: string | null; // Escrow contract ID (Stellar escrow account address)
-  created_at: string;
-  updated_at: string;
-}
+// Usar tipos de Database en lugar de definir manualmente
+type Milestone = Database['public']['Tables']['milestones']['Row'];
+type Project = Database['public']['Tables']['projects']['Row'];
 
 export function useProjectMilestones(projectId: string) {
   const [project, setProject] = useState<Project | null>(null);
@@ -229,7 +207,7 @@ export function useProjectMilestones(projectId: string) {
   const getCurrentMilestone = () => {
     return (
       milestones.find((m) => m.status === "in_progress") ||
-      milestones.find((m) => m.status === "pending") ||
+      milestones.find((m) => m.status === "pending" || m.status === null) ||
       null
     );
   };

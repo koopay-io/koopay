@@ -3,10 +3,10 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { EOrganizationType } from '@/lib/supabase/types/enums';
-import { TOrganizationInsert } from '@/lib/supabase/types/domain/organizations';
-import { TUserOrganizationInsert } from '@/lib/supabase/types/domain/user_organization';
-import { TCountryRow } from '@/lib/supabase/types/domain/countries';
+import { EOrganizationType } from '@/lib/validations/shared/enums';
+import { TOrganizationInsert } from '@/lib/validations/organizations';
+import { TUserOrganizationInsert } from '@/lib/validations/user_organization';
+import { TCountryRow } from '@/lib/validations/countries';
 import { User } from '@supabase/supabase-js';
 
 interface OnboardingData extends Partial<Omit<TOrganizationInsert, 'avatar_url'>> {
@@ -239,7 +239,6 @@ export function OnboardingProvider({ children, countries, user }: OnboardingProv
           console.log('=== UPDATING ORGANIZATION WITH AVATAR URL ===');
           const { error: updateError } = await supabase
             .from('organizations')
-            // @ts-expect-error - Supabase type inference issue with IDatabase
             .update({ avatar_url: avatarUrl })
             .eq('id', organizationId);
 

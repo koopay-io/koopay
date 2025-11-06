@@ -7,7 +7,7 @@ import { Step1 } from './_components/Step1';
 import { Step2 } from './_components/Step2';
 import { Step3 } from './_components/Step3';
 import { Step4 } from './_components/Step4';
-import { OnboardingError } from './_components/onboarding-error';
+import { OnboardingError } from './_components/OnboardingError';
 import { useOnboardingContext } from '@/lib/contexts/OnboardingContext';
 
 function OnboardingContent() {

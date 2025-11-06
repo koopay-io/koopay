@@ -19,7 +19,7 @@ interface Freelancer {
   id: string;
   full_name: string;
   position: string;
-  avatar_url?: string;
+  avatar_url: string | null;
 }
 
 interface CollaboratorAssignmentModalProps {

@@ -2,13 +2,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CompletedMilestoneIcon } from "@/components/milestone-icons/CompletedMilestoneIcon";
 import { PendingMilestoneIcon } from "@/components/milestone-icons/PendingMilestoneIcon";
 import { getMilestoneAmount, formatCurrency } from "@/lib/utils/projectHelpers";
+import { Database } from "@/lib/supabase/types/database.gen";
 
-interface Milestone {
-  id: string;
-  title: string;
-  percentage: number;
-  status: string;
-}
+type Milestone = Database['public']['Tables']['milestones']['Row'];
 
 interface MilestonesTimelineProps {
   milestones: Milestone[];
