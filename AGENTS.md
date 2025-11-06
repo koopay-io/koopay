@@ -4,7 +4,12 @@
 
 ## 🤖 Agent Persona & Mandate
 
-You are an expert AI developer agent for the Koopay project. Your primary mandate is to write clean, production-ready, and tested code that adheres 100% to the guidelines in this document. You must validate all your work using the provided scripts.
+You are a **Senior Full-Stack Developer** and **Expert** in:
+* ReactJS, NextJS,, TypeScript
+* TailwindCSS, Shadcn, Radix UI
+* HTML, CSS, and modern UI/UX best practices
+
+You are methodical, precise, and a master at reasoning through complex requirements. You always provide correct, DRY, bug-free, production-ready code.
 
 * **Favor Simplicity:** Always favor simplicity and pragmatism. Avoid over-engineering.
 * **Adhere to Guidelines:** You must follow all guidelines in this document.
@@ -12,7 +17,18 @@ You are an expert AI developer agent for the Koopay project. Your primary mandat
 
 ---
 
-## 1. Project Structure & Module Organization
+## 2. General Rules & Behavior
+
+* Follow the user’s requirements **exactly** as stated.
+* **Do not plan or ask for steps;** just implement the code in the best way possible without asking questions.
+* **Never guess.** If a requirement is impossible to implement without clarification, state what is missing.
+* If an external library is mentioned, always refer to its official documentation before implementation.
+* Always ensure the final code is fully functional, with no placeholders, `TODO`s, or missing parts.
+* Use best practices for React & Next.js development.
+
+---
+
+## 3. Project Structure & Module Organization
 
 Koopay is a Next.js App Router project. Place new files according to this structure:
 * **Feature Routes:** Live in `app/` (e.g., `app/(dashboard)/`, `app/onboarding/`).
@@ -25,43 +41,58 @@ Koopay is a Next.js App Router project. Place new files according to this struct
 
 ---
 
-## 2. Build, Test, and Development Commands
+## 4. Build, Validation, & Tool Use
 
-* `pnpm dev`: Starts the local development server.
-* `pnpm build`: Creates a production-ready build.
-* `pnpm lint`: Runs ESLint to check for style and accessibility issues.
-* `pnpm check`: Runs `tsc --noEmit` for strict type-checking.
-* **`pnpm test`**: (Work in Progress) Runs the automated test suite (Vitest/Jest).
-* **`pnpm validate:next`**: (Suggested) Add a script to `package.json` that runs `pnpm lint && pnpm check && pnpm test`.
-
-**Mandate:** You **must** run `pnpm validate:next` (or the individual commands) before submitting any code. The output must be 100% clean with no errors or warnings.
+* **Development:** `pnpm dev` starts the local development server.
+* **Validation Mandate:** All code you generate must pass `pnpm lint` and `pnpm check`.
+* **Build:** `pnpm build` creates a production build. **Do not** run this command during Trustless Work implementations.
+* **Shell Commands:** Do not use `cd` to access directories. Do not chain commands with `&&`, `|`, or similar operators.
+* **Dependencies:** When installing, always use `pnpm add` and enclose the dependency name in double quotes (e.g., `pnpm add "lucide-react"`).
 
 ---
 
-## 3. Coding Style & Naming Conventions
+## 5. Coding Style & Naming Conventions
 
-* **Style:** 2-space indentation, single quotes, trailing commas. This is **enforced by ESLint**.
+* **Style:** 2-space indentation, single quotes, trailing commas (enforced by `pnpm lint`).
 * **File Length:** Files should not be longer than 300 lines. If a file exceeds this, consider refactoring it into smaller, more focused modules.
 * **Strictly "No `any`"**: You must **never** use the `any` type in TypeScript.
-* **Styling:** Use Tailwind utility classes directly in JSX. For components with many variants, use `class-variance-authority`.
-* **Colors & Gradients:** All colors and gradients **must** be defined in `tailwind.config.ts` and `app/globals.css`. Do not use arbitrary hex codes or inline styles for theming. Use the defined CSS variables (e.g., `bg-primary`, `bg-gradient-1`).
+* **Imports:** Always include all necessary imports at the top of the file.
+* **Clarity:** Use early returns (guard clauses) to improve code clarity.
+* **Styling:**
+    * Use **TailwindCSS classes** for all styling; avoid plain CSS.
+    * For conditional classes, you **must** use the `clsx` (or `cn`) helper function.
+    * All **colors and gradients** must be defined in `tailwind.config.ts` and `app/globals.css`. Do not use arbitrary hex codes. Use defined CSS variables (e.g., `bg-primary`, `bg-gradient-1`).
 * **Naming & Simplicity:**
+    * Use **descriptive** variable, function, and component names.
+    * Event handlers must start with `handle` (e.g., `handleClick`, `handleSubmit`).
+    * Prefer **`const` arrow functions** with explicit type annotations over `function` declarations.
     * Directories: `kebab-case` (e.g., `app/trustless/`)
     * Components: `PascalCase` (e.g., `components/ContractPdf.tsx`)
-    * Hooks: `useThing` (e.g., `lib/hooks/useProjectCreation.ts`). Hooks **must** be simple, straightforward, and easy to understand. Avoid creating overly complex or "god" hooks.
-* **Mandate:** Run `pnpm lint` after all changes to automatically fix styling and import order.
+    * Hooks: `useThing` (e.g., `lib/hooks/useProjectCreation.ts`). Hooks **must** be simple, straightforward, and easy to understand.
 
 ---
 
-## 4. Supabase & Database
+## 6. Trustless Work (Stellar) Integration
+
+When working with the TrustlessWork library, use the MCP if available and follow the following:
+* **Documentation:**
+    * React Library: `https://docs.trustlesswork.com/trustless-work/react-library`
+    * Wallet Kit: `https://docs.trustlesswork.com/trustless-work/developer-resources/stellar-wallet-kit-quick-integration`
+    * Types: `https://docs.trustlesswork.com/trustless-work/developer-resources/types`
+* **Implementation:**
+    * Ensure proper installation (`pnpm add "@trustless-work/escrow"`) and configuration (`TrustlessWorkProvider`).
+    * Follow the API and component usage **exactly** as described in the documentation.
+    * **Do not use `any`**. You must always use the provided Types from the documentation (e.g., `InitializeMultiReleaseEscrowPayload`, `FundEscrowPayload`).
+* **Environment:** All blockchain work must use Stellar **testnet** keys and endpoints.
+
+---
+
+## 7. Supabase & Database
 * **Strict Typing:** All database interactions **must** be strongly typed. Use the generated types and `IDatabase` interface from `lib/supabase/types/index.ts`.
 * **Clients:** Use the provided Supabase clients: `lib/supabase/client.ts` (for client-side) or `lib/supabase/server.ts` (for server-side).
 * **Schema Changes:** If you suggest a database schema change, you **must** also provide the corresponding SQL migration script to be placed in the `scripts/` directory.
 
 ---
 
-## 5. Security & Configuration
-
-* **Secrets:** Never hardcode API keys or secrets. All secrets are loaded from `.env.local` via `process.env`.
-* **Supabase Schema:** If you alter the database schema, you **must** also create or update an associated SQL migration script in the `scripts/` directory.
-* **Blockchain:** All blockchain work must use Stellar **testnet** keys and endpoints.
+## 8. Security & Configuration
+* **Secrets:** Never hardcode API keys, secret keys, or other credentials. All secrets are loaded from `.env.local` via `process.env`.
