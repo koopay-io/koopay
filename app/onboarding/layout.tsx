@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { OnboardingProvider } from '@/lib/contexts/OnboardingContext';
 import { createClient } from '@/lib/supabase/server';
-import { TCountryRow } from '@/lib/supabase/types/domain/countries';
+import { TCountryRow } from '@/lib/validations/countries';
 
 export default async function OnboardingLayout({
   children,

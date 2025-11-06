@@ -44,14 +44,14 @@ export default function ProjectPage() {
         <div className="max-w-7xl mx-auto">
           {/* Back Button */}
           <div className="flex items-center gap-4 mb-8">
-            <Button
-              variant="ghost"
-              onClick={() => router.back()}
+          <Button
+            variant="ghost"
+            onClick={() => router.back()}
               className="text-white hover:bg-white/20 hover:text-white gap-2 transition-all"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
             <Button
               variant="ghost"
               onClick={() => router.push("/platform")}

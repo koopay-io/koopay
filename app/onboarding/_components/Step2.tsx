@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, User } from 'lucide-react';
 import { useOnboardingContext } from '@/lib/contexts/OnboardingContext';
-import { TOrganizationInsert } from '@/lib/supabase/types/domain/organizations';
+import { TOrganizationInsert } from '@/lib/validations/organizations';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Stepper } from './Stepper';
 

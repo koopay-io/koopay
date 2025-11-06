@@ -43,3 +43,4 @@ export type TSupabaseJson = z.infer<typeof zSupabaseJson>;
 export type TBaseRow = z.infer<typeof zBaseRow>;
 export type TBaseInsert = z.infer<typeof zBaseInsert>;
 export type TBaseUpdate = z.infer<typeof zBaseUpdate>;
+

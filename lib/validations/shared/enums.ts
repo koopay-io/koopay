@@ -131,3 +131,4 @@ export type EOrganizationBusinessType = z.infer<typeof zOrganizationBusinessType
 export type EOrganizationIndustryType = z.infer<typeof zOrganizationIndustryTypeEnum>;
 export type EOrganizationMemberRole = z.infer<typeof zOrganizationMemberRoleEnum>;
 export type EOrganizationMemberStatus = z.infer<typeof zOrganizationMemberStatusEnum>;
+

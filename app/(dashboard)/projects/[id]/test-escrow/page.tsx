@@ -25,10 +25,18 @@ export default function TestEscrowPage() {
     escrowContractId
   );
 
-  // Extract escrow fields safely
-  const escrowTitle: string | null = escrowData?.escrow?.title ? String(escrowData.escrow.title) : null;
-  const escrowDescription: string | null = escrowData?.escrow?.description ? String(escrowData.escrow.description) : null;
-  const escrowType: string = escrowData?.escrow?.type ? String(escrowData.escrow.type) : "multi-release";
+  // Extract escrow fields safely - now with proper types from Trustless Work
+  const escrowTitle: string | null = escrowData?.escrow?.title 
+    ? (typeof escrowData.escrow.title === 'string' ? escrowData.escrow.title : String(escrowData.escrow.title))
+    : null;
+  
+  const escrowDescription: string | null = escrowData?.escrow?.description
+    ? (typeof escrowData.escrow.description === 'string' ? escrowData.escrow.description : String(escrowData.escrow.description))
+    : null;
+  
+  const escrowType: string = escrowData?.escrow?.type
+    ? (typeof escrowData.escrow.type === 'string' ? escrowData.escrow.type : String(escrowData.escrow.type))
+    : "multi-release";
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -171,23 +179,23 @@ export default function TestEscrowPage() {
                     </div>
 
                     {/* Escrow Title & Description */}
-                    {escrowTitle !== null ? (
+                    {escrowTitle !== null && (
                       <div>
                         <label className="text-white/60 text-sm mb-2 block">
                           Título
                         </label>
                         <p className="text-white">{escrowTitle}</p>
                       </div>
-                    ) : null}
+                    )}
 
-                    {escrowDescription !== null ? (
+                    {escrowDescription !== null && (
                       <div>
                         <label className="text-white/60 text-sm mb-2 block">
                           Descripción
                         </label>
                         <p className="text-white/80">{escrowDescription}</p>
                       </div>
-                    ) : null}
+                    )}
 
                     {/* Roles */}
                     {escrowData.escrow.roles && typeof escrowData.escrow.roles === 'object' && !Array.isArray(escrowData.escrow.roles) && (

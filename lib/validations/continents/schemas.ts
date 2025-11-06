@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zSupabaseId, zSupabaseTimestamp } from '../base';
+import { zSupabaseId, zSupabaseTimestamp } from '../shared/base';
 
 export const zContinentRow = z.object({
   id: zSupabaseId,
@@ -27,3 +27,4 @@ export const zContinentUpdate = z.object({
 export type TContinentRow = z.infer<typeof zContinentRow>;
 export type TContinentInsert = z.infer<typeof zContinentInsert>;
 export type TContinentUpdate = z.infer<typeof zContinentUpdate>;
+

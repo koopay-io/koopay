@@ -7,7 +7,7 @@ import { redirect } from 'next/navigation';
 import {
   TGetUserOrganizationsResponse,
   TGetUserOrganizationsParams,
-} from '@/lib/supabase/types/functions/get_user_organizations';
+} from '@/lib/validations/shared/functions';
 
 export default async function HomeLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();

@@ -6,8 +6,8 @@ import {
   zSupabaseId,
   zSupabaseUUID,
   zSupabaseTimestamp,
-} from '../base';
-import { zOrganizationMemberRoleEnum, zOrganizationMemberStatusEnum } from '../enums';
+} from '../shared/base';
+import { zOrganizationMemberRoleEnum, zOrganizationMemberStatusEnum } from '../shared/enums';
 
 export const zUserOrganizationRow = zBaseRow.extend({
   organization_id: zSupabaseId,
@@ -39,3 +39,4 @@ export const zUserOrganizationUpdate = zBaseUpdate.extend({
 export type TUserOrganizationRow = z.infer<typeof zUserOrganizationRow>;
 export type TUserOrganizationInsert = z.infer<typeof zUserOrganizationInsert>;
 export type TUserOrganizationUpdate = z.infer<typeof zUserOrganizationUpdate>;
+

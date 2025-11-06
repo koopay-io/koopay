@@ -16,7 +16,7 @@ export function getDaysLeft(dateString: string): number {
 /**
  * Calculate project progress percentage based on completed milestones
  */
-export function calculateProgress(milestones: Array<{ status: string }>): number {
+export function calculateProgress(milestones: Array<{ status: string | null }>): number {
   if (milestones.length === 0) return 0;
   const completedCount = milestones.filter((m) => m.status === "completed").length;
   return Math.round((completedCount / milestones.length) * 100);
@@ -43,7 +43,7 @@ export function formatCurrency(amount: number): string {
  * Extract escrow contract ID from project object
  */
 export function getEscrowContractId(
-  project: Record<string, unknown> | null | undefined
+  project: { contract_id?: string | null; contractId?: string | null } | null | undefined
 ): string | null {
   if (!project) return null;
   return (

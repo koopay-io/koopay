@@ -3,12 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Settings, Upload } from "lucide-react";
 import { formatDate, getDaysLeft, getMilestoneAmount } from "@/lib/utils/projectHelpers";
+import { Database } from "@/lib/supabase/types/database.gen";
 
-interface Milestone {
-  id: string;
-  title: string;
-  percentage: number;
-}
+type Milestone = Database['public']['Tables']['milestones']['Row'];
 
 interface CurrentMilestoneProps {
   milestone: Milestone | null;

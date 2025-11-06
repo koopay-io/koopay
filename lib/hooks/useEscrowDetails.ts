@@ -3,9 +3,21 @@
 import { useState, useEffect, useRef } from "react";
 import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
 
+// Using a more specific type for escrow based on Trustless Work structure
+// The escrow object from getEscrowByContractIds should have title, description, type, etc.
+interface MultiReleaseEscrow {
+  contractId?: string;
+  title?: string;
+  description?: string;
+  type?: string;
+  roles?: Record<string, unknown>;
+  milestones?: unknown[];
+  [key: string]: unknown; // Allow other properties
+}
+
 interface EscrowDetails {
   contractId: string;
-  escrow: Record<string, unknown>;
+  escrow: MultiReleaseEscrow;
   balance?: Record<string, unknown>;
   loading: boolean;
   error: string | null;
@@ -75,7 +87,7 @@ export const useEscrowDetails = (contractId: string | null | undefined) => {
         if (escrowData) {
           setEscrowData({
             contractId,
-            escrow: escrowData as Record<string, unknown>,
+            escrow: escrowData as MultiReleaseEscrow,
             loading: false,
             error: null,
           });
@@ -132,7 +144,7 @@ export const useEscrowDetails = (contractId: string | null | undefined) => {
             if (escrowData) {
               setEscrowData({
                 contractId,
-                escrow: escrowData as Record<string, unknown>,
+                escrow: escrowData as MultiReleaseEscrow,
                 loading: false,
                 error: null,
               });

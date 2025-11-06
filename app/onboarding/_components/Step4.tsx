@@ -15,8 +15,8 @@ import { useOnboardingContext } from '@/lib/contexts/OnboardingContext';
 import {
   zOrganizationBusinessTypeEnum,
   zOrganizationIndustryTypeEnum,
-} from '@/lib/supabase/types/enums';
-import { TOrganizationInsert } from '@/lib/supabase/types/domain/organizations';
+} from '@/lib/validations/shared/enums';
+import { TOrganizationInsert } from '@/lib/validations/organizations';
 import { Spinner } from '@/components/ui/spinner';
 import { Stepper } from './Stepper';
 

@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
 import { useOnboardingContext } from '@/lib/contexts/OnboardingContext';
-import { EOrganizationType } from '@/lib/supabase/types/enums';
+import { EOrganizationType } from '@/lib/validations/shared/enums';
 import { cn } from '@/lib/utils';
 
 export function OrganizationTypeSelector() {
