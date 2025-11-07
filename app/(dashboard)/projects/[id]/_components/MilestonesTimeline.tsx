@@ -32,6 +32,8 @@ export function MilestonesTimeline({ milestones, totalAmount }: MilestonesTimeli
     );
   }
 
+  // Milestones are already ordered correctly by created_at from the database
+  // No need to sort again - they come in the correct order from useProjectMilestones
   return (
     <div className="mb-8">
       <h2 className="text-2xl font-bold text-white mb-6">Milestones</h2>
