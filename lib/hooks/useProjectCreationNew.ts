@@ -133,16 +133,26 @@ export const useProjectCreation = () => {
 
       if (projectError) throw projectError;
 
-      // Save milestones to Supabase
-      const milestonesToInsert = data.milestones.map((milestone) => ({
-        // @ts-ignore
-        project_id: project.id,
-        title: milestone.title,
-        description: milestone.description,
-        percentage: milestone.percentage,
-        // deadline: milestone.deadline, // TODO! Add milestone deadline to supabase
-        status: "pending",
-      }));
+      // Save milestones to Supabase with explicit created_at timestamps to preserve order
+      // Each milestone gets a timestamp that respects the array order
+      // This ensures the order in DB matches the order in escrow (index 0, 1, 2...)
+      const baseTime = Date.now();
+      const milestonesToInsert = data.milestones.map((milestone, index) => {
+        // Create timestamp with incremental seconds to preserve order
+        // First milestone (index 0) gets base time, each subsequent gets +index seconds
+        // This ensures proper ordering even if inserted in batch
+        const milestoneTimestamp = new Date(baseTime + (index * 1000)).toISOString();
+        return {
+          // @ts-ignore
+          project_id: project.id,
+          title: milestone.title,
+          description: milestone.description,
+          percentage: milestone.percentage,
+          // deadline: milestone.deadline, // TODO! Add milestone deadline to supabase
+          status: "pending",
+          created_at: milestoneTimestamp, // Explicit timestamp to preserve order
+        };
+      });
 
       const { error: milestonesError } = await supabase
         .from("milestones")
