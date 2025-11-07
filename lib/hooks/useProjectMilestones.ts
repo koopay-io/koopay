@@ -143,7 +143,7 @@ export function useProjectMilestones(projectId: string) {
         throw new Error(`Error updating milestone: ${error.message}`);
       }
 
-      // Update local state
+      // Update local state - order is already preserved by created_at from DB
       setMilestones((prev) =>
         prev.map((milestone) =>
           milestone.id === milestoneId ? { ...milestone, status } : milestone
