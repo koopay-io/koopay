@@ -27,6 +27,8 @@ export default function ProjectPage() {
     handleViewContract,
     handleMilestoneComplete,
     router,
+    isApproving,
+    approvalError,
   } = useProjectPage(projectId);
 
   if (loading) {
@@ -94,23 +96,40 @@ export default function ProjectPage() {
           )}
 
           {/* Save Changes Button */}
-          <div className="flex justify-end gap-4">
+          <div className="flex flex-col items-end gap-4">
+            {approvalError && (
+              <div className="bg-red-900/20 border border-red-700 text-red-400 px-4 py-2 rounded text-sm">
+                Error: {approvalError}
+              </div>
+            )}
+            <div className="flex gap-4">
             <Button 
               onClick={handleViewContract} 
               variant="secondary"
               className="hover:brightness-110 hover:shadow-lg transition-all"
+                disabled={isApproving}
             >
               <FileText className="h-5 w-5" />
               Ver Contrato
             </Button>
             <Button
               onClick={handleMilestoneComplete}
-              disabled={!milestoneCompleted}
+                disabled={!milestoneCompleted || isApproving}
               className="bg-blue-500 hover:brightness-110 hover:shadow-lg text-white px-8 py-3 text-lg gap-2 disabled:opacity-50 transition-all"
             >
+                {isApproving ? (
+                  <>
+                    <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Aprobando en Smart Contract...
+                  </>
+                ) : (
+                  <>
               <Check className="h-5 w-5" />
               Guardar cambios
+                  </>
+                )}
             </Button>
+            </div>
           </div>
         </div>
       </main>
