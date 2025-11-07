@@ -1,11 +1,19 @@
 "use client";
 
-import { useInitializeEscrow, useFundEscrow, useSendTransaction } from "@trustless-work/escrow";
+import { 
+  useInitializeEscrow, 
+  useFundEscrow, 
+  useSendTransaction,
+  useApproveMilestone,
+  useChangeMilestoneStatus
+} from "@trustless-work/escrow/hooks";
 import { Keypair, Transaction, Networks } from "@stellar/stellar-sdk";
 import type { 
   InitializeMultiReleaseEscrowPayload, 
   FundEscrowPayload,
-  InitializeMultiReleaseEscrowResponse 
+  InitializeMultiReleaseEscrowResponse,
+  ApproveMilestonePayload,
+  ChangeMilestoneStatusPayload
 } from "@trustless-work/escrow/types";
 
 /**
@@ -34,6 +42,8 @@ export const useEscrowWithSecretKey = () => {
   const { deployEscrow } = useInitializeEscrow();
   const { fundEscrow } = useFundEscrow();
   const { sendTransaction } = useSendTransaction();
+  const { approveMilestone } = useApproveMilestone();
+  const { changeMilestoneStatus } = useChangeMilestoneStatus();
 
   /**
    * Deploy a multi-release escrow contract
@@ -100,9 +110,108 @@ export const useEscrowWithSecretKey = () => {
     return result;
   };
 
+  /**
+   * Approve a milestone in a multi-release escrow contract
+   * 
+   * @param payload - The milestone approval payload
+   * @param approverSecretKey - The approver's Stellar secret key
+   * @returns The approval result
+   */
+  const approveMilestoneInEscrow = async (
+    payload: ApproveMilestonePayload,
+    approverSecretKey: string
+  ) => {
+    try {
+      console.log("🔧 [Approve Milestone Step 1/3] Calling approveMilestone API...");
+      
+      // 1. Get unsigned transaction
+      // According to docs: const { unsignedTransaction } = await approveMilestone(payload);
+      const response = await approveMilestone(payload, "multi-release");
+      const unsignedTx = typeof response === 'string' 
+        ? response 
+        : (response as { unsignedTransaction?: string }).unsignedTransaction ||
+          (response as { unsignedTx?: string }).unsignedTx || 
+          (response as { transaction?: string }).transaction || 
+          String(response);
+      
+      if (!unsignedTx) {
+        throw new Error("Unsigned transaction is missing from approveMilestone response");
+      }
+      
+      console.log("✅ [Approve Milestone Step 1/3] Unsigned transaction received");
+      
+      // 2. Sign with secret key
+      console.log("🔧 [Approve Milestone Step 2/3] Signing transaction with secret key...");
+      const signedTx = signTransactionWithSecretKey(unsignedTx, approverSecretKey);
+      console.log("✅ [Approve Milestone Step 2/3] Transaction signed successfully");
+      
+      // 3. Send signed transaction
+      console.log("🔧 [Approve Milestone Step 3/3] Sending signed transaction to network...");
+      const result = await sendTransaction(signedTx);
+      console.log("✅ [Approve Milestone Step 3/3] Transaction submitted successfully");
+      console.log("🎉 Milestone approval result:", result);
+      
+      return result;
+    } catch (error) {
+      console.error("❌ [Approve Milestone Error] Failed at some step:");
+      console.error("Error details:", error);
+      throw error;
+    }
+  };
+
+  /**
+   * Change the status of a milestone in a multi-release escrow contract
+   * 
+   * @param payload - The milestone status change payload
+   * @param serviceProviderSecretKey - The service provider's Stellar secret key
+   * @returns The status change result
+   */
+  const changeMilestoneStatusInEscrow = async (
+    payload: ChangeMilestoneStatusPayload,
+    serviceProviderSecretKey: string
+  ) => {
+    try {
+      console.log("🔧 [Change Milestone Status Step 1/3] Calling changeMilestoneStatus API...");
+      
+      // 1. Get unsigned transaction
+      const response = await changeMilestoneStatus(payload, "multi-release");
+      const unsignedTx = typeof response === 'string' 
+        ? response 
+        : (response as { unsignedTransaction?: string }).unsignedTransaction ||
+          (response as { unsignedTx?: string }).unsignedTx || 
+          (response as { transaction?: string }).transaction || 
+          String(response);
+      
+      if (!unsignedTx) {
+        throw new Error("Unsigned transaction is missing from changeMilestoneStatus response");
+      }
+      
+      console.log("✅ [Change Milestone Status Step 1/3] Unsigned transaction received");
+      
+      // 2. Sign with secret key
+      console.log("🔧 [Change Milestone Status Step 2/3] Signing transaction with secret key...");
+      const signedTx = signTransactionWithSecretKey(unsignedTx, serviceProviderSecretKey);
+      console.log("✅ [Change Milestone Status Step 2/3] Transaction signed successfully");
+      
+      // 3. Send signed transaction
+      console.log("🔧 [Change Milestone Status Step 3/3] Sending signed transaction to network...");
+      const result = await sendTransaction(signedTx);
+      console.log("✅ [Change Milestone Status Step 3/3] Transaction submitted successfully");
+      console.log("🎉 Milestone status change result:", result);
+      
+      return result;
+    } catch (error) {
+      console.error("❌ [Change Milestone Status Error] Failed at some step:");
+      console.error("Error details:", error);
+      throw error;
+    }
+  };
+
   return {
     deployMultiReleaseEscrow,
     fundMultiReleaseEscrow,
+    approveMilestoneInEscrow,
+    changeMilestoneStatusInEscrow,
   };
 };
 
