@@ -223,29 +223,45 @@ export default function TestEscrowPage() {
                           Milestones del Escrow
                         </label>
                         <div className="space-y-3">
-                          {(escrowData.escrow.milestones as Array<{ description?: string; amount?: number; status?: string }>).map((milestone: { description?: string; amount?: number; status?: string }, index: number) => (
-                            <div
-                              key={index}
-                              className="bg-black/30 p-4 rounded border border-gray-700"
-                            >
-                              <div className="flex justify-between items-start mb-2">
-                                <span className="text-white font-medium">
-                                  {milestone.description || `Milestone ${index + 1}`}
-                                </span>
-                                <Badge className="bg-green-600 text-white">
-                                  {milestone.amount} USDC
-                                </Badge>
+                          {(escrowData.escrow.milestones as Array<{ description?: string; amount?: number; status?: string; flags?: { approved?: boolean } }>).map((milestone: { description?: string; amount?: number; status?: string; flags?: { approved?: boolean } }, index: number) => {
+                            // Determine if milestone is completed
+                            const isCompleted = milestone.status === "completed" || milestone.flags?.approved === true;
+                            const statusColor = isCompleted 
+                              ? "bg-green-900/30 border-green-700" 
+                              : "bg-yellow-900/20 border-yellow-700";
+                            const statusBadgeColor = isCompleted
+                              ? "bg-green-600 text-white"
+                              : "bg-yellow-600 text-white";
+                            
+                            return (
+                              <div
+                                key={index}
+                                className={`${statusColor} p-4 rounded border transition-colors`}
+                              >
+                                <div className="flex justify-between items-start mb-2">
+                                  <span className="text-white font-medium">
+                                    {milestone.description || `Milestone ${index + 1}`}
+                                  </span>
+                                  <Badge className="bg-blue-600 text-white">
+                                    {milestone.amount} USDC
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <Badge className={statusBadgeColor}>
+                                    {isCompleted ? "✅ Completed" : "⏳ Pending"}
+                                  </Badge>
+                                  {milestone.status && (
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs border-gray-600 text-gray-300"
+                                    >
+                                      Status: {milestone.status}
+                                    </Badge>
+                                  )}
+                                </div>
                               </div>
-                              {milestone.status && (
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs mt-2 border-gray-600 text-gray-300"
-                                >
-                                  Status: {milestone.status}
-                                </Badge>
-                              )}
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     )}
