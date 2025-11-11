@@ -61,7 +61,7 @@ export function Footer() {
                 <h3 className="text-2xl font-semibold text-zinc-100">Koopay</h3>
               </div>
               <p className="text-zinc-400/85 leading-relaxed">
-                A secure payment method for project-based work. Get paid on time, every time — no delays, no ghosting, no complications.
+                A secure payment method for project-based work. Get paid on time, every time. No delays, no ghosting, no complications.
               </p>
             </div>
 

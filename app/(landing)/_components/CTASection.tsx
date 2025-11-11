@@ -60,7 +60,7 @@ export function CTASection() {
             Get Paid on Time, Every Time
           </h2>
           <p className="text-xl md:text-2xl text-zinc-300/85 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Koopay delivers secure contracts, automatic payments, and transparent tracking — all in
+            Koopay delivers secure contracts, automatic payments, and transparent tracking, all in
             one simple platform.
           </p>
           <div className="w-24 h-1 bg-gradient-1 mx-auto rounded-full" />

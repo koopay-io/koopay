@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 import { MagnetizeButton } from '@/components/ui/magnetize-button';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -142,17 +141,27 @@ export function HeroSection({ hasUser, hasOrganization }: HeroSectionProps) {
               }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               className="inline-block bg-gradient-2 text-transparent bg-clip-text"
+              data-display-index={currentWordIndex}
             >
               {displayWord}
             </motion.span>
           </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            animate={mounted ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
+            transition={{ duration: 0.7, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="text-sm md:text-base text-zinc-400/90 max-w-xl mx-auto"
+          >
+            If you&apos;ve ever delivered work and waited days or even weeks to get paid, you already know
+            this pain.
+          </motion.p>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={mounted ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.8, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="text-lg md:text-2xl text-zinc-300/90 max-w-3xl mx-auto leading-relaxed"
           >
-            A secure payment method for project-based work — no delays, no ghosting, no
+            A secure payment method for project-based work. No delays, no ghosting, no
             complications.{' '}
             <motion.span
               initial={{ opacity: 0 }}

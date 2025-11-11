@@ -35,7 +35,7 @@ export function ProblemSection() {
       icon: <Clock className="w-8 h-8 text-sky-300" />,
       title: "Delayed Payments",
       description:
-        "Last-minute changes, endless revisions, or lack of response can leave you weeks without payment — or never getting paid.",
+        "Last-minute changes, endless revisions, or lack of response can leave you weeks without payment, or never getting paid.",
     },
     {
       icon: <Users className="w-8 h-8 text-indigo-300" />,
@@ -106,15 +106,15 @@ export function ProblemSection() {
               <div className="space-y-4 text-zinc-400/90">
                 <div className="flex items-center gap-3">
                   <div className="size-3 rounded-full bg-gradient-to-br from-rose-400 to-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.6)]" />
-                  <span>Informal agreements without backup — WhatsApp or email, no clear contracts</span>
+                  <span>Informal agreements without backup. WhatsApp or email, no clear contracts.</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="size-3 rounded-full bg-gradient-to-br from-rose-400 to-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.6)]" />
-                  <span>Delayed or unpaid — weeks without payment or never getting paid</span>
+                  <span>Delayed or unpaid. Weeks without payment or never getting paid.</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="size-3 rounded-full bg-gradient-to-br from-rose-400 to-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.6)]" />
-                  <span>Lack of transparency — everything depends on scattered messages and memory</span>
+                  <span>Lack of transparency. Everything depends on scattered messages and memory.</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="size-3 rounded-full bg-gradient-to-br from-rose-400 to-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.6)]" />
@@ -127,19 +127,19 @@ export function ProblemSection() {
               <div className="space-y-4 text-zinc-200/90">
                 <div className="flex items-center gap-3">
                   <div className="size-3 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 shadow-[0_0_12px_rgba(56,189,248,0.7)]" />
-                  <span>Smart, visible contracts — everything is recorded and shared</span>
+                  <span>Smart, visible contracts. Everything is recorded and shared.</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="size-3 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 shadow-[0_0_12px_rgba(56,189,248,0.7)]" />
-                  <span>Secured funds — money is deposited upfront and released automatically</span>
+                  <span>Secured funds. Money is deposited upfront and released automatically.</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="size-3 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 shadow-[0_0_12px_rgba(56,189,248,0.7)]" />
-                  <span>Protection for both — programmed rules protect both parties</span>
+                  <span>Protection for both. Programmed rules protect both parties.</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="size-3 rounded-full bg-gradient-to-br from-sky-400 to-blue-500 shadow-[0_0_12px_rgba(56,189,248,0.7)]" />
-                  <span>Global, simple, fast payments — minimal fees, no crypto knowledge needed</span>
+                  <span>Global, simple, fast payments. Minimal fees, no crypto knowledge needed.</span>
                 </div>
               </div>
             </div>

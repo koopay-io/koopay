@@ -91,13 +91,13 @@ export function VisionSection({ hasUser, hasOrganization }: VisionSectionProps) 
           </h2>
           <div className="max-w-4xl mx-auto">
             <p className="text-xl md:text-2xl text-zinc-300/85 leading-relaxed mb-6">
-              In project-based work, the biggest risk isn't in doing the work, it's in getting paid correctly.
+              In project-based work, the biggest risk isn&apos;t in doing the work; it&apos;s in getting paid correctly.
             </p>
             <p className="text-xl md:text-2xl text-zinc-300/85 leading-relaxed mb-6">
-              Koopay restores trust to freelance work — with clear rules, automatic payments, and total transparency from day one. Built on Stellar for global reach, near-zero fees, and instant payments with a simple, intuitive experience.
+              Koopay restores trust to freelance work with clear rules, automatic payments, and total transparency from day one. Built on Stellar for global reach, near-zero fees, and instant payments with a simple, intuitive experience.
             </p>
             <p className="text-xl md:text-2xl text-zinc-300/85 leading-relaxed mb-8">
-              In short: <strong>a smart, fair, and reliable way to get paid — on time, always.</strong>
+              In short: <strong>a smart, fair, and reliable way to get paid on time, always.</strong>
             </p>
             <div className="w-24 h-1 bg-gradient-1 mx-auto rounded-full" />
           </div>

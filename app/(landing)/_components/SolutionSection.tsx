@@ -90,10 +90,10 @@ export function SolutionSection({ hasUser, hasOrganization }: SolutionSectionPro
             Why Koopay wins
           </span>
           <h2 className="mt-6 text-4xl md:text-5xl font-bold text-zinc-50">
-            A Secure Payment Method for When There's Distrust
+            A Secure Payment Method for When There&apos;s Distrust
           </h2>
           <p className="mt-4 text-xl text-zinc-300/85 max-w-3xl mx-auto">
-            Koopay is a decentralized, transparent payment management platform that lets freelancers and clients collaborate with complete confidence. No crypto knowledge needed — just simple, secure payments.
+            Koopay is a decentralized, transparent payment management platform that lets freelancers and clients collaborate with complete confidence. No crypto knowledge needed. Just simple, secure payments.
           </p>
           <div className="mt-8 w-24 h-1 bg-gradient-1 mx-auto rounded-full" />
         </motion.div>
@@ -195,7 +195,7 @@ export function SolutionSection({ hasUser, hasOrganization }: SolutionSectionPro
                     },
                     {
                       title: 'Low Fees',
-                      copy: 'Minimal transaction fees — no hidden costs or surprise charges.',
+                      copy: 'Minimal transaction fees with no hidden costs or surprise charges.',
                     },
                     {
                       title: 'Instant',
