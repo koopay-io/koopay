@@ -1,8 +1,8 @@
-import { createServerClient } from '@supabase/ssr';
-import { NextResponse, type NextRequest } from 'next/server';
-import { hasSupabaseEnvVars } from '../utils';
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
+import { SUPABASE_PUBLISHABLE_OR_ANON_KEY, SUPABASE_URL } from "../constants";
 
-const PUBLIC_ROUTES = ['/', '/auth/login', '/auth/callback'];
+const PUBLIC_ROUTES = ["/", "/auth/login", "/auth/callback"];
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -11,31 +11,29 @@ export async function updateSession(request: NextRequest) {
 
   if (PUBLIC_ROUTES.includes(request.nextUrl.pathname)) return supabaseResponse;
 
-  // If the env vars are not set, skip middleware check. You can remove this
-  // once you setup the project.
-  if (!hasSupabaseEnvVars) return supabaseResponse;
-
   // With Fluid compute, don't put this client in a global environment
   // variable. Always create a new one on each request.
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_OR_ANON_KEY,
     {
       cookies: {
         getAll() {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value),
+          );
           supabaseResponse = NextResponse.next({
             request,
           });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, options),
           );
         },
       },
-    }
+    },
   );
 
   // Do not run code between createServerClient and
@@ -49,29 +47,34 @@ export async function updateSession(request: NextRequest) {
 
   // Protect all routes except public ones
   if (!user && !PUBLIC_ROUTES.includes(request.nextUrl.pathname)) {
-    return NextResponse.redirect(new URL('/auth/login', request.url));
+    return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
   // Fetch user organization
-  const { data: userOrganization, error: userOrganizationError } = await supabase
-    .from('user_organization')
-    .select('*')
-    .eq('user_id', user?.sub)
-    .is('deleted_at', null)
-    .is('deleted_by', null)
-    .single();
+  const { data: userOrganization, error: userOrganizationError } =
+    await supabase
+      .from("user_organization")
+      .select("*")
+      .eq("user_id", user?.sub)
+      .is("deleted_at", null)
+      .is("deleted_by", null)
+      .single();
 
   // If user is authenticated and does not have a user organization, redirect to onboarding
   if (
     user &&
     (userOrganizationError || !userOrganization) &&
-    !request.nextUrl.pathname.startsWith('/onboarding')
+    !request.nextUrl.pathname.startsWith("/onboarding")
   )
-    return NextResponse.redirect(new URL('/onboarding', request.url));
+    return NextResponse.redirect(new URL("/onboarding", request.url));
 
   // Check if user is authenticated and trying to access onboarding
-  if (user && userOrganization && request.nextUrl.pathname.startsWith('/onboarding'))
-    return NextResponse.redirect(new URL('/platform', request.url));
+  if (
+    user &&
+    userOrganization &&
+    request.nextUrl.pathname.startsWith("/onboarding")
+  )
+    return NextResponse.redirect(new URL("/platform", request.url));
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:

@@ -1,22 +1,23 @@
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
-import { Database } from './types/database.gen';
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { Database } from "./types/database.gen";
+import { SUPABASE_PUBLISHABLE_OR_ANON_KEY, SUPABASE_URL } from "../constants";
 
 /**
  * Creates a Supabase client for server-side usage (Server Components, Server Actions).
  * Uses Database type from database.gen.ts which includes all tables from your DB.
- * 
+ *
  * Especially important if using Fluid compute: Don't put this client in a
  * global variable. Always create a new client within each function when using it.
- * 
+ *
  * @returns Supabase client with full type safety for all database tables
  */
 export async function createClient() {
   const cookieStore = await cookies();
 
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_OR_ANON_KEY,
     {
       cookies: {
         getAll() {
@@ -25,7 +26,7 @@ export async function createClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore.set(name, value, options),
             );
           } catch {
             // The `setAll` method was called from a Server Component.
@@ -34,6 +35,6 @@ export async function createClient() {
           }
         },
       },
-    }
+    },
   );
 }

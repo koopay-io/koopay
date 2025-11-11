@@ -2,6 +2,7 @@
 
 import React from "react";
 import { development, TrustlessWorkConfig } from "@trustless-work/escrow";
+import { TRUSTLESS_API_KEY } from "@/lib/constants";
 
 interface TrustlessWorkProviderProps {
   children: React.ReactNode;
@@ -10,7 +11,7 @@ interface TrustlessWorkProviderProps {
 export const TrustlessWorkProvider: React.FC<TrustlessWorkProviderProps> = ({
   children,
 }) => {
-  const apiKey = process.env.NEXT_PUBLIC_API_KEY!;
+  const apiKey = TRUSTLESS_API_KEY;
   console.log(apiKey);
 
   // Validate API key is configured
