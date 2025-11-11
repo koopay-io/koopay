@@ -1,24 +1,26 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select } from '@/components/ui/select';
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '@/components/ui/carousel';
-import { ProjectCard } from './ProjectCard';
-import Link from 'next/link';
-import { Filter, Plus, X } from 'lucide-react';
+} from "@/components/ui/carousel";
+import { ProjectCard } from "./ProjectCard";
+import Link from "next/link";
+import { Filter, Plus, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Project {
+  id: string;
   title: string;
-  status: 'in_progress' | 'canceled' | 'done';
+  status: "in_progress" | "canceled" | "done";
   collaborator: string;
   dateRange: string;
   milestones: number;
@@ -30,15 +32,17 @@ interface ProjectsSectionProps {
 }
 
 export function ProjectsSection({ projects }: ProjectsSectionProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showFilters, setShowFilters] = useState(false);
 
   const filteredProjects = projects.filter((project) => {
     const matchesSearch =
       project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.collaborator.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
+    const matchesStatus =
+      statusFilter === "all" || project.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -97,8 +101,8 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
             variant="ghost"
             size="sm"
             onClick={() => {
-              setSearchQuery('');
-              setStatusFilter('all');
+              setSearchQuery("");
+              setStatusFilter("all");
             }}
             className="gap-2"
           >
@@ -110,14 +114,20 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
 
       {filteredProjects.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">No projects found matching your filters.</p>
+          <p className="text-muted-foreground">
+            No projects found matching your filters.
+          </p>
         </div>
       ) : (
         <>
           {/* Mobile: Always show as grid, one column */}
           <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:hidden">
             {filteredProjects.map((project, index) => (
-              <ProjectCard key={index} {...project} />
+              <ProjectCard
+                key={project.id}
+                {...project}
+                onViewProject={() => router.push(`/projects/${project.id}`)}
+              />
             ))}
           </div>
 
@@ -126,8 +136,13 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
             <Carousel className="hidden lg:block w-full">
               <CarouselContent className="-ml-4">
                 {filteredProjects.map((project, index) => (
-                  <CarouselItem key={index} className="pl-4 basis-1/3">
-                    <ProjectCard {...project} />
+                  <CarouselItem key={project.id} className="pl-4 basis-1/3">
+                    <ProjectCard
+                      {...project}
+                      onViewProject={() =>
+                        router.push(`/projects/${project.id}`)
+                      }
+                    />
                   </CarouselItem>
                 ))}
               </CarouselContent>
@@ -137,7 +152,11 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
           ) : (
             <div className="hidden lg:grid lg:grid-cols-3 gap-4 sm:gap-6">
               {filteredProjects.map((project, index) => (
-                <ProjectCard key={index} {...project} />
+                <ProjectCard
+                  key={project.id}
+                  {...project}
+                  onViewProject={() => router.push(`/projects/${project.id}`)}
+                />
               ))}
             </div>
           )}

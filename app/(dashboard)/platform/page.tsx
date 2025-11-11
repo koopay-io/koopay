@@ -33,6 +33,7 @@ export default async function Home() {
       };
 
       return {
+        id: project.id,
         title: project.title,
         status: statusMap[project.status || "draft"],
         collaborator: "N/A", // Collaborator name is 'N/A' for now due to RLS. TODO! Fix this
