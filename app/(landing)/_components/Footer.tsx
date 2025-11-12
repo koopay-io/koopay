@@ -1,6 +1,18 @@
 import Image from 'next/image';
 import React from 'react';
 import { Github, Twitter, Linkedin, Mail } from 'lucide-react';
+import {
+  ABOUT_LINK,
+  DOCS_LINK,
+  WHITEPAPER_LINK,
+  HELP_LINK,
+  LEGAL_LINK,
+  COMMUNITY_LINK,
+  TWITTER_LINK,
+  GITHUB_LINK,
+  LINKEDIN_LINK,
+  EMAIL,
+} from '@/lib/constants';
 
 export function Footer() {
   const footerLinks = {
@@ -11,30 +23,30 @@ export function Footer() {
       { name: 'API', href: '#api' },
     ],
     company: [
-      { name: 'About', href: '#about' },
+      { name: 'About', href: ABOUT_LINK },
       { name: 'Blog', href: '#blog' },
       { name: 'Careers', href: '#careers' },
       { name: 'Press', href: '#press' },
     ],
     resources: [
-      { name: 'Whitepaper', href: '#whitepaper' },
-      { name: 'Documentation', href: '#docs' },
-      { name: 'Help Center', href: '#help' },
-      { name: 'Community', href: '#community' },
+      { name: 'Whitepaper', href: WHITEPAPER_LINK },
+      { name: 'Documentation', href: DOCS_LINK },
+      { name: 'Help Center', href: HELP_LINK },
+      { name: 'Community', href: COMMUNITY_LINK },
     ],
     legal: [
-      { name: 'Privacy Policy', href: '#privacy' },
-      { name: 'Terms of Service', href: '#terms' },
-      { name: 'Cookie Policy', href: '#cookies' },
-      { name: 'Compliance', href: '#compliance' },
+      { name: 'Privacy Policy', href: LEGAL_LINK },
+      { name: 'Terms of Service', href: LEGAL_LINK },
+      { name: 'Cookie Policy', href: LEGAL_LINK },
+      { name: 'Compliance', href: LEGAL_LINK },
     ],
   };
 
   const socialLinks = [
-    { icon: <Twitter className="w-5 h-5" />, href: '#', label: 'Twitter' },
-    { icon: <Github className="w-5 h-5" />, href: '#', label: 'GitHub' },
-    { icon: <Linkedin className="w-5 h-5" />, href: '#', label: 'LinkedIn' },
-    { icon: <Mail className="w-5 h-5" />, href: '#', label: 'Email' },
+    { icon: <Twitter className="w-5 h-5" />, href: TWITTER_LINK, label: 'Twitter' },
+    { icon: <Github className="w-5 h-5" />, href: GITHUB_LINK, label: 'GitHub' },
+    { icon: <Linkedin className="w-5 h-5" />, href: LINKEDIN_LINK, label: 'LinkedIn' },
+    { icon: <Mail className="w-5 h-5" />, href: `mailto:${EMAIL}`, label: 'Email' },
   ];
 
   return (
@@ -71,6 +83,8 @@ export function Footer() {
                   key={index}
                   href={social.href}
                   aria-label={social.label}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="size-10 rounded-full border border-white/15 bg-slate-900/60 text-zinc-300 hover:text-white hover:border-sky-400/60 transition-all duration-200 flex items-center justify-center backdrop-blur"
                 >
                   {social.icon}
@@ -103,6 +117,10 @@ export function Footer() {
                   <a
                     href={link.href}
                     className="hover:text-zinc-100 transition-colors duration-200"
+                    {...(link.href.startsWith('http') && {
+                      target: '_blank',
+                      rel: 'noopener noreferrer',
+                    })}
                   >
                     {link.name}
                   </a>
@@ -119,6 +137,10 @@ export function Footer() {
                   <a
                     href={link.href}
                     className="hover:text-zinc-100 transition-colors duration-200"
+                    {...(link.href.startsWith('http') && {
+                      target: '_blank',
+                      rel: 'noopener noreferrer',
+                    })}
                   >
                     {link.name}
                   </a>
@@ -135,6 +157,10 @@ export function Footer() {
                   <a
                     href={link.href}
                     className="hover:text-zinc-100 transition-colors duration-200"
+                    {...(link.href.startsWith('http') && {
+                      target: '_blank',
+                      rel: 'noopener noreferrer',
+                    })}
                   >
                     {link.name}
                   </a>
