@@ -1,40 +1,41 @@
 import Image from 'next/image';
 import React from 'react';
 import { Github, Twitter, Linkedin, Mail } from 'lucide-react';
+import { SOCIAL_LINKS, EXTERNAL_LINKS } from '@/lib/constants';
 
 export function Footer() {
   const footerLinks = {
     product: [
-      { name: 'How it Works', href: '#how-it-works' },
-      { name: 'Pricing', href: '#pricing' },
-      { name: 'Security', href: '#security' },
-      { name: 'API', href: '#api' },
+      { name: 'How it Works', href: EXTERNAL_LINKS.howItWorks },
+      { name: 'Pricing', href: EXTERNAL_LINKS.pricing },
+      { name: 'Security', href: EXTERNAL_LINKS.security },
+      { name: 'API', href: EXTERNAL_LINKS.api },
     ],
     company: [
-      { name: 'About', href: '#about' },
-      { name: 'Blog', href: '#blog' },
-      { name: 'Careers', href: '#careers' },
-      { name: 'Press', href: '#press' },
+      { name: 'About', href: EXTERNAL_LINKS.about },
+      { name: 'Blog', href: EXTERNAL_LINKS.blog },
+      { name: 'Careers', href: EXTERNAL_LINKS.careers },
+      { name: 'Press', href: EXTERNAL_LINKS.press },
     ],
     resources: [
-      { name: 'Whitepaper', href: '#whitepaper' },
-      { name: 'Documentation', href: '#docs' },
-      { name: 'Help Center', href: '#help' },
-      { name: 'Community', href: '#community' },
+      { name: 'Whitepaper', href: EXTERNAL_LINKS.whitepaper },
+      { name: 'Documentation', href: EXTERNAL_LINKS.documentation },
+      { name: 'Help Center', href: EXTERNAL_LINKS.helpCenter },
+      { name: 'Community', href: EXTERNAL_LINKS.community },
     ],
     legal: [
-      { name: 'Privacy Policy', href: '#privacy' },
-      { name: 'Terms of Service', href: '#terms' },
-      { name: 'Cookie Policy', href: '#cookies' },
-      { name: 'Compliance', href: '#compliance' },
+      { name: 'Privacy Policy', href: EXTERNAL_LINKS.privacy },
+      { name: 'Terms of Service', href: EXTERNAL_LINKS.terms },
+      { name: 'Cookie Policy', href: EXTERNAL_LINKS.cookies },
+      { name: 'Compliance', href: EXTERNAL_LINKS.compliance },
     ],
   };
 
   const socialLinks = [
-    { icon: <Twitter className="w-5 h-5" />, href: '#', label: 'Twitter' },
-    { icon: <Github className="w-5 h-5" />, href: '#', label: 'GitHub' },
-    { icon: <Linkedin className="w-5 h-5" />, href: '#', label: 'LinkedIn' },
-    { icon: <Mail className="w-5 h-5" />, href: '#', label: 'Email' },
+    { icon: <Twitter className="w-5 h-5" />, href: SOCIAL_LINKS.twitter, label: 'Twitter' },
+    { icon: <Github className="w-5 h-5" />, href: SOCIAL_LINKS.github, label: 'GitHub' },
+    { icon: <Linkedin className="w-5 h-5" />, href: SOCIAL_LINKS.linkedin, label: 'LinkedIn' },
+    { icon: <Mail className="w-5 h-5" />, href: SOCIAL_LINKS.email, label: 'Email' },
   ];
 
   return (
@@ -86,6 +87,8 @@ export function Footer() {
                 <li key={index}>
                   <a
                     href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="hover:text-zinc-100 transition-colors duration-200"
                   >
                     {link.name}
@@ -102,6 +105,8 @@ export function Footer() {
                 <li key={index}>
                   <a
                     href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="hover:text-zinc-100 transition-colors duration-200"
                   >
                     {link.name}
@@ -118,6 +123,8 @@ export function Footer() {
                 <li key={index}>
                   <a
                     href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="hover:text-zinc-100 transition-colors duration-200"
                   >
                     {link.name}
@@ -134,6 +141,8 @@ export function Footer() {
                 <li key={index}>
                   <a
                     href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="hover:text-zinc-100 transition-colors duration-200"
                   >
                     {link.name}
