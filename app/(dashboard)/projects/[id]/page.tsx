@@ -11,6 +11,10 @@ import { CurrentMilestone } from "./_components/CurrentMilestone";
 import { MilestonesTimeline } from "./_components/MilestonesTimeline";
 import { ProjectProgress } from "./_components/ProjectProgress";
 import { EscrowInfoCard } from "./_components/EscrowInfoCard";
+import { useMilestoneEvidence } from "@/lib/hooks/useMilestoneEvidence";
+import { useEffect, useState } from "react";
+import { EvidenceList } from "./_components/EvidenceList";
+import { EvidenceUploadModal } from "@/components/EvidenceUploadModal";
 
 export default function ProjectPage() {
   const params = useParams();
@@ -31,6 +35,19 @@ export default function ProjectPage() {
     approvalError,
   } = useProjectPage(projectId);
 
+  const [isEvidenceModalOpen, setIsEvidenceModalOpen] = useState(false);
+  const {
+    evidence,
+    isLoading: isLoadingEvidence,
+    fetchEvidence,
+  } = useMilestoneEvidence();
+
+  useEffect(() => {
+    if (currentMilestone) {
+      fetchEvidence(currentMilestone.id);
+    }
+  }, [currentMilestone, fetchEvidence]);
+
   if (loading) {
     return <LoadingState />;
   }
@@ -46,14 +63,14 @@ export default function ProjectPage() {
         <div className="max-w-7xl mx-auto">
           {/* Back Button */}
           <div className="flex items-center gap-4 mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
+            <Button
+              variant="ghost"
+              onClick={() => router.back()}
               className="text-white hover:bg-white/20 hover:text-white gap-2 transition-all"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </Button>
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
             <Button
               variant="ghost"
               onClick={() => router.push("/platform")}
@@ -77,11 +94,26 @@ export default function ProjectPage() {
               totalAmount={project.total_amount}
               milestoneCompleted={milestoneCompleted}
               onMilestoneCompletedChange={setMilestoneCompleted}
+              onUploadEvidenceClick={() => setIsEvidenceModalOpen(true)}
             />
           </div>
 
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-white mb-6">Evidence</h2>
+            <EvidenceList evidence={evidence} isLoading={isLoadingEvidence} />
+          </div>
+
           {/* Milestones Timeline */}
-          <MilestonesTimeline milestones={milestones} totalAmount={project.total_amount} />
+          <MilestonesTimeline
+            milestones={milestones}
+            totalAmount={project.total_amount}
+          />
+
+          {/* Milestones Timeline */}
+          <MilestonesTimeline
+            milestones={milestones}
+            totalAmount={project.total_amount}
+          />
 
           {/* Project Progress */}
           <ProjectProgress milestones={milestones} />
@@ -91,7 +123,9 @@ export default function ProjectPage() {
             <EscrowInfoCard
               contractId={escrowContractId}
               projectId={projectId}
-              onViewDetails={() => router.push(`/projects/${projectId}/test-escrow`)}
+              onViewDetails={() =>
+                router.push(`/projects/${projectId}/test-escrow`)
+              }
             />
           )}
 
@@ -103,20 +137,20 @@ export default function ProjectPage() {
               </div>
             )}
             <div className="flex gap-4">
-            <Button 
-              onClick={handleViewContract} 
-              variant="secondary"
-              className="hover:brightness-110 hover:shadow-lg transition-all"
+              <Button
+                onClick={handleViewContract}
+                variant="secondary"
+                className="hover:brightness-110 hover:shadow-lg transition-all"
                 disabled={isApproving}
-            >
-              <FileText className="h-5 w-5" />
-              Ver Contrato
-            </Button>
-            <Button
-              onClick={handleMilestoneComplete}
+              >
+                <FileText className="h-5 w-5" />
+                Ver Contrato
+              </Button>
+              <Button
+                onClick={handleMilestoneComplete}
                 disabled={!milestoneCompleted || isApproving}
-              className="bg-blue-500 hover:brightness-110 hover:shadow-lg text-white px-8 py-3 text-lg gap-2 disabled:opacity-50 transition-all"
-            >
+                className="bg-blue-500 hover:brightness-110 hover:shadow-lg text-white px-8 py-3 text-lg gap-2 disabled:opacity-50 transition-all"
+              >
                 {isApproving ? (
                   <>
                     <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -124,15 +158,23 @@ export default function ProjectPage() {
                   </>
                 ) : (
                   <>
-              <Check className="h-5 w-5" />
-              Guardar cambios
+                    <Check className="h-5 w-5" />
+                    Guardar cambios
                   </>
                 )}
-            </Button>
+              </Button>
             </div>
           </div>
         </div>
       </main>
+      {currentMilestone && (
+        <EvidenceUploadModal
+          isOpen={isEvidenceModalOpen}
+          onClose={() => setIsEvidenceModalOpen(false)}
+          milestoneId={currentMilestone.id}
+          onUploadSuccess={() => fetchEvidence(currentMilestone.id)}
+        />
+      )}
     </div>
   );
 }

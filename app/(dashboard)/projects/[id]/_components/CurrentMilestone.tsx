@@ -2,10 +2,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Settings, Upload } from "lucide-react";
-import { formatDate, getDaysLeft, getMilestoneAmount } from "@/lib/utils/projectHelpers";
+import {
+  formatDate,
+  getDaysLeft,
+  getMilestoneAmount,
+} from "@/lib/utils/projectHelpers";
 import { Database } from "@/lib/supabase/types/database.gen";
 
-type Milestone = Database['public']['Tables']['milestones']['Row'];
+type Milestone = Database["public"]["Tables"]["milestones"]["Row"];
 
 interface CurrentMilestoneProps {
   milestone: Milestone | null;
@@ -13,6 +17,7 @@ interface CurrentMilestoneProps {
   totalAmount: number;
   milestoneCompleted: boolean;
   onMilestoneCompletedChange: (completed: boolean) => void;
+  onUploadEvidenceClick: () => void;
 }
 
 export function CurrentMilestone({
@@ -21,12 +26,15 @@ export function CurrentMilestone({
   totalAmount,
   milestoneCompleted,
   onMilestoneCompletedChange,
+  onUploadEvidenceClick,
 }: CurrentMilestoneProps) {
   if (!milestone) {
     return (
       <Card className="bg-blue-600 border-blue-500">
         <CardContent className="p-8">
-          <h2 className="text-xl font-semibold text-white mb-6">Current milestone:</h2>
+          <h2 className="text-xl font-semibold text-white mb-6">
+            Current milestone:
+          </h2>
           <div className="text-white/60">No hay hitos pendientes</div>
         </CardContent>
       </Card>
@@ -39,7 +47,9 @@ export function CurrentMilestone({
   return (
     <Card className="bg-blue-600 border-blue-500">
       <CardContent className="p-8">
-        <h2 className="text-xl font-semibold text-white mb-6">Current milestone:</h2>
+        <h2 className="text-xl font-semibold text-white mb-6">
+          Current milestone:
+        </h2>
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <Settings className="h-5 w-5 text-white" />
@@ -73,7 +83,10 @@ export function CurrentMilestone({
               <span className="text-white">Marcar hito como completado</span>
             </label>
 
-            <Button className="w-full bg-white text-blue-600 hover:brightness-110 hover:shadow-lg gap-2 transition-all">
+            <Button
+              className="w-full bg-white text-blue-600 hover:brightness-110 hover:shadow-lg gap-2 transition-all"
+              onClick={onUploadEvidenceClick}
+            >
               <Upload className="h-4 w-4" />
               Subir evidencia
             </Button>
@@ -83,4 +96,3 @@ export function CurrentMilestone({
     </Card>
   );
 }
-

@@ -5,7 +5,7 @@
  * Para regenerarlo, ejecuta: pnpm db:types
  * 
  * Generado desde: DB remota (producción - Project: cuxjevqinogjovbbcrwu)
- * Fecha: 2025-11-06T04:11:20.539Z
+ * Fecha: 2025-11-12T00:08:46.389Z
  * 
  * Modos disponibles:
  *   - pnpm db:types              # Auto-detecta (local si disponible, sino remoto)
@@ -317,7 +317,12 @@ export type Database = {
           created_by: string
           deleted_at: string | null
           deleted_by: string | null
+          description: string | null
+          file_name: string | null
+          file_type: string | null
+          file_url: string | null
           id: number
+          milestone_id: string | null
           updated_at: string
           updated_by: string
         }
@@ -326,7 +331,12 @@ export type Database = {
           created_by?: string
           deleted_at?: string | null
           deleted_by?: string | null
+          description?: string | null
+          file_name?: string | null
+          file_type?: string | null
+          file_url?: string | null
           id?: number
+          milestone_id?: string | null
           updated_at?: string
           updated_by?: string
         }
@@ -335,11 +345,24 @@ export type Database = {
           created_by?: string
           deleted_at?: string | null
           deleted_by?: string | null
+          description?: string | null
+          file_name?: string | null
+          file_type?: string | null
+          file_url?: string | null
           id?: number
+          milestone_id?: string | null
           updated_at?: string
           updated_by?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "evidences_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "milestones"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       freelancer_profiles: {
         Row: {
@@ -746,6 +769,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      projects2: {
+        Row: {
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          deleted_by: string | null
+          id: number
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: number
+          updated_at?: string
+          updated_by?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: number
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: []
       }
       user_organization: {
         Row: {
