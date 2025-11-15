@@ -56,10 +56,9 @@ export const useWaitlist = (): UseWaitlistReturn => {
       }
 
       // Insert into waitlist table
-      // Note: Using type assertion until types are regenerated after table creation
       const { error: insertError } = await supabase
-        .from('waitlist' as never)
-        .insert({ email: trimmedEmail } as never);
+        .from('waitlist')
+        .insert({ email: trimmedEmail });
 
       if (insertError) {
         // Check if it's a duplicate email error

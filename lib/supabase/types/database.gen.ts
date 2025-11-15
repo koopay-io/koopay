@@ -5,7 +5,7 @@
  * Para regenerarlo, ejecuta: pnpm db:types
  * 
  * Generado desde: DB remota (producción - Project: cuxjevqinogjovbbcrwu)
- * Fecha: 2025-11-12T00:08:46.389Z
+ * Fecha: 2025-11-15T03:34:55.745Z
  * 
  * Modos disponibles:
  *   - pnpm db:types              # Auto-detecta (local si disponible, sino remoto)
@@ -855,6 +855,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      waitlist: {
+        Row: {
+          created_at: string
+          email: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: number
+        }
+        Relationships: []
       }
     }
     Views: {
