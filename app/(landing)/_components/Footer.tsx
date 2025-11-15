@@ -1,8 +1,23 @@
+'use client';
+
 import Image from 'next/image';
-import React from 'react';
-import { Github, Twitter, Linkedin, Mail } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Github, Twitter, Linkedin, Mail, CheckCircle, AlertCircle } from 'lucide-react';
+import { useWaitlist } from '@/lib/hooks/useWaitlist';
 
 export function Footer() {
+  const [email, setEmail] = useState('');
+  const { joinWaitlist, isLoading, error, success } = useWaitlist();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await joinWaitlist(email);
+    if (result.success) {
+      setEmail('');
+    }
+  };
+
   const footerLinks = {
     product: [
       { name: 'How it Works', href: '#how-it-works' },
@@ -150,16 +165,46 @@ export function Footer() {
               <h4 className="font-semibold text-zinc-100 mb-2">Stay Updated</h4>
               <p className="text-zinc-400/85">Release notes and exclusive previews. No spam.</p>
             </div>
-            <div className="flex w-full md:w-auto max-w-md rounded-2xl border border-white/12 bg-slate-900/60 backdrop-blur">
-              <input
-                type="email"
-                placeholder="Your email address"
-                className="flex-1 px-4 py-3 bg-transparent rounded-l-2xl text-zinc-200 placeholder-zinc-500 focus:outline-none"
-              />
-              <button className="px-6 py-3 bg-gradient-1 hover:brightness-110 text-white font-semibold text-xs uppercase tracking-wide rounded-r-2xl transition-colors duration-200">
-                Subscribe
-              </button>
-            </div>
+            <form onSubmit={handleSubmit} className="flex w-full md:w-auto max-w-md flex-col gap-2">
+              <div className="flex w-full rounded-2xl border border-white/12 bg-slate-900/60 backdrop-blur">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Your email address"
+                  disabled={isLoading}
+                  className="flex-1 px-4 py-3 bg-transparent rounded-l-2xl text-zinc-200 placeholder-zinc-500 focus:outline-none disabled:opacity-50"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={isLoading || !email.trim()}
+                  className="px-6 py-3 bg-gradient-1 hover:brightness-110 text-white font-semibold text-xs uppercase tracking-wide rounded-r-2xl transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? 'Subscribing...' : 'Subscribe'}
+                </button>
+              </div>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-2 text-xs text-rose-400"
+                >
+                  <AlertCircle className="w-3 h-3" />
+                  <span>{error}</span>
+                </motion.div>
+              )}
+              {success && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-2 text-xs text-emerald-400"
+                >
+                  <CheckCircle className="w-3 h-3" />
+                  <span>Successfully subscribed!</span>
+                </motion.div>
+              )}
+            </form>
           </div>
         </div>
 

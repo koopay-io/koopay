@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Mail, Bell } from 'lucide-react';
+import { ArrowRight, Mail, Bell, CheckCircle, AlertCircle } from 'lucide-react';
+import { useWaitlist } from '@/lib/hooks/useWaitlist';
 
 const primaryButtonClasses =
   'px-8 py-4 text-sm font-semibold uppercase tracking-wide rounded-full bg-gradient-1 hover:brightness-110 text-white shadow-[0_24px_60px_-25px_rgba(79,70,229,0.9)]';
@@ -15,6 +16,8 @@ const secondaryButtonClasses =
 export function CTASection() {
   const containerRef = React.useRef(null);
   const isInView = useInView(containerRef, { once: true, amount: 0.2 });
+  const [email, setEmail] = useState('');
+  const { joinWaitlist, isLoading, error, success } = useWaitlist();
 
   const fadeInUp = {
     initial: { opacity: 0, y: 40 },
@@ -38,6 +41,14 @@ export function CTASection() {
     initial: { opacity: 0, y: 30, scale: 0.95 },
     animate: isInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 30, scale: 0.95 },
     transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await joinWaitlist(email);
+    if (result.success) {
+      setEmail('');
+    }
   };
 
   return (
@@ -79,19 +90,53 @@ export function CTASection() {
             </span>
           </div>
 
-          <div className="max-w-md mx-auto mb-8">
+          <form onSubmit={handleSubmit} className="max-w-md mx-auto mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0 rounded-2xl sm:rounded-full bg-slate-900/60 border border-white/12 p-2 backdrop-blur">
               <input
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="flex-1 w-full px-4 py-3 bg-transparent text-sm text-zinc-200 placeholder-zinc-500 outline-none"
+                disabled={isLoading}
+                className="flex-1 w-full px-4 py-3 bg-transparent text-sm text-zinc-200 placeholder-zinc-500 outline-none disabled:opacity-50"
+                required
               />
-              <Button className="w-full sm:w-auto rounded-full bg-gradient-1 hover:brightness-110 text-white text-xs font-semibold uppercase tracking-wide px-6">
-                <Mail className="w-4 h-4 mr-2" />
-                Join Waitlist
+              <Button
+                type="submit"
+                disabled={isLoading || !email.trim()}
+                className="w-full sm:w-auto rounded-full bg-gradient-1 hover:brightness-110 text-white text-xs font-semibold uppercase tracking-wide px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  'Joining...'
+                ) : (
+                  <>
+                    <Mail className="w-4 h-4 mr-2" />
+                    Join Waitlist
+                  </>
+                )}
               </Button>
             </div>
-          </div>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-3 flex items-center gap-2 text-sm text-rose-400"
+              >
+                <AlertCircle className="w-4 h-4" />
+                <span>{error}</span>
+              </motion.div>
+            )}
+            {success && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mt-3 flex items-center gap-2 text-sm text-emerald-400"
+              >
+                <CheckCircle className="w-4 h-4" />
+                <span>Successfully joined the waitlist!</span>
+              </motion.div>
+            )}
+          </form>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button size="lg" className={primaryButtonClasses}>
