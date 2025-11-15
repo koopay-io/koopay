@@ -45,7 +45,17 @@ export function useProjectMilestones(projectId: string) {
         }
 
         setProject(projectResult.data);
-        setMilestones(milestonesResult.data || []);
+        // Ensure consistent ordering: by created_at first, then by id as tiebreaker
+        const sortedMilestones = (milestonesResult.data || []).sort((a, b) => {
+          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          if (dateA !== dateB) {
+            return dateA - dateB;
+          }
+          // If created_at is the same, sort by id for consistent ordering
+          return a.id.localeCompare(b.id);
+        });
+        setMilestones(sortedMilestones);
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error occurred";
@@ -100,8 +110,19 @@ export function useProjectMilestones(projectId: string) {
         );
       }
 
-      setMilestones(data || []);
-      return data || [];
+      // Ensure consistent ordering: by created_at first, then by id as tiebreaker
+      const sortedMilestones = (data || []).sort((a, b) => {
+        const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+        const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+        if (dateA !== dateB) {
+          return dateA - dateB;
+        }
+        // If created_at is the same, sort by id for consistent ordering
+        return a.id.localeCompare(b.id);
+      });
+
+      setMilestones(sortedMilestones);
+      return sortedMilestones;
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
@@ -143,12 +164,9 @@ export function useProjectMilestones(projectId: string) {
         throw new Error(`Error updating milestone: ${error.message}`);
       }
 
-      // Update local state - order is already preserved by created_at from DB
-      setMilestones((prev) =>
-        prev.map((milestone) =>
-          milestone.id === milestoneId ? { ...milestone, status } : milestone
-        )
-      );
+      // Don't update local state here - fetchAllData() will be called after
+      // and will fetch fresh data from DB in correct order (created_at ASC)
+      // This ensures the order is always correct from the source of truth
 
       return data;
     } catch (error) {

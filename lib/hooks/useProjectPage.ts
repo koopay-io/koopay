@@ -55,13 +55,9 @@ export function useProjectPage(projectId: string) {
     const escrowMilestones = escrowData?.escrow?.milestones;
     if (!escrowMilestones || !Array.isArray(escrowMilestones)) {
       console.warn("Escrow milestones not available, using database order");
-      // Fallback to database order (ascending to match creation order)
-      const sortedMilestones = [...milestones].sort((a, b) => {
-        const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-        const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-        return dateA - dateB; // Ascending order (oldest first)
-      });
-      return sortedMilestones.findIndex((m) => m.id === milestoneId);
+      // Milestones are already in correct order from DB (created_at ASC)
+      // No need to sort - just find the index
+      return milestones.findIndex((m) => m.id === milestoneId);
     }
 
     // Match milestone by description (escrow uses description field, which matches milestone title)
