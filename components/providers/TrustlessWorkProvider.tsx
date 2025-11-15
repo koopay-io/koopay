@@ -2,7 +2,6 @@
 
 import React from "react";
 import { development, TrustlessWorkConfig } from "@trustless-work/escrow";
-import { TRUSTLESS_API_KEY } from "@/lib/constants";
 
 interface TrustlessWorkProviderProps {
   children: React.ReactNode;
@@ -11,8 +10,8 @@ interface TrustlessWorkProviderProps {
 export const TrustlessWorkProvider: React.FC<TrustlessWorkProviderProps> = ({
   children,
 }) => {
-  const apiKey = TRUSTLESS_API_KEY;
-  console.log(apiKey);
+  // Access environment variable directly in client component
+  const apiKey = process.env.NEXT_PUBLIC_API_KEY;
 
   // Validate API key is configured
   if (!apiKey && typeof window !== "undefined") {
@@ -20,7 +19,7 @@ export const TrustlessWorkProvider: React.FC<TrustlessWorkProviderProps> = ({
   }
 
   return (
-    <TrustlessWorkConfig baseURL={development} apiKey={apiKey}>
+    <TrustlessWorkConfig baseURL={development} apiKey={apiKey || ""}>
       {children}
     </TrustlessWorkConfig>
   );

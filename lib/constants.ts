@@ -9,7 +9,7 @@ export const ADMIN_PK =
 
 export const STELLAR_NETWORK =
   process.env.NEXT_PUBLIC_STELLAR_NETWORK || "testnet";
-export const TRUSTLESS_API_KEY = process.env.NEXT_PUBLIC_TRUSTLESS_API_KEY!;
+export const TRUSTLESS_API_KEY = process.env.NEXT_PUBLIC_API_KEY!;
 export const TRUSTLESS_PLATFORM_FEE =
   process.env.NEXT_PUBLIC_PLATFORM_FEE || "1.5";
 
