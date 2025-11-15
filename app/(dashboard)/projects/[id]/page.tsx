@@ -109,12 +109,6 @@ export default function ProjectPage() {
             totalAmount={project.total_amount}
           />
 
-          {/* Milestones Timeline */}
-          <MilestonesTimeline
-            milestones={milestones}
-            totalAmount={project.total_amount}
-          />
-
           {/* Project Progress */}
           <ProjectProgress milestones={milestones} />
 
