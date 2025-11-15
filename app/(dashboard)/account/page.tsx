@@ -268,7 +268,9 @@ export default function AccountPage() {
         deleted_at: new Date().toISOString(),
         deleted_by: user.id,
       };
-      const deleteResult = (await (
+      
+      // 1. Mark organization as deleted
+      const deleteOrgResult = (await (
         supabaseClient.from('organizations') as unknown as {
           update: (payload: typeof updatePayload) => {
             eq: (column: string, value: string | number) => Promise<{ error: Error | null }>;
@@ -277,9 +279,22 @@ export default function AccountPage() {
       )
         .update(updatePayload as unknown as never)
         .eq('id', currentOrganization.id)) as unknown as { error: Error | null };
-      const { error } = deleteResult;
+      
+      if (deleteOrgResult.error) throw deleteOrgResult.error;
 
-      if (error) throw error;
+      // 2. Also mark user_organization as deleted to prevent middleware loop
+      const deleteUserOrgResult = (await (
+        supabaseClient.from('user_organization') as unknown as {
+          update: (payload: typeof updatePayload) => {
+            eq: (column: string, value: string | number) => Promise<{ error: Error | null }>;
+          };
+        }
+      )
+        .update(updatePayload as unknown as never)
+        .eq('organization_id', currentOrganization.id)
+        .eq('user_id', user.id)) as unknown as { error: Error | null };
+      
+      if (deleteUserOrgResult.error) throw deleteUserOrgResult.error;
 
       toast.success('Account deleted successfully');
       router.push('/onboarding');

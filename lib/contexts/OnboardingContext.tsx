@@ -1,7 +1,6 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { EOrganizationType } from '@/lib/validations/shared/enums';
 import { TOrganizationInsert } from '@/lib/validations/organizations';
@@ -46,7 +45,6 @@ export function OnboardingProvider({ children, countries, user }: OnboardingProv
   const [maxStepReached, setMaxStepReached] = useState(0);
   const [isCompleting, setIsCompleting] = useState(false);
   const [completionError, setCompletionError] = useState<string | null>(null);
-  const router = useRouter();
 
   const updateData = (newData: Partial<OnboardingData>) => {
     setData((prev) => {
@@ -148,7 +146,8 @@ export function OnboardingProvider({ children, countries, user }: OnboardingProv
         custom_business_type: mergedData.custom_business_type || null,
         industry_type: mergedData.industry_type,
         custom_industry_type: mergedData.custom_industry_type || null,
-      } satisfies TOrganizationInsert;
+        created_by: user.id, // Explicitly set created_by so get_user_organizations RPC can find it
+      } as TOrganizationInsert & { created_by: string };
 
       console.log('=== CREATING ORGANIZATION ===');
       console.log('Organization data:', organizationData);
@@ -169,7 +168,33 @@ export function OnboardingProvider({ children, countries, user }: OnboardingProv
 
       console.log('Organization created successfully:', organization);
       const organizationId = (organization as { id: number }).id;
+      const createdBy = (organization as { created_by?: string }).created_by;
       console.log('Organization ID:', organizationId);
+      console.log('Organization created_by:', createdBy);
+      console.log('User ID:', user.id);
+      console.log('Created_by matches user.id:', createdBy === user.id);
+      
+      // Verify created_by was set correctly
+      if (createdBy !== user.id) {
+        console.error('WARNING: created_by does not match user.id!', {
+          createdBy,
+          userId: user.id,
+          organization
+        });
+        // Try to update it
+        const { error: updateError } = await supabase
+          .from('organizations')
+          .update({ created_by: user.id })
+          .eq('id', organizationId);
+        
+        if (updateError) {
+          console.error('Failed to update created_by:', updateError);
+          setCompletionError('Error setting organization creator. Please try again.');
+          setIsCompleting(false);
+          return;
+        }
+        console.log('Updated created_by to match user.id');
+      }
 
       console.log('=== CREATING USER_ORGANIZATION ===');
       const userOrganizationData = {
@@ -195,6 +220,55 @@ export function OnboardingProvider({ children, countries, user }: OnboardingProv
       }
 
       console.log('User organization created successfully');
+
+      // Verify that the organization can be retrieved using the RPC function
+      // This ensures the database transaction is fully committed and the RPC can find it
+      console.log('=== VERIFYING ORGANIZATION CREATION ===');
+      
+      // Try up to 3 times with a small delay to account for eventual consistency
+      let verified = false;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          const { data: verifyRpc, error: verifyRpcError } = await supabase.rpc(
+            'get_user_organizations',
+            { p_user_id: user.id }
+          ) as { data: { total: number; organizations: unknown[] } | null; error: unknown };
+
+          if (!verifyRpcError && verifyRpc && verifyRpc.total > 0) {
+            const orgs = verifyRpc.organizations;
+            const found = orgs.some((org: unknown) => {
+              if (typeof org === 'object' && org !== null && 'id' in org) {
+                const orgWithId = org as { id?: number };
+                return orgWithId.id === organizationId;
+              }
+              return false;
+            });
+            
+            if (found) {
+              console.log(`Organization verified successfully on attempt ${attempt}:`, verifyRpc);
+              verified = true;
+              break;
+            }
+          }
+          
+          if (attempt < 3) {
+            console.log(`Verification attempt ${attempt} failed, retrying...`);
+            await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms before retry
+          }
+        } catch (err) {
+          console.error(`Error on verification attempt ${attempt}:`, err);
+          if (attempt < 3) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+        }
+      }
+
+      if (!verified) {
+        console.error('Organization verification failed after 3 attempts');
+        setCompletionError('Organization created but verification failed. Please refresh the page.');
+        setIsCompleting(false);
+        return;
+      }
 
       let avatarUrl: string | null = null;
 
@@ -254,7 +328,14 @@ export function OnboardingProvider({ children, countries, user }: OnboardingProv
       }
 
       clearData();
-      router.push('/platform');
+      
+      // Small delay to ensure database changes are fully propagated
+      // before redirecting to platform
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Use window.location.href to force a full page reload
+      // This ensures the server-side layout sees the newly created organization
+      window.location.href = '/platform';
     } catch (err) {
       setCompletionError(
         'Unexpected error: ' + (err instanceof Error ? err.message : 'Unknown error')

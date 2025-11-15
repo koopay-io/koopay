@@ -11,6 +11,16 @@ export async function updateSession(request: NextRequest) {
 
   if (PUBLIC_ROUTES.includes(request.nextUrl.pathname)) return supabaseResponse;
 
+  // Validate environment variables
+  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_OR_ANON_KEY) {
+    console.error('Missing Supabase environment variables. SUPABASE_URL:', !!SUPABASE_URL, 'SUPABASE_PUBLISHABLE_OR_ANON_KEY:', !!SUPABASE_PUBLISHABLE_OR_ANON_KEY);
+    // For public routes, allow access; for protected routes, redirect to login
+    if (!PUBLIC_ROUTES.includes(request.nextUrl.pathname)) {
+      return NextResponse.redirect(new URL("/auth/login", request.url));
+    }
+    return supabaseResponse;
+  }
+
   // With Fluid compute, don't put this client in a global environment
   // variable. Always create a new one on each request.
   const supabase = createServerClient(
@@ -42,36 +52,99 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: If you remove getClaims() and you use server-side rendering
   // with the Supabase client, your users may be randomly logged out.
-  const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getClaims();
+    user = data?.claims;
+  } catch (error) {
+    // Handle SSL/connection errors gracefully
+    // Only log if it's not a known SSL error (which can be intermittent)
+    const isSSLError = error instanceof Error && 
+      (error.message.includes('SSL') || 
+       error.message.includes('tls_get_more_records') ||
+       error.cause && typeof error.cause === 'object' && 
+       'code' in error.cause && error.cause.code === 'ERR_SSL_PACKET_LENGTH_TOO_LONG');
+    
+    if (!isSSLError) {
+      console.error('Error getting auth claims in middleware:', error);
+    }
+    
+    // If it's a public route, allow access; otherwise redirect to login
+    if (!PUBLIC_ROUTES.includes(request.nextUrl.pathname)) {
+      return NextResponse.redirect(new URL("/auth/login", request.url));
+    }
+    return supabaseResponse;
+  }
 
   // Protect all routes except public ones
   if (!user && !PUBLIC_ROUTES.includes(request.nextUrl.pathname)) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
-  // Fetch user organization
-  const { data: userOrganization, error: userOrganizationError } =
-    await supabase
-      .from("user_organization")
-      .select("*")
-      .eq("user_id", user?.sub)
-      .is("deleted_at", null)
-      .is("deleted_by", null)
-      .single();
+  // Fetch user organization (only if user is authenticated)
+  let userOrganization = null;
+  let userOrganizationError = null;
+  let organizationDeleted = false;
 
-  // If user is authenticated and does not have a user organization, redirect to onboarding
+  if (user?.sub) {
+    try {
+      // Get all active user organizations (user can have multiple)
+      const { data: userOrganizations, error } = await supabase
+        .from("user_organization")
+        .select("organization_id")
+        .eq("user_id", user.sub)
+        .is("deleted_at", null)
+        .is("deleted_by", null)
+        .limit(1); // Just need to check if any exists, take first one
+      
+      if (error) {
+        userOrganizationError = error;
+      } else if (userOrganizations && userOrganizations.length > 0) {
+        // Use the first active user organization
+        userOrganization = userOrganizations[0];
+
+        // If user organization exists, check if the related organization is not deleted
+        if (userOrganization?.organization_id) {
+          try {
+            const { data: organization } = await supabase
+              .from("organizations")
+              .select("deleted_at, deleted_by")
+              .eq("id", userOrganization.organization_id)
+              .single();
+            
+            organizationDeleted = organization ? 
+              (organization.deleted_at !== null || organization.deleted_by !== null) : 
+              true;
+          } catch (orgError) {
+            console.error('Error fetching organization in middleware:', orgError);
+            // If we can't fetch the organization, assume it's deleted to be safe
+            organizationDeleted = true;
+          }
+        }
+      } else {
+        // No active user organizations found
+        userOrganization = null;
+      }
+    } catch (error) {
+      console.error('Error fetching user organization in middleware:', error);
+      userOrganizationError = error as Error;
+    }
+  }
+
+  // If user is authenticated and does not have a user organization, or organization is deleted, redirect to onboarding
   if (
     user &&
-    (userOrganizationError || !userOrganization) &&
+    (userOrganizationError || !userOrganization || organizationDeleted) &&
     !request.nextUrl.pathname.startsWith("/onboarding")
   )
     return NextResponse.redirect(new URL("/onboarding", request.url));
 
   // Check if user is authenticated and trying to access onboarding
+  // Only redirect to platform if user has an active organization (not deleted)
   if (
     user &&
     userOrganization &&
+    !organizationDeleted &&
     request.nextUrl.pathname.startsWith("/onboarding")
   )
     return NextResponse.redirect(new URL("/platform", request.url));
