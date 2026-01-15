@@ -1,27 +1,27 @@
-'use client';
+"use client";
 
-import { cn } from '@/lib/utils';
-import { createClient } from '@/lib/supabase/client';
-import { Button } from '@/components/ui/button';
-import { MagnetizeButton } from '@/components/ui/magnetize-button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
+import { MagnetizeButton } from "@/components/ui/magnetize-button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSeparator,
   InputOTPSlot,
-} from '@/components/ui/input-otp';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
+} from "@/components/ui/input-otp";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
@@ -30,10 +30,10 @@ export default function LoginPage() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const urlError = searchParams.get('error');
+    const urlError = searchParams.get("error");
     if (urlError) {
       setError(decodeURIComponent(urlError));
-      router.replace('/auth/login');
+      router.replace("/auth/login");
     }
   }, [searchParams, router]);
 
@@ -53,36 +53,51 @@ export default function LoginPage() {
   }, [resendCooldown]);
 
   const getErrorMessage = (error: any): string => {
-    if (!error) return 'An error occurred';
+    if (!error) return "An error occurred";
 
     const errorMessage = error.message || error.toString();
 
-    if (errorMessage.includes('email rate limit') || errorMessage.includes('too many requests')) {
-      return 'Too many requests. Please wait a moment before trying again.';
+    if (
+      errorMessage.includes("email rate limit") ||
+      errorMessage.includes("too many requests")
+    ) {
+      return "Too many requests. Please wait a moment before trying again.";
     }
-    if (errorMessage.includes('invalid email') || errorMessage.includes('email format')) {
-      return 'Please enter a valid email address.';
+    if (
+      errorMessage.includes("invalid email") ||
+      errorMessage.includes("email format")
+    ) {
+      return "Please enter a valid email address.";
     }
-    if (errorMessage.includes('token has expired') || errorMessage.includes('expired')) {
-      return 'The verification code has expired. Please request a new one.';
+    if (
+      errorMessage.includes("token has expired") ||
+      errorMessage.includes("expired")
+    ) {
+      return "The verification code has expired. Please request a new one.";
     }
-    if (errorMessage.includes('invalid token') || errorMessage.includes('invalid code')) {
-      return 'Invalid verification code. Please check and try again.';
+    if (
+      errorMessage.includes("invalid token") ||
+      errorMessage.includes("invalid code")
+    ) {
+      return "Invalid verification code. Please check and try again.";
     }
-    if (errorMessage.includes('email not confirmed') || errorMessage.includes('unconfirmed')) {
-      return 'Please verify your email address first.';
+    if (
+      errorMessage.includes("email not confirmed") ||
+      errorMessage.includes("unconfirmed")
+    ) {
+      return "Please verify your email address first.";
     }
-    if (errorMessage.includes('user not found')) {
-      return 'No account found with this email address.';
+    if (errorMessage.includes("user not found")) {
+      return "No account found with this email address.";
     }
-    if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
-      return 'Network error. Please check your connection and try again.';
+    if (errorMessage.includes("network") || errorMessage.includes("fetch")) {
+      return "Network error. Please check your connection and try again.";
     }
-    if (errorMessage.includes('email already confirmed')) {
-      return 'This email is already verified. Please use a different authentication method.';
+    if (errorMessage.includes("email already confirmed")) {
+      return "This email is already verified. Please use a different authentication method.";
     }
 
-    return errorMessage || 'An error occurred. Please try again.';
+    return errorMessage || "An error occurred. Please try again.";
   };
 
   const handleSendOTP = async (e: React.FormEvent) => {
@@ -95,7 +110,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm`,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
       if (error) throw error;
@@ -119,12 +134,12 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm`,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
       if (error) throw error;
       setResendCooldown(60);
-      setOtp('');
+      setOtp("");
     } catch (error: unknown) {
       setError(getErrorMessage(error));
     } finally {
@@ -142,15 +157,15 @@ export default function LoginPage() {
       const { error } = await supabase.auth.verifyOtp({
         email,
         token: otp,
-        type: 'email',
+        type: "email",
       });
       if (error) throw error;
-      router.push('/onboarding');
+      router.push("/onboarding");
     } catch (error: unknown) {
       const errorMessage = getErrorMessage(error);
       setError(errorMessage);
-      if (errorMessage.includes('expired')) {
-        setOtp('');
+      if (errorMessage.includes("expired")) {
+        setOtp("");
       }
     } finally {
       setIsLoading(false);
@@ -164,13 +179,13 @@ export default function LoginPage() {
 
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
           queryParams: {
-            prompt: 'select_account',
-            access_type: 'offline',
-            include_granted_scopes: 'true',
+            prompt: "select_account",
+            access_type: "offline",
+            include_granted_scopes: "true",
           },
         },
       });
@@ -188,10 +203,10 @@ export default function LoginPage() {
 
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'azure',
+        provider: "azure",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
-          scopes: 'email',
+          scopes: "email",
         },
       });
       if (error) throw error;
@@ -253,20 +268,22 @@ export default function LoginPage() {
 
   const handleChangeEmail = () => {
     setOtpSent(false);
-    setOtp('');
+    setOtp("");
     setError(null);
     setResendCooldown(0);
   };
 
   return (
-    <div className={cn('w-full max-w-sm lg:max-w-md flex gap-4 sm:gap-5 md:gap-6')}>
+    <div
+      className={cn("w-full max-w-sm lg:max-w-md flex gap-4 sm:gap-5 md:gap-6")}
+    >
       <Card
         className={`w-full border-none bg-black/10 mix-blend-overlay py-6 px-6 sm:py-8 sm:px-6 md:py-10 md:px-8 lg:py-16 lg:px-16 ${
-          otpSent ? 'relative' : ''
+          otpSent ? "relative" : ""
         }`}
         style={{
-          boxShadow: '0 0 20px rgba(255, 255, 255, 0.05)',
-          borderRadius: '24px',
+          boxShadow: "0 0 20px rgba(255, 255, 255, 0.05)",
+          borderRadius: "24px",
         }}
       >
         {otpSent && (
@@ -315,7 +332,11 @@ export default function LoginPage() {
                     className="bg-[#101b40] border-0 outline-0 rounded-full px-6 py-5 text-base placeholder:text-white placeholder:font-normal font-bold hover:outline-0 focus-visible:ring-0"
                   />
                 </div>
-                {error && <p className="text-sm text-destructive break-words">{error}</p>}
+                {error && (
+                  <p className="text-sm text-destructive break-words">
+                    {error}
+                  </p>
+                )}
                 <div className="flex flex-col gap-3">
                   <MagnetizeButton
                     type="submit"
@@ -325,7 +346,7 @@ export default function LoginPage() {
                     particleCount={14}
                     attractRadius={60}
                   >
-                    {isLoading ? 'Sending code...' : 'Continue'}
+                    {isLoading ? "Sending code..." : "Continue"}
                   </MagnetizeButton>
                   <OAuthButtons />
                 </div>
@@ -336,7 +357,11 @@ export default function LoginPage() {
               <div className="flex flex-col gap-3 sm:gap-4">
                 <div className="grid gap-2">
                   <div className="flex justify-center">
-                    <InputOTP maxLength={6} value={otp} onChange={(value) => setOtp(value)}>
+                    <InputOTP
+                      maxLength={6}
+                      value={otp}
+                      onChange={(value) => setOtp(value)}
+                    >
                       <InputOTPGroup>
                         <InputOTPSlot index={0} className="w-10 h-10" />
                         <InputOTPSlot index={1} className="w-10 h-10" />
@@ -352,7 +377,9 @@ export default function LoginPage() {
                   </div>
                 </div>
                 {error && (
-                  <p className="text-sm text-destructive break-words text-center px-2">{error}</p>
+                  <p className="text-sm text-destructive break-words text-center px-2">
+                    {error}
+                  </p>
                 )}
                 <div className="flex flex-col items-center gap-1">
                   {resendCooldown > 0 ? (
@@ -379,7 +406,7 @@ export default function LoginPage() {
                     particleCount={14}
                     attractRadius={60}
                   >
-                    {isLoading ? 'Verifying...' : 'Verify code'}
+                    {isLoading ? "Verifying..." : "Verify code"}
                   </MagnetizeButton>
                 </div>
                 <OAuthButtons />
