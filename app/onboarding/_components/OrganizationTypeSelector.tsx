@@ -1,25 +1,38 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Check } from 'lucide-react';
-import { useOnboardingContext } from '@/lib/contexts/OnboardingContext';
-import { EOrganizationType } from '@/lib/validations/shared/enums';
-import { cn } from '@/lib/utils';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Check, Rocket } from "lucide-react";
+import { useOnboardingContext } from "@/lib/contexts/OnboardingContext";
+import { EOrganizationType } from "@/lib/validations/shared/enums";
+import { cn } from "@/lib/utils";
 
 export function OrganizationTypeSelector() {
   const router = useRouter();
-  const [selectedType, setSelectedType] = useState<EOrganizationType | null>(null);
-  const { setOrganizationType, setMaxStepReached } = useOnboardingContext();
+  const [selectedType, setSelectedType] = useState<EOrganizationType | null>(
+    null,
+  );
+  const {
+    setOrganizationType,
+    setMaxStepReached,
+    skipOnboarding,
+    isCompleting,
+  } = useOnboardingContext();
 
   const handleContinue = () => {
     if (!selectedType) return;
     setOrganizationType(selectedType);
     setMaxStepReached(1);
-    router.push('/onboarding?step=1');
+    router.push("/onboarding?step=1");
+  };
+
+  const handleQuickStart = async () => {
+    if (!selectedType) return;
+    setOrganizationType(selectedType);
+    await skipOnboarding();
   };
 
   return (
@@ -41,12 +54,12 @@ export function OrganizationTypeSelector() {
       <div className="flex flex-col md:flex-row gap-4 sm:gap-6 w-full max-w-4xl">
         <Card
           className={cn(
-            'flex-1 cursor-pointer transition-all duration-300',
-            selectedType === 'provider'
-              ? 'ring-2 ring-primary bg-card/50'
-              : 'bg-card hover:bg-card/80'
+            "flex-1 cursor-pointer transition-all duration-300",
+            selectedType === "provider"
+              ? "ring-2 ring-primary bg-card/50"
+              : "bg-card hover:bg-card/80",
           )}
-          onClick={() => setSelectedType('provider')}
+          onClick={() => setSelectedType("provider")}
         >
           <CardContent className="px-4 py-6 sm:px-8 sm:py-8 text-center h-auto flex flex-col justify-center">
             <div className="space-y-4">
@@ -55,7 +68,7 @@ export function OrganizationTypeSelector() {
               </p>
               <Button className="w-full gap-2 bg-gradient-1">
                 Provider
-                {selectedType === 'provider' && (
+                {selectedType === "provider" && (
                   <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center">
                     <Check className="h-3 w-3 text-white" />
                   </div>
@@ -67,12 +80,12 @@ export function OrganizationTypeSelector() {
 
         <Card
           className={cn(
-            'flex-1 cursor-pointer transition-all duration-300',
-            selectedType === 'requester'
-              ? 'ring-2 ring-primary bg-card/50'
-              : 'bg-card hover:bg-card/80'
+            "flex-1 cursor-pointer transition-all duration-300",
+            selectedType === "requester"
+              ? "ring-2 ring-primary bg-card/50"
+              : "bg-card hover:bg-card/80",
           )}
-          onClick={() => setSelectedType('requester')}
+          onClick={() => setSelectedType("requester")}
         >
           <CardContent className="p-6 sm:p-8 text-center h-auto flex flex-col justify-center">
             <div className="space-y-4">
@@ -81,7 +94,7 @@ export function OrganizationTypeSelector() {
               </p>
               <Button className="w-full gap-2 bg-gradient-3">
                 Requester
-                {selectedType === 'requester' && (
+                {selectedType === "requester" && (
                   <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center">
                     <Check className="h-3 w-3 text-white" />
                   </div>
@@ -94,15 +107,26 @@ export function OrganizationTypeSelector() {
 
       <div
         className={cn(
-          'mt-8 sm:mt-12 w-full max-w-4xl px-4 transition-all duration-300 text-center',
-          selectedType ? 'opacity-100' : 'opacity-0'
+          "mt-8 sm:mt-12 w-full max-w-4xl px-4 transition-all duration-300 flex flex-col sm:flex-row gap-4 justify-center",
+          selectedType ? "opacity-100" : "opacity-0",
         )}
       >
         <Button
           onClick={handleContinue}
-          className="bg-gradient-1 hover:bg-primary/90 text-white px-8 py-3 text-base sm:text-lg w-full sm:w-auto"
+          className="bg-secondary hover:bg-secondary/80 text-white px-8 py-3 text-base sm:text-lg w-full sm:w-auto"
+          disabled={isCompleting}
         >
-          Continue
+          Full Setup
+        </Button>
+
+        <Button
+          onClick={handleQuickStart}
+          variant="default"
+          className="bg-gradient-1 hover:bg-primary/90 text-white px-8 py-3 text-base sm:text-lg w-full sm:w-auto gap-2"
+          disabled={isCompleting}
+        >
+          {isCompleting ? "Setting up..." : "Quick Start (Skip Details)"}
+          {!isCompleting && <Rocket className="h-4 w-4" />}
         </Button>
       </div>
     </div>
