@@ -19,6 +19,11 @@ export const SUPABASE_PUBLISHABLE_OR_ANON_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!;
 export const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!;
 
+// Disputes
+// Wallet address to be set as dispute resolver when initializing escrows
+export const DISPUTE_RESOLVER_ADDRESS =
+  process.env.NEXT_PUBLIC_DISPUTE_RESOLVER || "";
+
 // Links
 export const ABOUT_LINK =
   "https://www.notion.so/About-2a984efbef218048a146ce2555af9c69?source=copy_link";

@@ -13,8 +13,10 @@ import type {
   FundEscrowPayload,
   InitializeMultiReleaseEscrowResponse,
   ApproveMilestonePayload,
-  ChangeMilestoneStatusPayload
+  ChangeMilestoneStatusPayload,
+  MultiReleaseStartDisputePayload
 } from "@trustless-work/escrow/types";
+import { useStartDispute } from "@trustless-work/escrow/hooks";
 
 /**
  * Helper function to sign Stellar transactions with a secret key
@@ -44,6 +46,7 @@ export const useEscrowWithSecretKey = () => {
   const { sendTransaction } = useSendTransaction();
   const { approveMilestone } = useApproveMilestone();
   const { changeMilestoneStatus } = useChangeMilestoneStatus();
+  const { startDispute } = useStartDispute();
 
   /**
    * Deploy a multi-release escrow contract
@@ -212,6 +215,33 @@ export const useEscrowWithSecretKey = () => {
     fundMultiReleaseEscrow,
     approveMilestoneInEscrow,
     changeMilestoneStatusInEscrow,
+    /**
+     * Start a dispute in a multi-release escrow contract (by milestone)
+     */
+    startDisputeInEscrow: async (
+      payload: MultiReleaseStartDisputePayload,
+      initiatorSecretKey: string
+    ) => {
+      // 1. Get unsigned transaction
+      const response = await startDispute(payload, "multi-release");
+      const unsignedTx = typeof response === 'string' 
+        ? response 
+        : (response as { unsignedTransaction?: string }).unsignedTransaction ||
+          (response as { unsignedTx?: string }).unsignedTx || 
+          (response as { transaction?: string }).transaction || 
+          String(response);
+      
+      if (!unsignedTx) {
+        throw new Error("Unsigned transaction is missing from startDispute response");
+      }
+      
+      // 2. Sign with secret key
+      const signedTx = signTransactionWithSecretKey(unsignedTx, initiatorSecretKey);
+      
+      // 3. Send signed transaction
+      const result = await sendTransaction(signedTx);
+      return result;
+    }
   };
 };
 

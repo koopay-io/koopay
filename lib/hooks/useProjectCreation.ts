@@ -232,8 +232,8 @@ export const useProjectCreation = () => {
           approver: wallet.publicKey, // Contractor approves milestones
           serviceProvider: freelancerPublicKey, // Freelancer provides service (Stellar PK)
           platformAddress: wallet.publicKey, // Using contractor's account for testing (admin needs USDC trustline)
-          release: wallet.publicKey, // ⚠️ "release" NOT "releaseSigner" (per Scalar example)
-          disputeResolver: wallet.publicKey, // Using contractor's account for testing
+          releaseSigner: wallet.publicKey,
+          disputeResolver: DISPUTE_RESOLVER_ADDRESS || wallet.publicKey, // Prefer configured resolver
         },
         platformFee, // Must be a number (not string) - Currently 1.5 from env
         milestones: data.milestones.map((m) => ({

@@ -15,6 +15,10 @@ import { useMilestoneEvidence } from "@/lib/hooks/useMilestoneEvidence";
 import { useEffect, useState } from "react";
 import { EvidenceList } from "./_components/EvidenceList";
 import { EvidenceUploadModal } from "@/components/EvidenceUploadModal";
+import { DisputeInitiationModal } from "@/components/DisputeInitiationModal";
+import { useDispute } from "@/lib/hooks/useDispute";
+import { useEscrowDetails } from "@/lib/hooks/useEscrowDetails";
+import { getEscrowContractId } from "@/lib/utils/projectHelpers";
 
 export default function ProjectPage() {
   const params = useParams();
@@ -41,6 +45,15 @@ export default function ProjectPage() {
     isLoading: isLoadingEvidence,
     fetchEvidence,
   } = useMilestoneEvidence();
+  const { openDispute, isSubmitting: isSubmittingDispute } = useDispute();
+  const [isDisputeModalOpen, setIsDisputeModalOpen] = useState(false);
+
+  // Listen for child dispute open event
+  useEffect(() => {
+    const handler = () => setIsDisputeModalOpen(true);
+    window.addEventListener("koopay:open-dispute", handler);
+    return () => window.removeEventListener("koopay:open-dispute", handler);
+  }, []);
 
   useEffect(() => {
     if (currentMilestone) {
@@ -167,6 +180,41 @@ export default function ProjectPage() {
           onClose={() => setIsEvidenceModalOpen(false)}
           milestoneId={currentMilestone.id}
           onUploadSuccess={() => fetchEvidence(currentMilestone.id)}
+        />
+      )}
+      {currentMilestone && escrowContractId && (
+        <DisputeInitiationModal
+          open={isDisputeModalOpen}
+          onOpenChange={setIsDisputeModalOpen}
+          onSubmit={async ({ reason, comments, files }) => {
+            // map milestone to index
+            const { escrowData } = useEscrowDetails(escrowContractId);
+            // Fallback: index by DB order if not available on first render
+            let milestoneIndex = 0;
+            const escrowMilestones = escrowData?.escrow?.milestones;
+            if (Array.isArray(escrowMilestones)) {
+              const title = currentMilestone.title;
+              milestoneIndex = escrowMilestones.findIndex((m: unknown) => {
+                if (typeof m === "object" && m !== null && "description" in (m as Record<string, unknown>)) {
+                  const desc = (m as { description?: string }).description;
+                  return desc === title;
+                }
+                return false;
+              });
+              if (milestoneIndex < 0) milestoneIndex = 0;
+            }
+            await openDispute({
+              projectId,
+              milestoneId: currentMilestone.id,
+              contractId: escrowContractId,
+              milestoneIndex,
+              reason,
+              comments,
+              files,
+            });
+            // refresh evidence list and close
+            await fetchEvidence(currentMilestone.id);
+          }}
         />
       )}
     </div>

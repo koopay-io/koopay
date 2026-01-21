@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Settings, Upload } from "lucide-react";
+import { Calendar, Settings, Upload, ShieldAlert } from "lucide-react";
 import {
   formatDate,
   getDaysLeft,
@@ -89,6 +89,19 @@ export function CurrentMilestone({
             >
               <Upload className="h-4 w-4" />
               Subir evidencia
+            </Button>
+
+            <Button
+              variant="secondary"
+              className="w-full bg-blue-500/20 text-white hover:bg-blue-500/30 gap-2 transition-all"
+              // Consumers will handle opening the Dispute modal from parent component
+              onClick={() => {
+                const event = new CustomEvent("koopay:open-dispute");
+                window.dispatchEvent(event);
+              }}
+            >
+              <ShieldAlert className="h-4 w-4" />
+              Open Dispute
             </Button>
           </div>
         </div>
