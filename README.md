@@ -15,6 +15,12 @@
   <img alt="Frontend" src="https://img.shields.io/badge/Frontend-Next.js-black.svg?style=for-the-badge&logo=nextdotjs">
 </p>
 
+<p align="center">
+  <a href="CONTRIBUTING.md">Contributing Guidelines</a> •
+  <a href="https://github.com/koopay-io/koopay/issues">Report Bug</a> •
+  <a href="https://github.com/koopay-io/koopay/issues">Request Feature</a>
+</p>
+
 Koopay is a blockchain-based freelancing platform designed to make work agreements between clients (Requesters) and freelancers (Providers) more transparent and automated. It combines freelance project management, smart contract escrow services, and on-chain reputation tracking into a single, easy-to-use system.
 
 The platform operates around **milestone-based projects**, where funds are held in secure smart contracts until specific parts of the work are completed. Payments are made in **USDC**, a stablecoin pegged to the U.S. dollar, allowing for fast, low-fee, and borderless transfers.
