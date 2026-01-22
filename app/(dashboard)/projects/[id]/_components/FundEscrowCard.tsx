@@ -42,7 +42,7 @@ export function FundEscrowCard({
   }, [balance]);
 
   const hasWallet = Boolean(wallet?.publicKey && wallet?.secretKey);
-  const isFunded = fundingStatus === 'funded';
+  const isFunded = fundingStatus === 'funded' || fundingSuccess;
   const isInsufficientBalance =
     totalAmount > 0 && contractorUsdcBalance < totalAmount;
   const isActionDisabled =
@@ -79,6 +79,8 @@ export function FundEscrowCard({
 
       setFundingSuccess(true);
       await refreshBalance();
+      // Delay before refetching escrow to give indexer time to update
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       onFundingSuccess?.();
     } catch (error) {
       const message =
