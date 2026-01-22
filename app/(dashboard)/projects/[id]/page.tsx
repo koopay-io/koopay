@@ -11,6 +11,7 @@ import { CurrentMilestone } from "./_components/CurrentMilestone";
 import { MilestonesTimeline } from "./_components/MilestonesTimeline";
 import { ProjectProgress } from "./_components/ProjectProgress";
 import { EscrowInfoCard } from "./_components/EscrowInfoCard";
+import { FundEscrowCard } from "./_components/FundEscrowCard";
 import { useMilestoneEvidence } from "@/lib/hooks/useMilestoneEvidence";
 import { useEffect, useState } from "react";
 import { EvidenceList } from "./_components/EvidenceList";
@@ -26,6 +27,9 @@ export default function ProjectPage() {
     loading,
     currentMilestone,
     escrowContractId,
+    escrowFundingStatus,
+    escrowUsdcBalance,
+    refetchEscrowDetails,
     milestoneCompleted,
     setMilestoneCompleted,
     handleViewContract,
@@ -112,15 +116,27 @@ export default function ProjectPage() {
           {/* Project Progress */}
           <ProjectProgress milestones={milestones} />
 
-          {/* Quick Escrow Info - Link to test page */}
-          {escrowContractId && (
-            <EscrowInfoCard
-              contractId={escrowContractId}
-              projectId={projectId}
-              onViewDetails={() =>
-                router.push(`/projects/${projectId}/test-escrow`)
-              }
-            />
+          {escrowContractId && project && (
+            <>
+              {escrowFundingStatus !== 'funded' && (
+                <FundEscrowCard
+                  contractId={escrowContractId}
+                  totalAmount={project.total_amount}
+                  fundingStatus={escrowFundingStatus}
+                  escrowUsdcBalance={escrowUsdcBalance}
+                  onFundingSuccess={refetchEscrowDetails}
+                />
+              )}
+              <EscrowInfoCard
+                contractId={escrowContractId}
+                projectId={projectId}
+                fundingStatus={escrowFundingStatus}
+                escrowUsdcBalance={escrowUsdcBalance}
+                onViewDetails={() =>
+                  router.push(`/projects/${projectId}/test-escrow`)
+                }
+              />
+            </>
           )}
 
           {/* Save Changes Button */}
