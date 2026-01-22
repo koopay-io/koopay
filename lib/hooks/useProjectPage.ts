@@ -8,6 +8,7 @@ import { useStellarWallet } from "./useStellarWallet";
 import { useEscrowWithSecretKey } from "./useEscrowWithSecretKey";
 import { useEscrowDetails } from "./useEscrowDetails";
 import type { ApproveMilestonePayload, ChangeMilestoneStatusPayload } from "@trustless-work/escrow/types";
+import { getUserStellarWallet } from "@/lib/actions/wallet";
 
 /**
  * Custom hook to manage project page state and handlers
@@ -33,7 +34,7 @@ export function useProjectPage(projectId: string) {
   const currentMilestone = getCurrentMilestone();
   const escrowContractId = getEscrowContractId(project);
   const { escrowData } = useEscrowDetails(escrowContractId);
-  
+
   // Get serviceProvider from escrow roles
   const serviceProvider = escrowData?.escrow?.roles && typeof escrowData.escrow.roles === 'object' && !Array.isArray(escrowData.escrow.roles)
     ? (escrowData.escrow.roles as { serviceProvider?: string }).serviceProvider
@@ -112,7 +113,7 @@ export function useProjectPage(projectId: string) {
     try {
       // 1. Calculate milestone index in escrow
       const milestoneIndex = getMilestoneIndex(currentMilestone.id);
-      
+
       // 2. Check if milestone is already approved in escrow
       const escrowMilestones = escrowData?.escrow?.milestones;
       if (escrowMilestones && Array.isArray(escrowMilestones) && escrowMilestones[milestoneIndex]) {
@@ -123,7 +124,7 @@ export function useProjectPage(projectId: string) {
           return;
         }
       }
-      
+
       // 3. Step 1: Approve milestone (sets flags.approved = true)
       const approvalPayload: ApproveMilestonePayload = {
         contractId: escrowContractId,
@@ -156,11 +157,20 @@ export function useProjectPage(projectId: string) {
       // 3. Step 2: Change milestone status to "completed"
       // Note: This requires the serviceProvider's secret key, but in this case
       // since serviceProvider === approver (same wallet for testing), we use the same key
+      // Fetch the freelancer's public key (Service Provider)
+      if (!project?.freelancer_id) {
+        throw new Error("Project not found or freelancer not assigned");
+      }
+      const freelancerWallet = await getUserStellarWallet(project.freelancer_id);
+      if (!freelancerWallet) {
+        throw new Error("Freelancer wallet not found. Please ensure freelancer has completed onboarding.");
+      }
+
       const statusChangePayload: ChangeMilestoneStatusPayload = {
         contractId: escrowContractId,
         milestoneIndex: milestoneIndex.toString(),
         newStatus: "completed",
-        serviceProvider: serviceProvider,
+        serviceProvider: freelancerWallet,
       };
 
       console.log("🔧 Step 2/2: Changing milestone status to 'completed':", {
@@ -187,7 +197,7 @@ export function useProjectPage(projectId: string) {
 
       // 4. Update milestone status in database
       await updateMilestoneStatus(currentMilestone.id, "completed");
-      
+
       // 5. Refresh data to reflect changes
       await fetchAllData();
 
@@ -196,12 +206,12 @@ export function useProjectPage(projectId: string) {
 
       console.log("✅ Milestone completed successfully in database and smart contract (both flag and status updated)");
     } catch (error) {
-      const errorMessage = error instanceof Error 
-        ? error.message 
+      const errorMessage = error instanceof Error
+        ? error.message
         : "Failed to complete milestone in smart contract";
       setApprovalError(errorMessage);
       console.error("❌ Error completing milestone:", error);
-      
+
       // Don't update database if smart contract operations failed
       // The user can try again
     } finally {
