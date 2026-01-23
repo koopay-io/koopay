@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
+import { useState, useEffect, useRef } from 'react';
+import { useGetEscrowFromIndexerByContractIds } from '@trustless-work/escrow';
 
 // Using a more specific type for escrow based on Trustless Work structure
 // The escrow object from getEscrowByContractIds should have title, description, type, etc.
@@ -15,10 +15,19 @@ interface MultiReleaseEscrow {
   [key: string]: unknown; // Allow other properties
 }
 
+type FundingStatus = 'unfunded' | 'funding' | 'funded' | 'error';
+
+interface EscrowBalanceSummary {
+  assetCode: string;
+  balance: number;
+}
+
 interface EscrowDetails {
   contractId: string;
   escrow: MultiReleaseEscrow;
-  balance?: Record<string, unknown>;
+  balances?: EscrowBalanceSummary[];
+  usdcBalance?: number | null;
+  fundingStatus?: FundingStatus;
   loading: boolean;
   error: string | null;
 }
@@ -26,13 +35,121 @@ interface EscrowDetails {
 /**
  * Hook to fetch escrow details by contractId
  */
-export const useEscrowDetails = (contractId: string | null | undefined) => {
+export const useEscrowDetails = (
+  contractId: string | null | undefined,
+  targetAmount?: number,
+) => {
   const [escrowData, setEscrowData] = useState<EscrowDetails | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { getEscrowByContractIds } = useGetEscrowFromIndexerByContractIds();
   const lastContractIdRef = useRef<string | null | undefined>(null);
   const isFetchingRef = useRef(false);
+
+  const parseBalanceEntries = (raw: unknown): EscrowBalanceSummary[] => {
+    if (Array.isArray(raw)) {
+      return raw.reduce<EscrowBalanceSummary[]>((acc, entry) => {
+        if (entry && typeof entry === 'object') {
+          const balanceEntry = entry as {
+            asset_code?: unknown;
+            assetCode?: unknown;
+            balance?: unknown;
+          };
+          const assetCode =
+            typeof balanceEntry.asset_code === 'string'
+              ? balanceEntry.asset_code
+              : typeof balanceEntry.assetCode === 'string'
+                ? balanceEntry.assetCode
+                : null;
+          const balanceValue =
+            typeof balanceEntry.balance === 'string' ||
+            typeof balanceEntry.balance === 'number'
+              ? Number(balanceEntry.balance)
+              : NaN;
+          if (assetCode && Number.isFinite(balanceValue)) {
+            acc.push({
+              assetCode,
+              balance: balanceValue,
+            });
+          }
+        }
+        return acc;
+      }, []);
+    }
+
+    if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+      return Object.entries(raw).reduce<EscrowBalanceSummary[]>(
+        (acc, [assetCode, balance]) => {
+          if (typeof balance === 'string' || typeof balance === 'number') {
+            const balanceValue = Number(balance);
+            if (Number.isFinite(balanceValue)) {
+              acc.push({
+                assetCode,
+                balance: balanceValue,
+              });
+            }
+          }
+          return acc;
+        },
+        [],
+      );
+    }
+
+    return [];
+  };
+
+  const getFundingStatus = (
+    usdcBalance: number | null,
+    totalAmount?: number,
+  ): FundingStatus => {
+    if (!usdcBalance || usdcBalance <= 0) {
+      return 'unfunded';
+    }
+    if (typeof totalAmount === 'number') {
+      return usdcBalance >= totalAmount ? 'funded' : 'funding';
+    }
+    return 'funding';
+  };
+
+  const resolveEscrowFromResponse = (response: unknown) => {
+    let resolvedEscrow: MultiReleaseEscrow | null = null;
+
+    if (Array.isArray(response)) {
+      if (response.length > 0) {
+        resolvedEscrow = response[0] as MultiReleaseEscrow;
+      }
+    } else if (response && typeof response === 'object') {
+      if (
+        'escrows' in response &&
+        Array.isArray((response as { escrows?: unknown }).escrows)
+      ) {
+        const escrows = (response as { escrows: unknown[] }).escrows;
+        if (escrows.length > 0) {
+          resolvedEscrow = escrows[0] as MultiReleaseEscrow;
+        }
+      } else if ('contractId' in response || 'engagementId' in response) {
+        resolvedEscrow = response as MultiReleaseEscrow;
+      }
+    }
+
+    return resolvedEscrow;
+  };
+
+  const resolveBalances = (response: unknown, escrow: MultiReleaseEscrow) => {
+    const responseBalance =
+      response && typeof response === 'object'
+        ? (response as { balance?: unknown; balances?: unknown }).balance ??
+          (response as { balances?: unknown }).balances
+        : null;
+    const escrowBalance =
+      escrow && typeof escrow === 'object'
+        ? (escrow as { balance?: unknown; balances?: unknown }).balance ??
+          (escrow as { balances?: unknown }).balances
+        : null;
+
+    const rawBalance = responseBalance ?? escrowBalance;
+    return parseBalanceEntries(rawBalance);
+  };
 
   useEffect(() => {
     // Skip if contractId hasn't changed or if we're already fetching
@@ -59,46 +176,31 @@ export const useEscrowDetails = (contractId: string | null | undefined) => {
           contractIds: [contractId],
         });
 
-        // The response can be:
-        // 1. An array of escrows directly: [{...}]
-        // 2. An object with escrows array: { escrows: [...] }
-        // 3. A single escrow object: { contractId: ..., ... }
-        let escrowData = null;
-        
-        if (Array.isArray(response)) {
-          // Case 1: Response is directly an array
-          if (response.length > 0) {
-            escrowData = response[0];
-          }
-        } else if (response && typeof response === 'object') {
-          // Check if response has escrows array
-          if ('escrows' in response && Array.isArray((response as { escrows: unknown[] }).escrows)) {
-            const escrows = (response as { escrows: unknown[] }).escrows;
-            if (escrows.length > 0) {
-              escrowData = escrows[0];
-            }
-          } 
-          // Check if response is directly the escrow object (has contractId or engagementId)
-          else if ('contractId' in response || 'engagementId' in response) {
-            escrowData = response;
-          }
-        }
+        const resolvedEscrow = resolveEscrowFromResponse(response);
+        if (resolvedEscrow) {
+          const balances = resolveBalances(response, resolvedEscrow);
+          const usdcEntry =
+            balances.find((entry) => entry.assetCode === 'USDC') || null;
+          const usdcBalance = usdcEntry ? usdcEntry.balance : null;
+          const fundingStatus = getFundingStatus(usdcBalance, targetAmount);
 
-        if (escrowData) {
           setEscrowData({
             contractId,
-            escrow: escrowData as MultiReleaseEscrow,
+            escrow: resolvedEscrow,
+            balances,
+            usdcBalance,
+            fundingStatus,
             loading: false,
             error: null,
           });
         } else {
-          setError("Escrow not found or not yet indexed");
+          setError('Escrow not found or not yet indexed');
           setEscrowData(null);
         }
       } catch (err) {
-        console.error("❌ Error fetching escrow details:", err);
+        console.error('❌ Error fetching escrow details:', err);
         const errorMessage =
-          err instanceof Error ? err.message : "Failed to fetch escrow details";
+          err instanceof Error ? err.message : 'Failed to fetch escrow details';
         setError(errorMessage);
         setEscrowData(null);
         // Don't throw - just set error state so UI can still render
@@ -116,6 +218,10 @@ export const useEscrowDetails = (contractId: string | null | undefined) => {
     escrowData,
     loading,
     error,
+    fundingStatus: error
+      ? 'error'
+      : getFundingStatus(escrowData?.usdcBalance ?? null, targetAmount),
+    usdcBalance: escrowData?.usdcBalance ?? null,
     refetch: () => {
       if (contractId) {
         const fetchEscrowDetails = async () => {
@@ -125,33 +231,32 @@ export const useEscrowDetails = (contractId: string | null | undefined) => {
             const response = await getEscrowByContractIds({
               contractIds: [contractId],
             });
-            let escrowData = null;
-            if (Array.isArray(response)) {
-              // Response is directly an array
-              if (response.length > 0) {
-                escrowData = response[0];
-              }
-            } else if (response && typeof response === 'object') {
-              if ('escrows' in response && Array.isArray((response as { escrows: unknown[] }).escrows)) {
-                const escrows = (response as { escrows: unknown[] }).escrows;
-                if (escrows.length > 0) {
-                  escrowData = escrows[0];
-                }
-              } else if ('contractId' in response || 'engagementId' in response) {
-                escrowData = response;
-              }
-            }
-            if (escrowData) {
+            const resolvedEscrow = resolveEscrowFromResponse(response);
+            if (resolvedEscrow) {
+              const balances = resolveBalances(response, resolvedEscrow);
+              const usdcEntry =
+                balances.find((entry) => entry.assetCode === 'USDC') || null;
+              const usdcBalance = usdcEntry ? usdcEntry.balance : null;
+              const fundingStatus = getFundingStatus(usdcBalance, targetAmount);
+
               setEscrowData({
                 contractId,
-                escrow: escrowData as MultiReleaseEscrow,
+                escrow: resolvedEscrow,
+                balances,
+                usdcBalance,
+                fundingStatus,
                 loading: false,
                 error: null,
               });
+            } else {
+              setError('Escrow not found or not yet indexed');
+              setEscrowData(null);
             }
           } catch (err) {
             const errorMessage =
-              err instanceof Error ? err.message : "Failed to fetch escrow details";
+              err instanceof Error
+                ? err.message
+                : 'Failed to fetch escrow details';
             setError(errorMessage);
           } finally {
             setLoading(false);

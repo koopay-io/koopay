@@ -32,7 +32,12 @@ export function useProjectPage(projectId: string) {
 
   const currentMilestone = getCurrentMilestone();
   const escrowContractId = getEscrowContractId(project);
-  const { escrowData } = useEscrowDetails(escrowContractId);
+  const {
+    escrowData,
+    fundingStatus,
+    usdcBalance,
+    refetch: refetchEscrowDetails,
+  } = useEscrowDetails(escrowContractId, project?.total_amount);
   
   // Get serviceProvider from escrow roles
   const serviceProvider = escrowData?.escrow?.roles && typeof escrowData.escrow.roles === 'object' && !Array.isArray(escrowData.escrow.roles)
@@ -215,6 +220,9 @@ export function useProjectPage(projectId: string) {
     loading,
     currentMilestone,
     escrowContractId,
+    escrowFundingStatus: fundingStatus,
+    escrowUsdcBalance: usdcBalance,
+    refetchEscrowDetails,
     milestoneCompleted,
     setMilestoneCompleted,
     handleViewContract,

@@ -46,6 +46,7 @@ export async function createEscrow(
     milestones: apiMilestones,
     trustline: {
       address: USDC_TRUSLINE,
+      symbol: "USDC",
     },
   });
   return response.data;

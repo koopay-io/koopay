@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogContent,
@@ -10,16 +10,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { createClient } from "@/lib/supabase/client";
-import { Search, User } from "lucide-react";
-import Image from "next/image";
+} from '@/components/ui/dialog';
+import { createClient } from '@/lib/supabase/client';
+import { Search, User } from 'lucide-react';
 
 interface Freelancer {
   id: string;
   full_name: string;
   position: string;
-  avatar_url: string | null;
 }
 
 interface CollaboratorAssignmentModalProps {
@@ -35,35 +33,50 @@ export function CollaboratorAssignmentModal({
   onSelect,
   selectedFreelancer,
 }: CollaboratorAssignmentModalProps) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [freelancers, setFreelancers] = useState<Freelancer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const supabase = createClient();
 
   const fetchFreelancers = useCallback(
-    async (searchTerm = "") => {
-      if (searchTerm.trim() === "") return;
-
+    async (searchTerm = '') => {
+      const normalizedTerm = searchTerm.trim();
       setIsLoading(true);
+      setLoadError(null);
       try {
-        const query = supabase
-          .from("freelancer_profiles")
-          .select("id, full_name, position, avatar_url")
-          .ilike("full_name", `%${searchTerm.trim()}%`);
+        let query = supabase
+          .from('freelancer_profiles')
+          .select('id, full_name, position');
+
+        if (normalizedTerm.length > 0) {
+          const escapedTerm = normalizedTerm.replace(/%/g, '\\%');
+          query = query.or(
+            `full_name.ilike.%${escapedTerm}%,position.ilike.%${escapedTerm}%`,
+          );
+        }
 
         const { data, error } = await query.limit(20);
 
-        console.log("searchTerm", searchTerm);
-        console.log("data", data);
-
         if (error) {
-          console.error("Error fetching freelancers:", error);
+          console.error(
+            'Error fetching freelancers:',
+            error.message || error,
+          );
+          setLoadError(
+            error.message || 'No se pudieron cargar los freelancers.',
+          );
           return;
         }
 
         setFreelancers(data ?? []);
       } catch (error) {
-        console.error("Error fetching freelancers:", error);
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'No se pudieron cargar los freelancers.';
+        console.error('Error fetching freelancers:', message);
+        setLoadError(message);
       } finally {
         setIsLoading(false);
       }
@@ -74,11 +87,7 @@ export function CollaboratorAssignmentModal({
   // Debounce search
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (searchQuery.length > 0) {
-        fetchFreelancers(searchQuery);
-      } else {
-        fetchFreelancers();
-      }
+      fetchFreelancers(searchQuery);
     }, 300);
 
     return () => clearTimeout(timeoutId);
@@ -127,6 +136,10 @@ export function CollaboratorAssignmentModal({
               <div className="text-center py-8 text-muted-foreground">
                 Loading freelancers...
               </div>
+            ) : loadError ? (
+              <div className="text-center py-8 text-destructive">
+                {loadError}
+              </div>
             ) : freelancers.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 {searchQuery
@@ -146,17 +159,7 @@ export function CollaboratorAssignmentModal({
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
-                      {freelancer.avatar_url ? (
-                        <Image
-                          src={freelancer.avatar_url}
-                          alt={freelancer.full_name}
-                          className="w-full h-full rounded-full object-cover"
-                          width={40}
-                          height={40}
-                        />
-                      ) : (
-                        <User className="h-5 w-5 text-muted-foreground" />
-                      )}
+                      <User className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div className="flex-1">
                       <h4 className="font-medium text-foreground">
