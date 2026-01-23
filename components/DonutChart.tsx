@@ -3,6 +3,8 @@
 import type React from "react";
 import { useState } from "react";
 import { CheckCircle, Clock, XCircle } from "lucide-react";
+import type { ProjectStatistics } from "@/lib/utils/projectStatistics";
+import { formatCurrency } from "@/lib/utils/projectStatistics";
 
 interface ChartData {
   label: string;
@@ -12,35 +14,79 @@ interface ChartData {
   icon: React.ReactNode;
 }
 
-export function DonutChart() {
+interface DonutChartProps {
+  statistics?: ProjectStatistics;
+}
+
+export function DonutChart({ statistics }: DonutChartProps) {
   const [hoveredSegment, setHoveredSegment] = useState<number | null>(null);
 
-  const totalBalance = 8000;
-  const completedProjects = 3;
+  // Use real statistics or show empty state
+  const stats = statistics || {
+    totalProjects: 0,
+    activeCount: 0,
+    completedCount: 0,
+    cancelledCount: 0,
+    activePercentage: 0,
+    completedPercentage: 0,
+    cancelledPercentage: 0,
+    totalActiveAmount: 0,
+    totalPaidAmount: 0,
+    averageProjectValue: 0,
+  };
 
+  const totalBalance = stats.totalActiveAmount + stats.totalPaidAmount;
+  const completedProjects = stats.completedCount;
+
+  // Build chart data with real percentages
   const data: ChartData[] = [
     {
       label: "In progress",
-      value: 40,
+      value: stats.activePercentage,
       color: "#0E3CFF",
       hoverColor: "#2E5AFF",
       icon: <Clock className="w-4 h-4" />,
     },
     {
       label: "Canceled",
-      value: 50,
+      value: stats.cancelledPercentage,
       color: "#273186",
       hoverColor: "#3A4196",
       icon: <XCircle className="w-4 h-4" />,
     },
     {
       label: "Done",
-      value: 10,
+      value: stats.completedPercentage,
       color: "#2E96FF",
       hoverColor: "#4EA6FF",
       icon: <CheckCircle className="w-4 h-4" />,
     },
   ];
+
+  // Calculate center value - show largest percentage or 0 if no projects
+  const largestValue = data.length > 0 ? Math.max(...data.map((d) => d.value)) : 0;
+  const centerValue = stats.totalProjects > 0 ? largestValue : 0;
+
+  // Handle empty state
+  if (stats.totalProjects === 0) {
+    return (
+      <div
+        className="p-6 sm:p-6 lg:p-8 text-white relative h-full flex items-center justify-center lg:min-h-[336px]"
+        style={{
+          borderRadius: "30px",
+          background: "rgba(22, 19, 44, 0.6)",
+        }}
+      >
+        <div className="absolute inset-0 backdrop-blur-sm rounded-[30px] -z-10" />
+        <div className="text-center">
+          <p className="text-white/60 text-lg">No projects yet</p>
+          <p className="text-white/40 text-sm mt-2">
+            Create your first project to see statistics
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -61,7 +107,7 @@ export function DonutChart() {
               className="relative w-full h-full"
               style={{ isolation: "isolate" }}
             >
-              {/* In progress segment (40%) */}
+              {/* In progress segment */}
               <div
                 className={`absolute inset-0 rounded-full cursor-pointer transition-all duration-300 ease-out ${
                   hoveredSegment === 0
@@ -70,8 +116,8 @@ export function DonutChart() {
                 }`}
                 style={{
                   background: `conic-gradient(
-                    #0E3CFF 0deg 144deg,
-                    transparent 144deg 360deg
+                    #0E3CFF 0deg ${stats.activePercentage * 3.6}deg,
+                    transparent ${stats.activePercentage * 3.6}deg 360deg
                   )`,
                   mask: "radial-gradient(circle at center, transparent 60px, black 60px)",
                   WebkitMask:
@@ -86,7 +132,7 @@ export function DonutChart() {
                 onMouseLeave={() => setHoveredSegment(null)}
               ></div>
 
-              {/* Canceled segment (50%) */}
+              {/* Canceled segment */}
               <div
                 className={`absolute inset-0 rounded-full cursor-pointer transition-all duration-300 ease-out ${
                   hoveredSegment === 1
@@ -95,9 +141,13 @@ export function DonutChart() {
                 }`}
                 style={{
                   background: `conic-gradient(
-                    transparent 0deg 144deg,
-                    #273186 144deg 324deg,
-                    transparent 324deg 360deg
+                    transparent 0deg ${stats.activePercentage * 3.6}deg,
+                    #273186 ${stats.activePercentage * 3.6}deg ${
+                      (stats.activePercentage + stats.cancelledPercentage) * 3.6
+                    }deg,
+                    transparent ${
+                      (stats.activePercentage + stats.cancelledPercentage) * 3.6
+                    }deg 360deg
                   )`,
                   mask: "radial-gradient(circle at center, transparent 60px, black 60px)",
                   WebkitMask:
@@ -112,7 +162,7 @@ export function DonutChart() {
                 onMouseLeave={() => setHoveredSegment(null)}
               ></div>
 
-              {/* Done segment (10%) */}
+              {/* Done segment */}
               <div
                 className={`absolute inset-0 rounded-full cursor-pointer transition-all duration-300 ease-out ${
                   hoveredSegment === 2
@@ -121,8 +171,12 @@ export function DonutChart() {
                 }`}
                 style={{
                   background: `conic-gradient(
-                    transparent 0deg 324deg,
-                    #2E96FF 324deg 360deg
+                    transparent 0deg ${
+                      (stats.activePercentage + stats.cancelledPercentage) * 3.6
+                    }deg,
+                    #2E96FF ${
+                      (stats.activePercentage + stats.cancelledPercentage) * 3.6
+                    }deg 360deg
                   )`,
                   mask: "radial-gradient(circle at center, transparent 60px, black 60px)",
                   WebkitMask:
@@ -155,7 +209,9 @@ export function DonutChart() {
                   </div>
                 </div>
               ) : (
-                <div className="text-4xl font-bold text-white">40%</div>
+                <div className="text-4xl font-bold text-white">
+                  {Math.max(centerValue, 0)}%
+                </div>
               )}
             </div>
           </div>
@@ -163,42 +219,42 @@ export function DonutChart() {
 
         {/* Desktop: Graphs section with legend */}
         <div className="hidden lg:flex flex-col w-full max-w-sm justify-between min-h-[192px] bg-[#16132C] rounded-3xl px-8 py-6">
-            {/* Total balance section */}
+          {/* Total balance section */}
           <div className="flex justify-between mb-4">
-              <div className="w-8/12 text-2xl font-bold">Total balance</div>
-              <div className="w-4/12 text-2xl font-bold text-white">
-                ${totalBalance.toLocaleString("en-US")}
-              </div>
-            </div>
-
-            {/* Vertical legend */}
-            <div className="space-y-4 w-full">
-              {data.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex w-full items-center justify-between min-w-[200px]"
-                >
-                  <div className="w-8/12 flex items-center space-x-3">
-                    <div
-                      className="w-3 h-3 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span className="text-white/80 text-sm">{item.label}</span>
-                  </div>
-                  <span className="w-4/12 text-white font-semibold text-sm text-left">
-                    {item.value}%
-                  </span>
-                </div>
-              ))}
+            <div className="w-8/12 text-2xl font-bold">Total balance</div>
+            <div className="w-4/12 text-2xl font-bold text-white">
+              {formatCurrency(totalBalance)}
             </div>
           </div>
+
+          {/* Vertical legend */}
+          <div className="space-y-4 w-full">
+            {data.map((item, index) => (
+              <div
+                key={index}
+                className="flex w-full items-center justify-between min-w-[200px]"
+              >
+                <div className="w-8/12 flex items-center space-x-3">
+                  <div
+                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className="text-white/80 text-sm">{item.label}</span>
+                </div>
+                <span className="w-4/12 text-white font-semibold text-sm text-left">
+                  {item.value}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Mobile: Total balance, projects, and legend */}
         <div className="flex flex-col gap-4 w-full lg:hidden">
           <div className="flex flex-col gap-3 w-full bg-[#16132C] rounded-2xl px-6 py-4">
             <div className="text-lg font-bold">Total balance</div>
             <div className="text-xl font-bold text-white">
-              ${totalBalance.toLocaleString("en-US")}
+              {formatCurrency(totalBalance)}
             </div>
           </div>
 
