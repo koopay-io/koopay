@@ -16,6 +16,7 @@ import { useMilestoneEvidence } from "@/lib/hooks/useMilestoneEvidence";
 import { useEffect, useState } from "react";
 import { EvidenceList } from "./_components/EvidenceList";
 import { EvidenceUploadModal } from "@/components/EvidenceUploadModal";
+import { PaymentTransactionCard } from "./_components/PaymentTransactionCard";
 
 export default function ProjectPage() {
   const params = useParams();
@@ -106,6 +107,27 @@ export default function ProjectPage() {
             <h2 className="text-2xl font-bold text-white mb-6">Evidence</h2>
             <EvidenceList evidence={evidence} isLoading={isLoadingEvidence} />
           </div>
+
+          {/* Payment Details - Show for current milestone OR last completed milestone with payment */}
+          {(() => {
+            const milestoneToShow = currentMilestone?.status === "completed" 
+              ? currentMilestone 
+              : milestones
+                  .filter(m => m.status === "completed" && m.payment_hash)
+                  .sort((a, b) => new Date(b.payment_sent_at || 0).getTime() - new Date(a.payment_sent_at || 0).getTime())[0];
+            
+            return milestoneToShow?.payment_hash ? (
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-white mb-6">Payment Details</h2>
+                <PaymentTransactionCard
+                  paymentHash={milestoneToShow.payment_hash}
+                  amount={project.total_amount * (milestoneToShow.percentage / 100)}
+                  recipient={project.freelancer_id ?? ""}
+                  timestamp={milestoneToShow.payment_sent_at ?? null}
+                />
+              </div>
+            ) : null;
+          })()}
 
           {/* Milestones Timeline */}
           <MilestonesTimeline

@@ -115,10 +115,9 @@ export function useProjectPage(projectId: string) {
     setApprovalError(null);
 
     try {
-      // 1. Calculate milestone index in escrow
       const milestoneIndex = getMilestoneIndex(currentMilestone.id);
       
-      // 2. Check if milestone is already approved in escrow
+      // Check if milestone already approved
       const escrowMilestones = escrowData?.escrow?.milestones;
       if (escrowMilestones && Array.isArray(escrowMilestones) && escrowMilestones[milestoneIndex]) {
         const escrowMilestone = escrowMilestones[milestoneIndex] as { flags?: { approved?: boolean } };
@@ -190,16 +189,27 @@ export function useProjectPage(projectId: string) {
 
       console.log("✅ Step 2/2: Milestone status changed to 'completed'");
 
-      // 4. Update milestone status in database
-      await updateMilestoneStatus(currentMilestone.id, "completed");
+      // Extract transaction hash from result
+      const extractTransactionHash = (result: unknown): string | null => {
+        if (!result || typeof result !== "object") return null;
+        const response = result as Record<string, unknown>;
+        if (typeof response.hash === "string") return response.hash;
+        if (typeof response.id === "string") return response.id;
+        if (typeof response.transactionHash === "string") return response.transactionHash;
+        return null;
+      };
+
+      const txHash = extractTransactionHash(statusChangeResult);
       
-      // 5. Refresh data to reflect changes
+      // Update milestone in database with payment hash
+      await updateMilestoneStatus(currentMilestone.id, "completed", txHash);
+      
       await fetchAllData();
 
       // 6. Reset checkbox state for next milestone
       setMilestoneCompleted(false);
 
-      console.log("✅ Milestone completed successfully in database and smart contract (both flag and status updated)");
+      console.log("✅ Milestone completed successfully", txHash ? `(tx: ${txHash})` : "");
     } catch (error) {
       const errorMessage = error instanceof Error 
         ? error.message 

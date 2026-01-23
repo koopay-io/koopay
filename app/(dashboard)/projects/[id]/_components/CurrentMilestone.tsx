@@ -70,6 +70,11 @@ export function CurrentMilestone({
             <Badge className="bg-white/20 text-white border-white/30">
               {daysLeft} days left
             </Badge>
+            {milestone.status === "completed" && milestone.payment_hash && (
+              <Badge className="bg-green-600 text-white border-green-500">
+                ✓ Paid
+              </Badge>
+            )}
           </div>
 
           <div className="mt-6 space-y-4">
