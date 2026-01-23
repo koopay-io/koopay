@@ -1,14 +1,16 @@
-'use client';
+"use client";
 
-import { createContext, useContext, useState, ReactNode } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { EOrganizationType } from '@/lib/validations/shared/enums';
-import { TOrganizationInsert } from '@/lib/validations/organizations';
-import { TUserOrganizationInsert } from '@/lib/validations/user_organization';
-import { TCountryRow } from '@/lib/validations/countries';
-import { User } from '@supabase/supabase-js';
+import { createContext, useContext, useState, ReactNode } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { EOrganizationType } from "@/lib/validations/shared/enums";
+import { TOrganizationInsert } from "@/lib/validations/organizations";
+import { TUserOrganizationInsert } from "@/lib/validations/user_organization";
+import { TCountryRow } from "@/lib/validations/countries";
+import { User } from "@supabase/supabase-js";
 
-interface OnboardingData extends Partial<Omit<TOrganizationInsert, 'avatar_url'>> {
+interface OnboardingData extends Partial<
+  Omit<TOrganizationInsert, "avatar_url">
+> {
   avatarFile?: File;
 }
 
@@ -28,9 +30,12 @@ interface OnboardingContextType {
   completionError: string | null;
   completeOnboarding: (finalData?: Partial<OnboardingData>) => Promise<void>;
   clearCompletionError: () => void;
+  skipOnboarding: () => Promise<void>;
 }
 
-const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
+const OnboardingContext = createContext<OnboardingContextType | undefined>(
+  undefined,
+);
 
 interface OnboardingProviderProps {
   children: ReactNode;
@@ -38,10 +43,15 @@ interface OnboardingProviderProps {
   user: User | null;
 }
 
-export function OnboardingProvider({ children, countries, user }: OnboardingProviderProps) {
+export function OnboardingProvider({
+  children,
+  countries,
+  user,
+}: OnboardingProviderProps) {
   const [data, setData] = useState<OnboardingData>({});
   const [currentStep, setCurrentStep] = useState(0);
-  const [organizationType, setOrganizationType] = useState<EOrganizationType | null>(null);
+  const [organizationType, setOrganizationType] =
+    useState<EOrganizationType | null>(null);
   const [maxStepReached, setMaxStepReached] = useState(0);
   const [isCompleting, setIsCompleting] = useState(false);
   const [completionError, setCompletionError] = useState<string | null>(null);
@@ -49,7 +59,8 @@ export function OnboardingProvider({ children, countries, user }: OnboardingProv
   const updateData = (newData: Partial<OnboardingData>) => {
     setData((prev) => {
       const newType = newData.type !== undefined ? newData.type : prev.type;
-      const newLegalType = newData.legal_type !== undefined ? newData.legal_type : prev.legal_type;
+      const newLegalType =
+        newData.legal_type !== undefined ? newData.legal_type : prev.legal_type;
 
       const shouldReset =
         (newType !== undefined && newType !== prev.type) ||
@@ -74,7 +85,7 @@ export function OnboardingProvider({ children, countries, user }: OnboardingProv
           ({
             type: type,
             legal_type: prev.legal_type,
-          } as OnboardingData)
+          }) as OnboardingData,
       );
     }
   };
@@ -92,12 +103,12 @@ export function OnboardingProvider({ children, countries, user }: OnboardingProv
     const mergedData = { ...data, ...finalData };
 
     if (!organizationType || !mergedData.legal_type) {
-      setCompletionError('Missing required information');
+      setCompletionError("Missing required information");
       return;
     }
 
     if (!user) {
-      setCompletionError('Could not get authenticated user');
+      setCompletionError("Could not get authenticated user");
       return;
     }
 
@@ -115,7 +126,7 @@ export function OnboardingProvider({ children, countries, user }: OnboardingProv
       !mergedData.business_type ||
       !mergedData.industry_type
     ) {
-      setCompletionError('Please complete all required fields');
+      setCompletionError("Please complete all required fields");
       return;
     }
 
@@ -149,123 +160,135 @@ export function OnboardingProvider({ children, countries, user }: OnboardingProv
         created_by: user.id, // Explicitly set created_by so get_user_organizations RPC can find it
       } as TOrganizationInsert & { created_by: string };
 
-      console.log('=== CREATING ORGANIZATION ===');
-      console.log('Organization data:', organizationData);
+      console.log("=== CREATING ORGANIZATION ===");
+      console.log("Organization data:", organizationData);
 
       const { data: organization, error: orgError } = await supabase
-        .from('organizations')
+        .from("organizations")
         .insert(organizationData as any)
         .select()
         .single();
 
       if (orgError || !organization) {
-        console.error('Error creating organization:', orgError);
-        console.error('Full error:', JSON.stringify(orgError, null, 2));
-        setCompletionError('Error creating organization: ' + orgError?.message);
+        console.error("Error creating organization:", orgError);
+        console.error("Full error:", JSON.stringify(orgError, null, 2));
+        setCompletionError("Error creating organization: " + orgError?.message);
         setIsCompleting(false);
         return;
       }
 
-      console.log('Organization created successfully:', organization);
+      console.log("Organization created successfully:", organization);
       const organizationId = (organization as { id: number }).id;
       const createdBy = (organization as { created_by?: string }).created_by;
-      console.log('Organization ID:', organizationId);
-      console.log('Organization created_by:', createdBy);
-      console.log('User ID:', user.id);
-      console.log('Created_by matches user.id:', createdBy === user.id);
-      
+      console.log("Organization ID:", organizationId);
+      console.log("Organization created_by:", createdBy);
+      console.log("User ID:", user.id);
+      console.log("Created_by matches user.id:", createdBy === user.id);
+
       // Verify created_by was set correctly
       if (createdBy !== user.id) {
-        console.error('WARNING: created_by does not match user.id!', {
+        console.error("WARNING: created_by does not match user.id!", {
           createdBy,
           userId: user.id,
-          organization
+          organization,
         });
         // Try to update it
         const { error: updateError } = await supabase
-          .from('organizations')
+          .from("organizations")
           .update({ created_by: user.id })
-          .eq('id', organizationId);
-        
+          .eq("id", organizationId);
+
         if (updateError) {
-          console.error('Failed to update created_by:', updateError);
-          setCompletionError('Error setting organization creator. Please try again.');
+          console.error("Failed to update created_by:", updateError);
+          setCompletionError(
+            "Error setting organization creator. Please try again.",
+          );
           setIsCompleting(false);
           return;
         }
-        console.log('Updated created_by to match user.id');
+        console.log("Updated created_by to match user.id");
       }
 
-      console.log('=== CREATING USER_ORGANIZATION ===');
+      console.log("=== CREATING USER_ORGANIZATION ===");
       const userOrganizationData = {
         organization_id: organizationId,
         user_id: user.id,
-        email: user.email || '',
-        role: 'owner' as const,
-        status: 'active' as const,
+        email: user.email || "",
+        role: "owner" as const,
+        status: "active" as const,
         joined_at: new Date().toISOString(),
       } satisfies TUserOrganizationInsert;
 
-      console.log('User organization data:', userOrganizationData);
+      console.log("User organization data:", userOrganizationData);
       const { error: userOrgError } = await supabase
-        .from('user_organization')
+        .from("user_organization")
         .insert(userOrganizationData as any);
 
       if (userOrgError) {
-        console.error('Error creating user_organization:', userOrgError);
-        console.error('Full error:', JSON.stringify(userOrgError, null, 2));
-        setCompletionError('Error associating user with organization: ' + userOrgError.message);
+        console.error("Error creating user_organization:", userOrgError);
+        console.error("Full error:", JSON.stringify(userOrgError, null, 2));
+        setCompletionError(
+          "Error associating user with organization: " + userOrgError.message,
+        );
         setIsCompleting(false);
         return;
       }
 
-      console.log('User organization created successfully');
+      console.log("User organization created successfully");
 
       // Verify that the organization can be retrieved using the RPC function
       // This ensures the database transaction is fully committed and the RPC can find it
-      console.log('=== VERIFYING ORGANIZATION CREATION ===');
-      
+      console.log("=== VERIFYING ORGANIZATION CREATION ===");
+
       // Try up to 3 times with a small delay to account for eventual consistency
       let verified = false;
       for (let attempt = 1; attempt <= 3; attempt++) {
         try {
-          const { data: verifyRpc, error: verifyRpcError } = await supabase.rpc(
-            'get_user_organizations',
-            { p_user_id: user.id }
-          ) as { data: { total: number; organizations: unknown[] } | null; error: unknown };
+          const { data: verifyRpc, error: verifyRpcError } =
+            (await supabase.rpc("get_user_organizations", {
+              p_user_id: user.id,
+            })) as {
+              data: { total: number; organizations: unknown[] } | null;
+              error: unknown;
+            };
 
           if (!verifyRpcError && verifyRpc && verifyRpc.total > 0) {
             const orgs = verifyRpc.organizations;
             const found = orgs.some((org: unknown) => {
-              if (typeof org === 'object' && org !== null && 'id' in org) {
+              if (typeof org === "object" && org !== null && "id" in org) {
                 const orgWithId = org as { id?: number };
                 return orgWithId.id === organizationId;
               }
               return false;
             });
-            
+
             if (found) {
-              console.log(`Organization verified successfully on attempt ${attempt}:`, verifyRpc);
+              console.log(
+                `Organization verified successfully on attempt ${attempt}:`,
+                verifyRpc,
+              );
               verified = true;
               break;
             }
           }
-          
+
           if (attempt < 3) {
             console.log(`Verification attempt ${attempt} failed, retrying...`);
-            await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms before retry
+            await new Promise((resolve) => setTimeout(resolve, 500)); // Wait 500ms before retry
           }
         } catch (err) {
           console.error(`Error on verification attempt ${attempt}:`, err);
           if (attempt < 3) {
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise((resolve) => setTimeout(resolve, 500));
           }
         }
       }
 
       if (!verified) {
-        console.error('Organization verification failed after 3 attempts');
-        setCompletionError('Organization created but verification failed. Please refresh the page.');
+        console.error("Organization verification failed after 3 attempts");
+        setCompletionError(
+          "Organization created but verification failed. Please refresh the page.",
+        );
         setIsCompleting(false);
         return;
       }
@@ -273,72 +296,78 @@ export function OnboardingProvider({ children, countries, user }: OnboardingProv
       let avatarUrl: string | null = null;
 
       if (mergedData.avatarFile) {
-        console.log('=== UPLOADING AVATAR ===');
-        console.log('Avatar file:', mergedData.avatarFile);
-        console.log('File name:', mergedData.avatarFile.name);
-        console.log('File size:', mergedData.avatarFile.size);
-        console.log('File type:', mergedData.avatarFile.type);
+        console.log("=== UPLOADING AVATAR ===");
+        console.log("Avatar file:", mergedData.avatarFile);
+        console.log("File name:", mergedData.avatarFile.name);
+        console.log("File size:", mergedData.avatarFile.size);
+        console.log("File type:", mergedData.avatarFile.type);
 
-        const fileExt = mergedData.avatarFile.name.split('.').pop();
+        const fileExt = mergedData.avatarFile.name.split(".").pop();
         const fileName = `avatar-${Date.now()}.${fileExt}`;
         const filePath = `${organizationId}/avatars/${fileName}`;
 
-        console.log('File extension:', fileExt);
-        console.log('File name:', fileName);
-        console.log('File path:', filePath);
+        console.log("File extension:", fileExt);
+        console.log("File name:", fileName);
+        console.log("File path:", filePath);
         console.log('Attempting to upload to bucket "organizations"...');
 
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('organizations')
+          .from("organizations")
           .upload(filePath, mergedData.avatarFile, {
-            cacheControl: '3600',
+            cacheControl: "3600",
             upsert: false,
           });
 
         if (uploadError) {
-          console.error('Upload error:', uploadError);
-          console.error('Error message:', uploadError.message);
-          console.error('Full error object:', JSON.stringify(uploadError, null, 2));
-          console.error('Avatar upload failed, but continuing without avatar URL');
+          console.error("Upload error:", uploadError);
+          console.error("Error message:", uploadError.message);
+          console.error(
+            "Full error object:",
+            JSON.stringify(uploadError, null, 2),
+          );
+          console.error(
+            "Avatar upload failed, but continuing without avatar URL",
+          );
         } else {
-          console.log('Upload successful!', uploadData);
+          console.log("Upload successful!", uploadData);
 
           const {
             data: { publicUrl },
-          } = supabase.storage.from('organizations').getPublicUrl(filePath);
+          } = supabase.storage.from("organizations").getPublicUrl(filePath);
 
           avatarUrl = publicUrl;
-          console.log('Public URL:', publicUrl);
+          console.log("Public URL:", publicUrl);
 
-          console.log('=== UPDATING ORGANIZATION WITH AVATAR URL ===');
+          console.log("=== UPDATING ORGANIZATION WITH AVATAR URL ===");
           const { error: updateError } = await supabase
-            .from('organizations')
+            .from("organizations")
             .update({ avatar_url: avatarUrl })
-            .eq('id', organizationId);
+            .eq("id", organizationId);
 
           if (updateError) {
-            console.error('Error updating avatar URL:', updateError);
-            console.error('Full error:', JSON.stringify(updateError, null, 2));
+            console.error("Error updating avatar URL:", updateError);
+            console.error("Full error:", JSON.stringify(updateError, null, 2));
           } else {
-            console.log('Organization updated with avatar URL successfully');
+            console.log("Organization updated with avatar URL successfully");
           }
         }
       } else {
-        console.log('No avatar file to upload');
+        console.log("No avatar file to upload");
       }
 
       clearData();
-      
+
       // Small delay to ensure database changes are fully propagated
       // before redirecting to platform
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
       // Use window.location.href to force a full page reload
       // This ensures the server-side layout sees the newly created organization
-      window.location.href = '/platform';
+      window.location.href = "/platform";
     } catch (err) {
       setCompletionError(
-        'Unexpected error: ' + (err instanceof Error ? err.message : 'Unknown error')
+        "Unexpected error: " +
+          (err instanceof Error ? err.message : "Unknown error"),
       );
       setIsCompleting(false);
     }
@@ -347,6 +376,47 @@ export function OnboardingProvider({ children, countries, user }: OnboardingProv
   const clearCompletionError = () => {
     setCompletionError(null);
     setIsCompleting(false);
+  };
+
+  const skipOnboarding = async () => {
+    if (!organizationType) {
+      setCompletionError(
+        "Please select an organization type first (Provider or Requester).",
+      );
+      return;
+    }
+
+    if (!user) {
+      setCompletionError("User not authenticated.");
+      return;
+    }
+
+    // Use the first available country or default to 1 if list is empty (fallback)
+    const defaultCountryId = countries.length > 0 ? countries[0].id : 1;
+
+    const defaultData: Partial<OnboardingData> = {
+      name: "My Organization",
+      legal_type: "individual",
+      legal_name: user.email?.split("@")[0] || "My Name",
+      legal_id: "PENDING",
+      legal_phone: null,
+      bio: "I am using Koopay to manage my crypto payments.",
+
+      // Address placeholders
+      legal_country_id: defaultCountryId,
+      legal_state: "Pending",
+      legal_city: "Pending",
+      legal_street_name: "Pending",
+      legal_street_number: 1,
+      legal_postal_code: "0000",
+
+      // Business Enums placeholders
+      business_type: "other",
+      industry_type: "Other",
+    };
+
+    // Reuse the existing completeOnboarding logic with our defaults
+    await completeOnboarding(defaultData);
   };
 
   return (
@@ -367,6 +437,7 @@ export function OnboardingProvider({ children, countries, user }: OnboardingProv
         completionError,
         completeOnboarding,
         clearCompletionError,
+        skipOnboarding,
       }}
     >
       {children}
@@ -377,7 +448,9 @@ export function OnboardingProvider({ children, countries, user }: OnboardingProv
 export function useOnboardingContext() {
   const context = useContext(OnboardingContext);
   if (context === undefined) {
-    throw new Error('useOnboardingContext must be used within an OnboardingProvider');
+    throw new Error(
+      "useOnboardingContext must be used within an OnboardingProvider",
+    );
   }
   return context;
 }

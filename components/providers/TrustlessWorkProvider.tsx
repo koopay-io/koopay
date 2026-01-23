@@ -11,7 +11,7 @@ export const TrustlessWorkProvider: React.FC<TrustlessWorkProviderProps> = ({
   children,
 }) => {
   // Access environment variable directly in client component
-  const apiKey = process.env.NEXT_PUBLIC_API_KEY;
+  const apiKey = process.env.NEXT_PUBLIC_TRUSTLESS_API_KEY;
 
   // Validate API key is configured
   if (!apiKey && typeof window !== "undefined") {

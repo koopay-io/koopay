@@ -2,9 +2,10 @@
 export const USDC_TRUSLINE =
   "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
 export const BASE_URL =
-  process.env.NEXT_PUBLIC_BASE_URL || "https://dev.api.trustlesswork.com";
+  process.env.NEXT_PUBLIC_TRUSTLESS_BASE_URL ||
+  "https://dev.api.trustlesswork.com";
 export const ADMIN_PK =
-  process.env.NEXT_PUBLIC_ADMIN_PK ||
+  process.env.NEXT_PUBLIC_TURSTLESS_ADMIN_PK ||
   "GDT26YDR47N3AC2RHMXPW65TM754XTMHTSE7RKSOP6W4NTOAFDERMWT3";
 
 export const STELLAR_NETWORK =

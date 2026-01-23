@@ -24,7 +24,7 @@ interface ProjectData {
 
 import { Database } from "@/lib/supabase/types/database.gen";
 
-type Project = Database['public']['Tables']['projects']['Row'];
+type Project = Database["public"]["Tables"]["projects"]["Row"];
 
 interface CreateProjectResult {
   success: boolean;
@@ -35,40 +35,47 @@ interface CreateProjectResult {
 
 /**
  * Hook to create projects with automatic escrow deployment
- * 
+ *
  * This hook orchestrates the complete flow:
  * 1. Validates contractor wallet and milestones
  * 2. Deploys multi-release escrow contract
  * 3. Funds the escrow with project amount
  * 4. Saves project and milestones to database
- * 
+ *
  * Uses invisible wallets created with Stellar SDK instead of Wallet Kit
  */
 export const useProjectCreation = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { wallet } = useStellarWallet(); // Wallet del contractor
-  const { deployMultiReleaseEscrow, fundMultiReleaseEscrow } = useEscrowWithSecretKey();
+  const { deployMultiReleaseEscrow, fundMultiReleaseEscrow } =
+    useEscrowWithSecretKey();
   const supabase = createClient();
 
   /**
    * Validate milestones sum to 100%
    */
   const validateMilestones = (milestones: Milestone[]): boolean => {
-    const totalPercentage = milestones.reduce((sum, m) => sum + m.percentage, 0);
+    const totalPercentage = milestones.reduce(
+      (sum, m) => sum + m.percentage,
+      0,
+    );
     return totalPercentage === 100;
   };
 
   /**
    * Create a project with automatic escrow deployment
-   * 
+   *
    * @param data - Project data including title, description, milestones, etc.
    * @returns Result object with success status and project data
    */
-  const createProjectWithEscrow = async (data: ProjectData): Promise<CreateProjectResult> => {
+  const createProjectWithEscrow = async (
+    data: ProjectData,
+  ): Promise<CreateProjectResult> => {
     // Validation: Check contractor wallet
     if (!wallet?.secretKey) {
-      const errorMsg = "Contractor wallet not found. Please ensure you're logged in.";
+      const errorMsg =
+        "Contractor wallet not found. Please ensure you're logged in.";
       setError(errorMsg);
       return { success: false, error: errorMsg };
     }
@@ -92,9 +99,12 @@ export const useProjectCreation = () => {
 
     try {
       // Get environment variables
-      const platformFee = Number(process.env.NEXT_PUBLIC_PLATFORM_FEE || "1.5");
-      const adminPk = process.env.NEXT_PUBLIC_ADMIN_PK || "";
-      const skipEscrow = process.env.NEXT_PUBLIC_SKIP_ESCROW === "true";
+      const platformFee = Number(
+        process.env.NEXT_PUBLIC_TRUSTLESS_PLATFORM_FEE || "1.5",
+      );
+      const adminPk = process.env.NEXT_PUBLIC_TRUSTLESS_ADMIN_PK || "";
+      const skipEscrow =
+        process.env.NEXT_PUBLIC_TRUSTLESS_SKIP_ESCROW === "true";
 
       if (!adminPk) {
         throw new Error("Platform admin public key not configured");
@@ -103,9 +113,11 @@ export const useProjectCreation = () => {
       // 🔧 DEVELOPMENT MODE: Skip escrow deployment
       if (skipEscrow) {
         console.warn("⚠️ DEVELOPMENT MODE: Skipping escrow deployment");
-        
+
         const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
         if (!user) {
           throw new Error("User not authenticated");
@@ -130,8 +142,9 @@ export const useProjectCreation = () => {
           .single();
 
         if (projectError) throw projectError;
-        if (!project || !('id' in project)) throw new Error('Project creation failed');
-        
+        if (!project || !("id" in project))
+          throw new Error("Project creation failed");
+
         const projectId = (project as { id: string }).id;
 
         // Save milestones
@@ -150,8 +163,8 @@ export const useProjectCreation = () => {
 
         if (milestonesError) throw milestonesError;
 
-        return { 
-          success: true, 
+        return {
+          success: true,
           project,
           contractId: `mock-contract-${Date.now()}`,
         };
@@ -159,15 +172,21 @@ export const useProjectCreation = () => {
 
       // 1. Verify and fund contractor's account if needed
       const stellarManager = new StellarWalletManager("testnet");
-      const accountExists = await stellarManager.accountExists(wallet.publicKey);
-      
+      const accountExists = await stellarManager.accountExists(
+        wallet.publicKey,
+      );
+
       if (!accountExists) {
-        const funded = await stellarManager.fundTestnetAccount(wallet.publicKey);
+        const funded = await stellarManager.fundTestnetAccount(
+          wallet.publicKey,
+        );
         if (!funded) {
-          throw new Error("Failed to fund contractor account. Please ensure you're connected to testnet.");
+          throw new Error(
+            "Failed to fund contractor account. Please ensure you're connected to testnet.",
+          );
         }
         // Wait for account to be created on the network
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise((resolve) => setTimeout(resolve, 5000));
         console.log("✅ Contractor account funded");
       } else {
         console.log("✅ Contractor account already exists");
@@ -179,46 +198,60 @@ export const useProjectCreation = () => {
       const freelancerPublicKey = wallet.publicKey; // Use contractor's own wallet for testing
 
       // 3. Setup USDC (Trustless Work requires a trustline asset)
-      const usdcIssuer = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
-      
+      const usdcIssuer =
+        "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
+
       try {
-        await stellarManager.establishTrustline(wallet.secretKey, "USDC", usdcIssuer);
-      } catch {
-      }
-      
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+        await stellarManager.establishTrustline(
+          wallet.secretKey,
+          "USDC",
+          usdcIssuer,
+        );
+      } catch {}
+
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       // IMPORTANT: Admin account also needs USDC trustline (he's the receiver)
       console.warn(`⚠️ Admin account ${adminPk} must have USDC trustline`);
-      
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // Format amount with max 7 decimals (Stellar requirement)
       const swapAmount = (data.total_amount * 1.1).toFixed(7);
-      const swapped = await stellarManager.swapXLMtoUSDC(wallet.secretKey, swapAmount, usdcIssuer);
-      
+      const swapped = await stellarManager.swapXLMtoUSDC(
+        wallet.secretKey,
+        swapAmount,
+        usdcIssuer,
+      );
+
       if (!swapped) {
-        console.warn("⚠️ Could not obtain USDC automatically (expected in testnet)");
+        console.warn(
+          "⚠️ Could not obtain USDC automatically (expected in testnet)",
+        );
         // In production, this would be a hard error
         // throw new Error("No USDC available");
       } else {
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        await new Promise((resolve) => setTimeout(resolve, 3000));
       }
-      
+
       // 4. Check balances of all involved accounts
-      const contractorBalance = await stellarManager.getBalance(wallet.publicKey);
-      
+      const contractorBalance = await stellarManager.getBalance(
+        wallet.publicKey,
+      );
+
       try {
         await stellarManager.getBalance(adminPk);
       } catch (error) {
         console.error("❌ Admin account doesn't exist or has issues:", error);
       }
-      
+
       // 5. Validate accounts
-      const contractorHasUSDC = contractorBalance.some(b => b.asset === "USDC");
-      
+      const contractorHasUSDC = contractorBalance.some(
+        (b) => b.asset === "USDC",
+      );
+
       // 6. Deploy escrow contract with USDC
-      
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const escrowPayload: any = {
         signer: wallet.publicKey, // ✅ Moved to first position (matches Scalar example)
@@ -250,7 +283,10 @@ export const useProjectCreation = () => {
         receiverMemo: Date.now() % 1000000, // Generate a unique 6-digit memo
       };
 
-      const deployResult = await deployMultiReleaseEscrow(escrowPayload, wallet.secretKey);
+      const deployResult = await deployMultiReleaseEscrow(
+        escrowPayload,
+        wallet.secretKey,
+      );
       const contractId = deployResult.contractId;
 
       // 6. Fund escrow
@@ -260,11 +296,13 @@ export const useProjectCreation = () => {
           contractId,
           signer: wallet.publicKey,
         },
-        wallet.secretKey
+        wallet.secretKey,
       );
 
       // 7. Save project to Supabase
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
       const projectInsert = {
@@ -285,8 +323,9 @@ export const useProjectCreation = () => {
         .single();
 
       if (projectError) throw projectError;
-      if (!project || !('id' in project)) throw new Error('Project creation failed');
-      
+      if (!project || !("id" in project))
+        throw new Error("Project creation failed");
+
       const projectId = (project as { id: string }).id;
 
       // 8. Save milestones with explicit created_at timestamps to preserve order
@@ -297,7 +336,9 @@ export const useProjectCreation = () => {
         // Create timestamp with incremental seconds to preserve order
         // First milestone (index 0) gets base time, each subsequent gets +index seconds
         // This ensures proper ordering even if inserted in batch
-        const milestoneTimestamp = new Date(baseTime + (index * 1000)).toISOString();
+        const milestoneTimestamp = new Date(
+          baseTime + index * 1000,
+        ).toISOString();
         return {
           project_id: projectId,
           title: m.title,
@@ -319,16 +360,29 @@ export const useProjectCreation = () => {
       return { success: true, project, contractId };
     } catch (err: unknown) {
       console.error("❌ Error creating project:", err);
-      
+
       // Log detailed error information from API
-      const error = err as { response?: { status: number; data?: { message?: string }; headers?: unknown }; message?: string };
+      const error = err as {
+        response?: {
+          status: number;
+          data?: { message?: string };
+          headers?: unknown;
+        };
+        message?: string;
+      };
       if (error.response) {
         console.error("📛 API Response Status:", error.response.status);
-        console.error("📛 API Response Data:", JSON.stringify(error.response.data, null, 2));
+        console.error(
+          "📛 API Response Data:",
+          JSON.stringify(error.response.data, null, 2),
+        );
         console.error("📛 API Response Headers:", error.response.headers);
       }
-      
-      const errorMsg = error.response?.data?.message || error.message || "Failed to create project";
+
+      const errorMsg =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to create project";
       setError(errorMsg);
       setIsLoading(false);
       return { success: false, error: errorMsg };
