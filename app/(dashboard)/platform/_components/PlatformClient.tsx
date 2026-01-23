@@ -8,6 +8,7 @@ import { CreateProjectCard } from "./CreateProjectCard";
 import { ProjectsSection } from "./ProjectsSection";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { calculateProjectStatistics } from "@/lib/utils/projectStatistics";
 
 // Define the props it accepts from the Server Component
 type ProjectCardData = React.ComponentProps<
@@ -21,6 +22,9 @@ interface PlatformClientProps {
 export function PlatformClient({ projects }: PlatformClientProps) {
   // Get the organization from the global store (populated by the layout)
   const { currentOrganization } = useGlobalStore();
+
+  // Calculate statistics from projects data
+  const statistics = calculateProjectStatistics(projects);
 
   return (
     <div>
@@ -50,7 +54,7 @@ export function PlatformClient({ projects }: PlatformClientProps) {
 
         {/* Desktop: Right Column - Statistics */}
         <div className="lg:col-span-7 w-full order-2 lg:order-2 lg:h-[336px]">
-          <DonutChart />
+          <DonutChart statistics={statistics} />
         </div>
       </div>
 
