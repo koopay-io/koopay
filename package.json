@@ -4,7 +4,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "tsc eslint .",
     "check": "tsc --noEmit",
     "db:types": "node scripts/generate-types.js",
     "db:types:local": "node scripts/generate-types.js --local",

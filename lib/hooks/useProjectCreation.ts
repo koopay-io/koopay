@@ -282,6 +282,7 @@ export const useProjectCreation = () => {
         // 🔧 FIX: According to Scalar docs example, trustline is an OBJECT (not array)
         trustline: {
           address: usdcIssuer, // USDC testnet issuer
+          symbol: "USDC",
         },
         // 🔧 FIX: Adding receiverMemo field (was missing - might be required by API)
         // Field used to identify recipient's address in transactions through intermediary account
