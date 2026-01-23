@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useStellarWallet } from "./useStellarWallet";
 import { useEscrowWithSecretKey } from "./useEscrowWithSecretKey";
 import { StellarWalletManager } from "@/lib/stellar/wallet";
+import { getUserStellarWallet } from "@/lib/actions/wallet";
 
 interface Milestone {
   title: string;
@@ -193,9 +194,13 @@ export const useProjectCreation = () => {
       }
 
       // 2. Get freelancer's Stellar wallet public key
-      // TODO: Query freelancer's wallet from user_metadata properly
-      // For now, using CONTRACTOR'S OWN wallet for testing (since we don't have admin secret key)
-      const freelancerPublicKey = wallet.publicKey; // Use contractor's own wallet for testing
+      const freelancerWallet = await getUserStellarWallet(data.freelancer_id);
+
+      if (!freelancerWallet) {
+        throw new Error("Freelancer wallet not found. Please ensure freelancer has completed onboarding.");
+      }
+
+      const freelancerPublicKey = freelancerWallet;
 
       // 3. Setup USDC (Trustless Work requires a trustline asset)
       const usdcIssuer =
@@ -207,7 +212,7 @@ export const useProjectCreation = () => {
           "USDC",
           usdcIssuer,
         );
-      } catch {}
+      } catch { }
 
       await new Promise((resolve) => setTimeout(resolve, 2000));
 

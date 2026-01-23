@@ -7,6 +7,7 @@ import { useStellarWallet } from "./useStellarWallet";
 import { createEscrow, signTransactionWithSk } from "@/lib/stellar/trustless";
 import { useSendTransaction } from "@trustless-work/escrow";
 import { useContractGeneration } from "./useContractGeneration";
+import { getUserStellarWallet } from "@/lib/actions/wallet";
 
 // Interface for data from the Create Project form
 interface Milestone {
@@ -63,9 +64,14 @@ export const useProjectCreation = () => {
     setError(null);
 
     try {
-      // FOR TESTING: Use the contractor's own wallet as the freelancer
-      // TODO! fetch the freelancer's public key from their profile.
-      const collaboratorPublicKey = wallet.publicKey;
+      // Fetch the freelancer's public key from their profile
+      const freelancerWallet = await getUserStellarWallet(data.freelancer_id);
+
+      if (!freelancerWallet) {
+        throw new Error("Freelancer wallet not found. Please ensure freelancer has completed onboarding.");
+      }
+
+      const collaboratorPublicKey = freelancerWallet;
 
       // Call API to get unsigned transaction
       const escrowResult = await createEscrow(
