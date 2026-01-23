@@ -12,11 +12,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { createClient } from "@/lib/supabase/client";
-import { Search, User } from "lucide-react";
+import { Search, User, Building2 } from "lucide-react";
 import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+// We keep your interface name 'Freelancer' for compatibility with the parent component
 interface Freelancer {
-  id: string;
+  id: string; // This will be the User UUID
   full_name: string;
   position: string;
   avatar_url: string | null;
@@ -42,43 +44,72 @@ export function CollaboratorAssignmentModal({
 
   const fetchFreelancers = useCallback(
     async (searchTerm = "") => {
-      if (searchTerm.trim() === "") return;
-
       setIsLoading(true);
       try {
-        const query = supabase
-          .from("freelancer_profiles")
-          .select("id, full_name, position, avatar_url")
-          .ilike("full_name", `%${searchTerm.trim()}%`);
+        // UPDATED QUERY: Fetch from organizations where type is 'provider'
+        // We join with user_organization to get the actual User UUID
+        let query = supabase
+          .from("organizations")
+          .select(
+            `
+            *,
+            user_organization!inner (
+              user_id
+            )
+          `,
+          )
+          .eq("type", "provider")
+          .limit(20);
 
-        const { data, error } = await query.limit(20);
+        if (searchTerm.trim()) {
+          // Search by name or legal_name
+          query = query.or(
+            `name.ilike.%${searchTerm.trim()}%,legal_name.ilike.%${searchTerm.trim()}%`,
+          );
+        }
 
-        console.log("searchTerm", searchTerm);
-        console.log("data", data);
+        const { data, error } = await query;
 
         if (error) {
-          console.error("Error fetching freelancers:", error);
+          console.error("Error fetching providers:", error);
           return;
         }
 
-        setFreelancers(data ?? []);
+        // Map the organization data to the Freelancer interface
+        const mappedFreelancers: Freelancer[] = (data || [])
+          .map((org: any) => {
+            const userId = org.user_organization?.[0]?.user_id;
+
+            // Skip if no user is attached
+            if (!userId) return null;
+
+            // Use legal_name for individuals, name for companies
+            const displayName =
+              org.legal_type === "individual" ? org.legal_name : org.name;
+
+            return {
+              id: userId,
+              full_name: displayName,
+              position: org.industry_type || "Provider", // Default if industry is missing
+              avatar_url: org.avatar_url,
+            };
+          })
+          .filter((f): f is Freelancer => f !== null);
+
+        setFreelancers(mappedFreelancers);
       } catch (error) {
-        console.error("Error fetching freelancers:", error);
+        console.error("Error fetching providers:", error);
       } finally {
         setIsLoading(false);
       }
     },
-    [supabase]
+    [supabase],
   );
 
   // Debounce search
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (searchQuery.length > 0) {
-        fetchFreelancers(searchQuery);
-      } else {
-        fetchFreelancers();
-      }
+      fetchFreelancers(searchQuery);
     }, 300);
 
     return () => clearTimeout(timeoutId);
@@ -89,8 +120,6 @@ export function CollaboratorAssignmentModal({
       fetchFreelancers();
     }
   }, [isOpen, fetchFreelancers]);
-
-  // No need for local filtering since we're doing it in the database
 
   const handleSelectFreelancer = (freelancer: Freelancer) => {
     onSelect(freelancer);
@@ -105,7 +134,7 @@ export function CollaboratorAssignmentModal({
             Assign Collaborator
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Search and select a freelancer for your project
+            Search and select a provider for your project
           </DialogDescription>
         </DialogHeader>
 
@@ -114,7 +143,7 @@ export function CollaboratorAssignmentModal({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
-              placeholder="Search by name or position..."
+              placeholder="Search by name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 bg-muted/50 border-border text-foreground"
@@ -125,13 +154,11 @@ export function CollaboratorAssignmentModal({
           <div className="max-h-96 overflow-y-auto space-y-2">
             {isLoading ? (
               <div className="text-center py-8 text-muted-foreground">
-                Loading freelancers...
+                Loading providers...
               </div>
             ) : freelancers.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                {searchQuery
-                  ? "No freelancers found"
-                  : "No freelancers available"}
+                {searchQuery ? "No providers found" : "No providers available"}
               </div>
             ) : (
               freelancers.map((freelancer) => (
@@ -145,19 +172,18 @@ export function CollaboratorAssignmentModal({
                   onClick={() => handleSelectFreelancer(freelancer)}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
+                    <Avatar className="w-10 h-10 border border-border">
                       {freelancer.avatar_url ? (
-                        <Image
+                        <AvatarImage
                           src={freelancer.avatar_url}
                           alt={freelancer.full_name}
-                          className="w-full h-full rounded-full object-cover"
-                          width={40}
-                          height={40}
                         />
-                      ) : (
-                        <User className="h-5 w-5 text-muted-foreground" />
-                      )}
-                    </div>
+                      ) : null}
+                      <AvatarFallback className="bg-muted">
+                        <Building2 className="h-5 w-5 text-muted-foreground" />
+                      </AvatarFallback>
+                    </Avatar>
+
                     <div className="flex-1">
                       <h4 className="font-medium text-foreground">
                         {freelancer.full_name}
