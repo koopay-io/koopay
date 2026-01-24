@@ -2,171 +2,261 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import {
-  StellarWalletManager,
-  StellarWallet,
-  WalletBalance,
+	StellarWalletManager,
+	StellarWallet,
+	WalletBalance,
 } from "@/lib/stellar/wallet";
 import { createClient } from "@/lib/supabase/client";
+import { useErrorToast } from "./useErrorToast";
+import { logError, isNetworkError } from "@/lib/utils/errorHelpers";
 
 export interface UseStellarWalletReturn {
-  wallet: StellarWallet | null;
-  balance: WalletBalance[];
-  isLoading: boolean;
-  error: string | null;
-  createWallet: (userId: string) => Promise<void>;
-  refreshBalance: () => Promise<void>;
-  sendPayment: (
-    destination: string,
-    amount: string,
-    asset?: string
-  ) => Promise<string | null>;
+	wallet: StellarWallet | null;
+	balance: WalletBalance[];
+	isLoading: boolean;
+	error: string | null;
+	createWallet: (userId: string) => Promise<void>;
+	refreshBalance: () => Promise<void>;
+	sendPayment: (
+		destination: string,
+		amount: string,
+		asset?: string,
+	) => Promise<string | null>;
 }
 
 export function useStellarWallet(): UseStellarWalletReturn {
-  const [wallet, setWallet] = useState<StellarWallet | null>(null);
-  const [balance, setBalance] = useState<WalletBalance[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+	const [wallet, setWallet] = useState<StellarWallet | null>(null);
+	const [balance, setBalance] = useState<WalletBalance[]>([]);
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 
-  const walletManager = useMemo(() => new StellarWalletManager("testnet"), []);
-  const supabase = useMemo(() => createClient(), []);
+	const walletManager = useMemo(() => new StellarWalletManager("testnet"), []);
+	const supabase = useMemo(() => createClient(), []);
+	const { showError, showSuccess, showNetworkError, showAPIError } =
+		useErrorToast();
 
-  const loadWalletFromSupabase = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+	const loadWalletFromSupabase = useCallback(async () => {
+		try {
+			setIsLoading(true);
+			setError(null);
 
-      if (!user) {
-        setWallet(null);
-        return;
-      }
+			const {
+				data: { user },
+				error: userError,
+			} = await supabase.auth.getUser();
 
-      // Check if wallet exists in user metadata
-      const walletData = user.user_metadata?.stellar_wallet;
+			if (userError) {
+				throw new Error("Failed to authenticate. Please sign in again.");
+			}
 
-      if (walletData) {
-        setWallet(walletData);
-      }
-    } catch (err) {
-      console.error("Error loading wallet:", err);
-      setError("Failed to load wallet");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [supabase]);
+			if (!user) {
+				setWallet(null);
+				return;
+			}
 
-  const createWallet = useCallback(
-    async (userId: string) => {
-      try {
-        setIsLoading(true);
-        setError(null);
+			// Check if wallet exists in user metadata
+			const walletData = user.user_metadata?.stellar_wallet;
 
-        // Create wallet from Google user data
-        const newWallet = await walletManager.createAndFundWallet(
-          userId,
-          "google"
-        );
+			if (walletData) {
+				setWallet(walletData);
+			} else {
+				// No wallet found - user needs to create one
+				console.log("No wallet found for user");
+			}
+		} catch (err) {
+			logError(err, "Load Wallet");
+			const errorMessage =
+				err instanceof Error ? err.message : "Failed to load wallet";
+			setError(errorMessage);
 
-        // Save wallet to Supabase user metadata
-        const { error } = await supabase.auth.updateUser({
-          data: {
-            stellar_wallet: newWallet,
-          },
-        });
+			if (isNetworkError(err)) {
+				showNetworkError(loadWalletFromSupabase);
+			} else {
+				showAPIError(err, "Failed to Load Wallet");
+			}
+		} finally {
+			setIsLoading(false);
+		}
+	}, [supabase, showNetworkError, showAPIError]);
 
-        if (error) {
-          throw error;
-        }
+	const createWallet = useCallback(
+		async (userId: string) => {
+			try {
+				setIsLoading(true);
+				setError(null);
 
-        setWallet(newWallet);
-        console.log("✅ Stellar wallet created:", newWallet.publicKey);
-      } catch (err: unknown) {
-        console.error("Error creating wallet:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to create wallet"
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [walletManager, supabase]
-  );
+				// Create wallet from Google user data
+				const newWallet = await walletManager.createAndFundWallet(
+					userId,
+					"google",
+				);
 
-  const refreshBalance = useCallback(async () => {
-    if (!wallet?.publicKey) return;
+				// Save wallet to Supabase user metadata
+				const { error: updateError } = await supabase.auth.updateUser({
+					data: {
+						stellar_wallet: newWallet,
+					},
+				});
 
-    try {
-      setIsLoading(true);
-      const balances = await walletManager.getBalance(wallet.publicKey);
-      setBalance(balances);
-    } catch (err) {
-      console.error("Error fetching balance:", err);
-      setError("Failed to fetch balance");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [wallet?.publicKey, walletManager]);
+				if (updateError) {
+					if (updateError.message.includes("permission")) {
+						throw new Error(
+							"You don't have permission to update your profile. Please contact support.",
+						);
+					}
+					throw new Error(`Failed to save wallet: ${updateError.message}`);
+				}
 
-  const sendPayment = useCallback(
-    async (
-      destination: string,
-      amount: string,
-      asset: string = "XLM"
-    ): Promise<string | null> => {
-      if (!wallet?.secretKey) {
-        setError("Wallet secret key not available");
-        return null;
-      }
+				setWallet(newWallet);
+				showSuccess(
+					"Wallet Created",
+					`Stellar wallet created successfully for public key: ${newWallet.publicKey.slice(0, 8)}...`,
+				);
+				console.log("✅ Stellar wallet created:", newWallet.publicKey);
+			} catch (err: unknown) {
+				logError(err, "Create Wallet");
+				const errorMessage =
+					err instanceof Error ? err.message : "Failed to create wallet";
+				setError(errorMessage);
 
-      try {
-        setIsLoading(true);
-        setError(null);
+				if (isNetworkError(err)) {
+					showNetworkError(() => createWallet(userId));
+				} else {
+					showError(err, "Failed to Create Wallet");
+				}
+			} finally {
+				setIsLoading(false);
+			}
+		},
+		[walletManager, supabase, showError, showSuccess, showNetworkError],
+	);
 
-        const txHash = await walletManager.sendPayment(
-          wallet.secretKey,
-          destination,
-          amount,
-          asset
-        );
+	const refreshBalance = useCallback(async () => {
+		if (!wallet?.publicKey) {
+			setError("No wallet available. Please create a wallet first.");
+			return;
+		}
 
-        if (txHash) {
-          // Refresh balance after successful payment
-          await refreshBalance();
-        }
+		try {
+			setIsLoading(true);
+			setError(null);
 
-        return txHash;
-      } catch (err: unknown) {
-        console.error("Payment failed:", err);
-        setError(err instanceof Error ? err.message : "Payment failed");
-        return null;
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [wallet?.secretKey, walletManager, refreshBalance]
-  );
+			const balances = await walletManager.getBalance(wallet.publicKey);
+			setBalance(balances);
+		} catch (err) {
+			logError(err, "Refresh Balance");
+			const errorMessage =
+				err instanceof Error ? err.message : "Failed to fetch balance";
+			setError(errorMessage);
 
-  // Load wallet from Supabase on mount
-  useEffect(() => {
-    loadWalletFromSupabase();
-  }, [loadWalletFromSupabase]);
+			if (isNetworkError(err)) {
+				showNetworkError(refreshBalance);
+			} else {
+				showError(err, "Failed to Fetch Balance");
+			}
+		} finally {
+			setIsLoading(false);
+		}
+	}, [wallet?.publicKey, walletManager, showError, showNetworkError]);
 
-  // Load balance when wallet changes
-  useEffect(() => {
-    if (wallet?.publicKey) {
-      refreshBalance();
-    }
-  }, [wallet?.publicKey, refreshBalance]);
+	const sendPayment = useCallback(
+		async (
+			destination: string,
+			amount: string,
+			asset: string = "XLM",
+		): Promise<string | null> => {
+			if (!wallet?.secretKey) {
+				const errorMsg =
+					"Wallet secret key not available. Please create a wallet first.";
+				setError(errorMsg);
+				showError({ message: errorMsg }, "Payment Failed");
+				return null;
+			}
 
-  return {
-    wallet,
-    balance,
-    isLoading,
-    error,
-    createWallet,
-    refreshBalance,
-    sendPayment,
-  };
+			try {
+				setIsLoading(true);
+				setError(null);
+
+				const txHash = await walletManager.sendPayment(
+					wallet.secretKey,
+					destination,
+					amount,
+					asset,
+				);
+
+				if (txHash) {
+					showSuccess(
+						"Payment Sent",
+						`Successfully sent ${amount} ${asset}`,
+					);
+
+					// Refresh balance after successful payment
+					await refreshBalance();
+				}
+
+				return txHash;
+			} catch (err: unknown) {
+				logError(err, "Send Payment");
+				const errorMessage =
+					err instanceof Error ? err.message : "Payment failed";
+				setError(errorMessage);
+
+				// Handle specific payment errors
+				if (errorMessage.includes("insufficient balance")) {
+					showError(
+						{
+							message: `Insufficient ${asset} balance. Please add funds to your wallet.`,
+						},
+						"Payment Failed",
+					);
+				} else if (errorMessage.includes("destination")) {
+					showError(
+						{
+							message:
+								"Invalid destination address. Please check and try again.",
+						},
+						"Payment Failed",
+					);
+				} else if (isNetworkError(err)) {
+					showNetworkError(() => sendPayment(destination, amount, asset));
+				} else {
+					showError(err, "Payment Failed");
+				}
+
+				return null;
+			} finally {
+				setIsLoading(false);
+			}
+		},
+		[
+			wallet?.secretKey,
+			walletManager,
+			refreshBalance,
+			showError,
+			showSuccess,
+			showNetworkError,
+		],
+	);
+
+	// Load wallet from Supabase on mount
+	useEffect(() => {
+		loadWalletFromSupabase();
+	}, [loadWalletFromSupabase]);
+
+	// Load balance when wallet changes
+	useEffect(() => {
+		if (wallet?.publicKey) {
+			refreshBalance();
+		}
+	}, [wallet?.publicKey, refreshBalance]);
+
+	return {
+		wallet,
+		balance,
+		isLoading,
+		error,
+		createWallet,
+		refreshBalance,
+		sendPayment,
+	};
 }
