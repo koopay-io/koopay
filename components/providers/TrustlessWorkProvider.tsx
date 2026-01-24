@@ -15,7 +15,9 @@ export const TrustlessWorkProvider: React.FC<TrustlessWorkProviderProps> = ({
 
   // Validate API key is configured
   if (!apiKey && typeof window !== "undefined") {
-    console.error("❌ NEXT_PUBLIC_TRUSTLESS_API_KEY is not configured in .env.local");
+    console.error(
+      "❌ NEXT_PUBLIC_TRUSTLESS_API_KEY is not configured in .env.local",
+    );
   }
 
   return (

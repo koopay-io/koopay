@@ -99,28 +99,22 @@ cp .env.example .env.local
 You will need to fill in the following values in `.env.local`:
 
 ```env
-# Supabase (Get from your Supabase project dashboard)
+# Supabase
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=
 
-# Stellar Network (Keep as testnet)
-NEXT_PUBLIC_STELLAR_NETWORK=testnet
-
-# Google OAuth (Optional - Get from Google Cloud Console)
+# Google
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=
 
-# Trustless Work API (Required for escrow contracts)
-# Get this from the Trustless Work team
-NEXT_PUBLIC_API_KEY=
-NEXT_PUBLIC_ADMIN_PK=
-NEXT_PUBLIC_PLATFORM_FEE=1.5
+# Stellar
+NEXT_PUBLIC_STELLAR_NETWORK=testnet
 
-# For testing - you can generate these with the Stellar CLI
-NEXT_PUBLIC_CONTRACTOR_SK=
-NEXT_PUBLIC_FREELANCER_PK=
-
-# Set to "true" to bypass escrow deployment (for UI development)
-NEXT_PUBLIC_SKIP_ESCROW=false
+# Trustless Work
+NEXT_PUBLIC_TRUSTLESS_BASE_URL=
+NEXT_PUBLIC_TRUSTLESS_API_KEY=
+NEXT_PUBLIC_TRUSTLESS_ADMIN_PK=
+NEXT_PUBLIC_TRUSTLESS_PLATFORM_FEE=1.5
+NEXT_PUBLIC_TRUSTLESS_SKIP_ESCROW=false
 ```
 
 ### 4\. Set Up Supabase Database
