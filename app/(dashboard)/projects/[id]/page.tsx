@@ -116,14 +116,15 @@ export default function ProjectPage() {
                   .filter(m => m.status === "completed" && m.payment_hash)
                   .sort((a, b) => new Date(b.payment_sent_at || 0).getTime() - new Date(a.payment_sent_at || 0).getTime())[0];
             
-            return milestoneToShow?.payment_hash ? (
+            return milestoneToShow?.payment_hash && project.freelancer_id ? (
               <div className="mb-8">
                 <h2 className="text-2xl font-bold text-white mb-6">Payment Details</h2>
                 <PaymentTransactionCard
                   paymentHash={milestoneToShow.payment_hash}
                   amount={project.total_amount * (milestoneToShow.percentage / 100)}
-                  recipient={project.freelancer_id ?? ""}
+                  recipient={project.freelancer_id}
                   timestamp={milestoneToShow.payment_sent_at ?? null}
+                  status="success"
                 />
               </div>
             ) : null;

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useProjectMilestones } from "./useProjectMilestones";
 import { getEscrowContractId } from "@/lib/utils/projectHelpers";
+import { extractTransactionHash } from "@/lib/utils/stellar";
 import { useStellarWallet } from "./useStellarWallet";
 import { useEscrowWithSecretKey } from "./useEscrowWithSecretKey";
 import { useEscrowDetails } from "./useEscrowDetails";
@@ -200,15 +201,6 @@ export function useProjectPage(projectId: string) {
       console.log("✅ Step 2/2: Milestone status changed to 'completed'");
 
       // Extract transaction hash from result
-      const extractTransactionHash = (result: unknown): string | null => {
-        if (!result || typeof result !== "object") return null;
-        const response = result as Record<string, unknown>;
-        if (typeof response.hash === "string") return response.hash;
-        if (typeof response.id === "string") return response.id;
-        if (typeof response.transactionHash === "string") return response.transactionHash;
-        return null;
-      };
-
       const txHash = extractTransactionHash(statusChangeResult);
       
       // Update milestone in database with payment hash

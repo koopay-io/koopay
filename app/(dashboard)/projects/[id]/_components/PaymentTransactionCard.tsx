@@ -14,6 +14,7 @@ interface PaymentTransactionCardProps {
   amount: number;
   recipient: string;
   timestamp: string | null;
+  status: "pending" | "success" | "failed";
 }
 
 export function PaymentTransactionCard({
@@ -21,6 +22,7 @@ export function PaymentTransactionCard({
   amount,
   recipient,
   timestamp,
+  status,
 }: PaymentTransactionCardProps) {
   const [copied, setCopied] = useState(false);
 
@@ -45,12 +47,25 @@ export function PaymentTransactionCard({
 
   const explorerUrl = getStellarExplorerUrl(paymentHash);
 
+  const getStatusBadge = () => {
+    switch (status) {
+      case "success":
+        return <Badge className="bg-green-600 text-white">Success</Badge>;
+      case "pending":
+        return <Badge className="bg-yellow-600 text-white">Pending</Badge>;
+      case "failed":
+        return <Badge className="bg-red-600 text-white">Failed</Badge>;
+      default:
+        return <Badge className="bg-gray-600 text-white">Unknown</Badge>;
+    }
+  };
+
   return (
     <Card className="bg-gray-900/50 border-gray-700">
       <CardContent className="p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-white">Payment Details</h3>
-          <Badge className="bg-green-600 text-white">Success</Badge>
+          {getStatusBadge()}
         </div>
 
         <div className="space-y-3">
