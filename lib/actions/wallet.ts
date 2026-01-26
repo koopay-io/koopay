@@ -8,7 +8,7 @@ import { SUPABASE_URL } from "@/lib/constants";
  * This is necessary because user_metadata for other users is not accessible via RLS on the client.
  */
 export async function getUserStellarWallet(userId: string): Promise<string | null> {
-  const serviceRoleKey = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!serviceRoleKey) {
     console.error("SUPABASE_SERVICE_ROLE_KEY is not defined");
