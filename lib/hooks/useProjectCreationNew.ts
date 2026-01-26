@@ -7,6 +7,7 @@ import { useStellarWallet } from "./useStellarWallet";
 import { createEscrow, signTransactionWithSk } from "@/lib/stellar/trustless";
 import { useSendTransaction } from "@trustless-work/escrow";
 import { useContractGeneration } from "./useContractGeneration";
+import { getUserStellarWallet } from "@/lib/actions/wallet";
 
 // Interface for data from the Create Project form
 interface Milestone {
@@ -63,9 +64,14 @@ export const useProjectCreation = () => {
     setError(null);
 
     try {
-      // FOR TESTING: Use the contractor's own wallet as the freelancer
-      // TODO! fetch the freelancer's public key from their profile.
-      const collaboratorPublicKey = wallet.publicKey;
+      // Fetch the freelancer's public key from their profile
+      const freelancerWallet = await getUserStellarWallet(data.freelancer_id);
+
+      if (!freelancerWallet) {
+        throw new Error("Freelancer wallet not found. Please ensure freelancer has completed onboarding.");
+      }
+
+      const collaboratorPublicKey = freelancerWallet;
 
       // Call API to get unsigned transaction
       const escrowResult = await createEscrow(
@@ -91,21 +97,31 @@ export const useProjectCreation = () => {
       // - SendTransactionResponse: { status, message } (no contractId)
       // - InitializeMultiReleaseEscrowResponse: { status, message, contractId, escrow }
       let contractId: string | null = null;
-      
+
       // Check if response has contractId (it's an InitializeMultiReleaseEscrowResponse)
-      if ('contractId' in txResponse && typeof txResponse.contractId === 'string') {
+      if (
+        "contractId" in txResponse &&
+        typeof txResponse.contractId === "string"
+      ) {
         contractId = txResponse.contractId;
-      } else if ('escrow' in txResponse && typeof txResponse.escrow === 'object' && txResponse.escrow !== null) {
+      } else if (
+        "escrow" in txResponse &&
+        typeof txResponse.escrow === "object" &&
+        txResponse.escrow !== null
+      ) {
         // Try to get contractId from escrow object
         const escrow = txResponse.escrow as { contractId?: string };
         if (escrow.contractId) {
           contractId = escrow.contractId;
         }
       }
-      
+
       if (!contractId) {
         console.error("❌ No contractId found in response:", txResponse);
-        throw new Error("No contractId returned from escrow deployment. Response: " + JSON.stringify(txResponse));
+        throw new Error(
+          "No contractId returned from escrow deployment. Response: " +
+            JSON.stringify(txResponse),
+        );
       }
 
       // Save project to Supabase
@@ -141,7 +157,9 @@ export const useProjectCreation = () => {
         // Create timestamp with incremental seconds to preserve order
         // First milestone (index 0) gets base time, each subsequent gets +index seconds
         // This ensures proper ordering even if inserted in batch
-        const milestoneTimestamp = new Date(baseTime + (index * 1000)).toISOString();
+        const milestoneTimestamp = new Date(
+          baseTime + index * 1000,
+        ).toISOString();
         return {
           // @ts-ignore
           project_id: project.id,
@@ -163,72 +181,83 @@ export const useProjectCreation = () => {
 
       // Generate and save contract PDF (invoice)
       try {
-        // Fetch contractor and freelancer profiles
-        const { data: contractorProfile } = await supabase
-          .from("contractor_profiles")
-          .select("*")
-          .eq("id", user.id)
+        // 1. Fetch Contractor Organization (The User creating the project)
+        const { data: contractorOrgData } = await supabase
+          .from("organizations")
+          .select("*, user_organization!inner(user_id, email)")
+          .eq("user_organization.user_id", user.id)
+          .limit(1)
           .single();
 
-        const { data: freelancerProfile } = await supabase
-          .from("freelancer_profiles")
-          .select("*")
-          .eq("id", data.freelancer_id)
+        // 2. Fetch Freelancer Organization (The User assigned)
+        const { data: freelancerOrgData } = await supabase
+          .from("organizations")
+          .select("*, user_organization!inner(user_id, email)")
+          .eq("user_organization.user_id", data.freelancer_id)
+          .limit(1)
           .single();
 
-        // Get user email from profiles table
-        const { data: contractorProfileData } = await supabase
-          .from("profiles")
-          .select("email")
-          .eq("id", user.id)
-          .single();
+        // 3. Get emails
+        const { data: contractorAuth } = await supabase.auth.getUser(); // Already have this as 'user'
 
-        const { data: freelancerProfileData } = await supabase
-          .from("profiles")
-          .select("email")
-          .eq("id", data.freelancer_id)
-          .single();
+        // We need to fetch freelancer email specifically if not available in org
+        // Note: We can't easily get another user's email from auth.users via client SDK for privacy
+        // We will use the email stored in user_organization if available, or a placeholder
+        const freelancerEmail =
+          freelancerOrgData?.user_organization?.[0]?.email || "";
 
-        if (contractorProfile && freelancerProfile) {
-          const contractorProfileTyped = contractorProfile as {
-            full_name?: string;
-            legal_name?: string;
-            display_name?: string;
-            individual_id?: string;
-            business_id?: string;
-            country?: string;
-            address?: string;
-          };
+        if (contractorOrgData && freelancerOrgData) {
+          // Prepare names
+          const contractorName =
+            contractorOrgData.legal_type === "individual"
+              ? contractorOrgData.legal_name
+              : contractorOrgData.name;
 
-          const freelancerProfileTyped = freelancerProfile as {
-            full_name?: string;
-            freelancer_id?: string;
-            country?: string;
-            address?: string;
-          };
+          const freelancerName =
+            freelancerOrgData.legal_type === "individual"
+              ? freelancerOrgData.legal_name
+              : freelancerOrgData.name;
 
-          const projectTyped = project as { id: string };
+          // Prepare addresses
+          const contractorAddr = [
+            contractorOrgData.legal_street_name,
+            contractorOrgData.legal_street_number,
+            contractorOrgData.legal_city,
+            contractorOrgData.legal_country_id,
+          ]
+            .filter(Boolean)
+            .join(", ");
+
+          const freelancerAddr = [
+            freelancerOrgData.legal_street_name,
+            freelancerOrgData.legal_street_number,
+            freelancerOrgData.legal_city,
+            freelancerOrgData.legal_country_id,
+          ]
+            .filter(Boolean)
+            .join(", ");
 
           const contractResult = await generateContract(
             {
-              fullName: contractorProfileTyped.full_name || undefined,
-              legalName: contractorProfileTyped.legal_name || undefined,
-              displayName: contractorProfileTyped.display_name || undefined,
-              individualId: contractorProfileTyped.individual_id || undefined,
-              businessId: contractorProfileTyped.business_id || undefined,
-              country: contractorProfileTyped.country || "Unknown",
-              address: contractorProfileTyped.address || "Unknown",
-              email: (contractorProfileData as { email?: string } | null)?.email || user.email || "",
+              fullName: contractorName,
+              legalName: contractorOrgData.legal_name,
+              displayName: contractorOrgData.name,
+              individualId: contractorOrgData.legal_id,
+              businessId: contractorOrgData.legal_id,
+              country: String(contractorOrgData.legal_country_id || "Unknown"),
+              address: contractorAddr,
+              email: user.email || "",
             },
             {
-              fullName: freelancerProfileTyped.full_name || "Unknown",
-              freelancerId: freelancerProfileTyped.freelancer_id || "Unknown",
-              country: freelancerProfileTyped.country || "Unknown",
-              address: freelancerProfileTyped.address || "Unknown",
-              email: (freelancerProfileData as { email?: string } | null)?.email || "",
+              fullName: freelancerName,
+              freelancerId: freelancerOrgData.legal_id,
+              country: String(freelancerOrgData.legal_country_id || "Unknown"),
+              address: freelancerAddr,
+              email: freelancerEmail,
             },
             {
-              id: projectTyped.id,
+              // @ts-ignore
+              id: project.id,
               title: data.title,
               description: data.description,
               totalAmount: data.total_amount,
@@ -238,31 +267,36 @@ export const useProjectCreation = () => {
                 description: m.description,
                 percentage: m.percentage,
               })),
-            }
+            },
           );
 
           if (contractResult.success && contractResult.contractUrl) {
-            // Update project with contract URL
             await supabase
               .from("projects")
-              .update({ contract_url: contractResult.contractUrl } as never)
-              .eq("id", projectTyped.id);
+              // @ts-ignore
+              .update({ contract_url: contractResult.contractUrl })
+              .eq("id", project.id);
           }
         }
       } catch (contractError) {
-        // Don't fail project creation if contract generation fails
         console.error("⚠️ Failed to generate contract PDF:", contractError);
       }
 
       setIsLoading(false);
-      return { success: true, project, contractId };
-    } catch (err: unknown) {
-      console.error("❌ Error creating project:", err);
-      const errorMsg =
-        err instanceof Error ? err.message : "Failed to create project";
-      setError(errorMsg);
+      return {
+        success: true,
+        project,
+        contractId,
+      };
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Unknown error occurred";
+      setError(errorMessage);
       setIsLoading(false);
-      return { success: false, error: errorMsg };
+      return {
+        success: false,
+        error: errorMessage,
+      };
     }
   };
 

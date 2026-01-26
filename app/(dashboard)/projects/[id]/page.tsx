@@ -11,10 +11,12 @@ import { CurrentMilestone } from "./_components/CurrentMilestone";
 import { MilestonesTimeline } from "./_components/MilestonesTimeline";
 import { ProjectProgress } from "./_components/ProjectProgress";
 import { EscrowInfoCard } from "./_components/EscrowInfoCard";
+import { FundEscrowCard } from "./_components/FundEscrowCard";
 import { useMilestoneEvidence } from "@/lib/hooks/useMilestoneEvidence";
 import { useEffect, useState } from "react";
 import { EvidenceList } from "./_components/EvidenceList";
 import { EvidenceUploadModal } from "@/components/EvidenceUploadModal";
+import { PaymentTransactionCard } from "./_components/PaymentTransactionCard";
 
 export default function ProjectPage() {
   const params = useParams();
@@ -26,6 +28,9 @@ export default function ProjectPage() {
     loading,
     currentMilestone,
     escrowContractId,
+    escrowFundingStatus,
+    escrowUsdcBalance,
+    refetchEscrowDetails,
     milestoneCompleted,
     setMilestoneCompleted,
     handleViewContract,
@@ -103,6 +108,28 @@ export default function ProjectPage() {
             <EvidenceList evidence={evidence} isLoading={isLoadingEvidence} />
           </div>
 
+          {/* Payment Details - Show for current milestone OR last completed milestone with payment */}
+          {(() => {
+            const milestoneToShow = currentMilestone?.status === "completed" 
+              ? currentMilestone 
+              : milestones
+                  .filter(m => m.status === "completed" && m.payment_hash)
+                  .sort((a, b) => new Date(b.payment_sent_at || 0).getTime() - new Date(a.payment_sent_at || 0).getTime())[0];
+            
+            return milestoneToShow?.payment_hash && project.freelancer_id ? (
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-white mb-6">Payment Details</h2>
+                <PaymentTransactionCard
+                  paymentHash={milestoneToShow.payment_hash}
+                  amount={project.total_amount * (milestoneToShow.percentage / 100)}
+                  recipient={project.freelancer_id}
+                  timestamp={milestoneToShow.payment_sent_at ?? null}
+                  status="success"
+                />
+              </div>
+            ) : null;
+          })()}
+
           {/* Milestones Timeline */}
           <MilestonesTimeline
             milestones={milestones}
@@ -112,15 +139,27 @@ export default function ProjectPage() {
           {/* Project Progress */}
           <ProjectProgress milestones={milestones} />
 
-          {/* Quick Escrow Info - Link to test page */}
-          {escrowContractId && (
-            <EscrowInfoCard
-              contractId={escrowContractId}
-              projectId={projectId}
-              onViewDetails={() =>
-                router.push(`/projects/${projectId}/test-escrow`)
-              }
-            />
+          {escrowContractId && project && (
+            <>
+              {escrowFundingStatus !== 'funded' && (
+                <FundEscrowCard
+                  contractId={escrowContractId}
+                  totalAmount={project.total_amount}
+                  fundingStatus={escrowFundingStatus}
+                  escrowUsdcBalance={escrowUsdcBalance}
+                  onFundingSuccess={refetchEscrowDetails}
+                />
+              )}
+              <EscrowInfoCard
+                contractId={escrowContractId}
+                projectId={projectId}
+                fundingStatus={escrowFundingStatus}
+                escrowUsdcBalance={escrowUsdcBalance}
+                onViewDetails={() =>
+                  router.push(`/projects/${projectId}/test-escrow`)
+                }
+              />
+            </>
           )}
 
           {/* Save Changes Button */}

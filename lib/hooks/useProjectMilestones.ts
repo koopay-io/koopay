@@ -147,15 +147,23 @@ export function useProjectMilestones(projectId: string) {
 
   const updateMilestoneStatus = async (
     milestoneId: string,
-    status: "pending" | "in_progress" | "completed"
+    status: "pending" | "in_progress" | "completed",
+    paymentHash?: string | null
   ) => {
     setLoading(true);
     setError(null);
 
     try {
+      const updateData: Record<string, unknown> = { status };
+      
+      if (paymentHash) {
+        updateData.payment_hash = paymentHash;
+        updateData.payment_sent_at = new Date().toISOString();
+      }
+
       const { data, error } = await supabase
         .from("milestones")
-        .update({ status } as unknown as never)
+        .update(updateData as never)
         .eq("id", milestoneId)
         .select()
         .single();

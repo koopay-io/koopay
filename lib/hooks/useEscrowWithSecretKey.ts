@@ -99,15 +99,64 @@ export const useEscrowWithSecretKey = () => {
     payload: FundEscrowPayload,
     contractorSecretKey: string
   ) => {
-    const unsignedTxResponse = await fundEscrow(payload, "multi-release");
-    const unsignedTx = typeof unsignedTxResponse === 'string' 
-      ? unsignedTxResponse 
-      : (unsignedTxResponse as { unsignedTx?: string; transaction?: string }).unsignedTx || 
-        (unsignedTxResponse as { transaction?: string }).transaction || 
-        String(unsignedTxResponse);
-    const signedTx = signTransactionWithSecretKey(unsignedTx, contractorSecretKey);
-    const result = await sendTransaction(signedTx);
-    return result;
+    try {
+      console.log("🔧 [Fund Step 1/3] Calling fundEscrow API...", payload);
+      
+      const unsignedTxResponse = await fundEscrow(payload, "multi-release");
+      console.log("📄 [Fund Step 1/3] Response:", unsignedTxResponse);
+      
+      // Check if response is an error
+      if (unsignedTxResponse && typeof unsignedTxResponse === 'object') {
+        const responseObj = unsignedTxResponse as { 
+          statusCode?: number; 
+          message?: string; 
+          error?: string;
+          unsignedTransaction?: string;
+          unsignedTx?: string;
+          transaction?: string;
+        };
+        
+        if (responseObj.statusCode && responseObj.statusCode >= 400) {
+          throw new Error(responseObj.message || responseObj.error || `API error: ${responseObj.statusCode}`);
+        }
+      }
+      
+      // Extract the unsigned transaction XDR
+      let unsignedTx: string | null = null;
+      
+      if (typeof unsignedTxResponse === 'string') {
+        unsignedTx = unsignedTxResponse;
+      } else if (unsignedTxResponse && typeof unsignedTxResponse === 'object') {
+        const responseObj = unsignedTxResponse as { 
+          unsignedTransaction?: string; 
+          unsignedTx?: string; 
+          transaction?: string;
+        };
+        unsignedTx = responseObj.unsignedTransaction || responseObj.unsignedTx || responseObj.transaction || null;
+      }
+      
+      if (!unsignedTx) {
+        console.error("❌ No unsigned transaction in response:", unsignedTxResponse);
+        throw new Error("La API no devolvió una transacción válida para firmar.");
+      }
+      
+      console.log("✅ [Fund Step 1/3] Got unsigned transaction");
+      
+      // Sign the transaction
+      console.log("🔧 [Fund Step 2/3] Signing transaction...");
+      const signedTx = signTransactionWithSecretKey(unsignedTx, contractorSecretKey);
+      console.log("✅ [Fund Step 2/3] Transaction signed");
+      
+      // Submit
+      console.log("🔧 [Fund Step 3/3] Submitting transaction...");
+      const result = await sendTransaction(signedTx);
+      console.log("✅ [Fund Step 3/3] Transaction submitted:", result);
+      
+      return result;
+    } catch (error) {
+      console.error("❌ [Fund Error]:", error);
+      throw error;
+    }
   };
 
   /**
