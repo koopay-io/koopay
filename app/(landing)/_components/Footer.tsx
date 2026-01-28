@@ -46,6 +46,7 @@ export function Footer() {
     resources: [
       { name: 'Whitepaper', href: WHITEPAPER_LINK },
       { name: 'Documentation', href: DOCS_LINK },
+      { name: 'Brand Kit', href: '/brand-kit' },
       { name: 'Help Center', href: HELP_LINK },
       { name: 'Community', href: COMMUNITY_LINK },
     ],
