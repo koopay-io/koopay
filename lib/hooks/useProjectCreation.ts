@@ -6,21 +6,23 @@ import { useStellarWallet } from "./useStellarWallet";
 import { useEscrowWithSecretKey } from "./useEscrowWithSecretKey";
 import { StellarWalletManager } from "@/lib/stellar/wallet";
 import { getUserStellarWallet } from "@/lib/actions/wallet";
+import { useErrorToast } from "./useErrorToast";
+import { logError, isNetworkError } from "@/lib/utils/errorHelpers";
 
 interface Milestone {
-  title: string;
-  description: string;
-  percentage: number;
-  deadline: string;
+	title: string;
+	description: string;
+	percentage: number;
+	deadline: string;
 }
 
 interface ProjectData {
-  title: string;
-  description: string;
-  total_amount: number;
-  expected_delivery_date: string;
-  freelancer_id: string | null;
-  milestones: Milestone[];
+	title: string;
+	description: string;
+	total_amount: number;
+	expected_delivery_date: string;
+	freelancer_id: string | null;
+	milestones: Milestone[];
 }
 
 import { Database } from "@/lib/supabase/types/database.gen";
@@ -28,372 +30,385 @@ import { Database } from "@/lib/supabase/types/database.gen";
 type Project = Database["public"]["Tables"]["projects"]["Row"];
 
 interface CreateProjectResult {
-  success: boolean;
-  project?: Project;
-  contractId?: string;
-  error?: string;
+	success: boolean;
+	project?: Project;
+	contractId?: string;
+	error?: string;
 }
 
 /**
- * Hook to create projects with automatic escrow deployment
- *
- * This hook orchestrates the complete flow:
- * 1. Validates contractor wallet and milestones
- * 2. Deploys multi-release escrow contract
- * 3. Funds the escrow with project amount
- * 4. Saves project and milestones to database
- *
- * Uses invisible wallets created with Stellar SDK instead of Wallet Kit
+ * Hook to create projects with automatic escrow deployment and improved error handling
  */
 export const useProjectCreation = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { wallet } = useStellarWallet(); // Wallet del contractor
-  const { deployMultiReleaseEscrow, fundMultiReleaseEscrow } =
-    useEscrowWithSecretKey();
-  const supabase = createClient();
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const { wallet } = useStellarWallet();
+	const { deployMultiReleaseEscrow, fundMultiReleaseEscrow } =
+		useEscrowWithSecretKey();
+	const { showError, showSuccess, showNetworkError } = useErrorToast();
+	const supabase = createClient();
 
-  /**
-   * Validate milestones sum to 100%
-   */
-  const validateMilestones = (milestones: Milestone[]): boolean => {
-    const totalPercentage = milestones.reduce(
-      (sum, m) => sum + m.percentage,
-      0,
-    );
-    return totalPercentage === 100;
-  };
+	/**
+	 * Validate milestones sum to 100%
+	 */
+	const validateMilestones = (milestones: Milestone[]): boolean => {
+		const totalPercentage = milestones.reduce(
+			(sum, m) => sum + m.percentage,
+			0,
+		);
+		return totalPercentage === 100;
+	};
 
-  /**
-   * Create a project with automatic escrow deployment
-   *
-   * @param data - Project data including title, description, milestones, etc.
-   * @returns Result object with success status and project data
-   */
-  const createProjectWithEscrow = async (
-    data: ProjectData,
-  ): Promise<CreateProjectResult> => {
-    // Validation: Check contractor wallet
-    if (!wallet?.secretKey) {
-      const errorMsg =
-        "Contractor wallet not found. Please ensure you're logged in.";
-      setError(errorMsg);
-      return { success: false, error: errorMsg };
-    }
+	/**
+	 * Create a project with automatic escrow deployment
+	 */
+	const createProjectWithEscrow = async (
+		data: ProjectData,
+	): Promise<CreateProjectResult> => {
+		// Validation: Check contractor wallet
+		if (!wallet?.secretKey) {
+			const errorMsg =
+				"Contractor wallet not found. Please ensure you're logged in.";
+			setError(errorMsg);
+			showError({ message: errorMsg }, "Wallet Required");
+			return { success: false, error: errorMsg };
+		}
 
-    // Validation: Check milestones sum to 100%
-    if (!validateMilestones(data.milestones)) {
-      const errorMsg = "Milestones must sum to 100%";
-      setError(errorMsg);
-      return { success: false, error: errorMsg };
-    }
+		// Validation: Check milestones sum to 100%
+		if (!validateMilestones(data.milestones)) {
+			const errorMsg = "Milestones must sum to 100%";
+			setError(errorMsg);
+			showError({ message: errorMsg }, "Invalid Milestones");
+			return { success: false, error: errorMsg };
+		}
 
-    // Validation: Check freelancer is assigned
-    if (!data.freelancer_id) {
-      const errorMsg = "Please assign a freelancer to the project";
-      setError(errorMsg);
-      return { success: false, error: errorMsg };
-    }
+		// Validation: Check freelancer is assigned
+		if (!data.freelancer_id) {
+			const errorMsg = "Please assign a freelancer to the project";
+			setError(errorMsg);
+			showError({ message: errorMsg }, "Freelancer Required");
+			return { success: false, error: errorMsg };
+		}
 
-    setIsLoading(true);
-    setError(null);
+		// Validation: Check project data
+		if (!data.title || data.title.trim() === "") {
+			const errorMsg = "Project title is required";
+			setError(errorMsg);
+			showError({ message: errorMsg }, "Validation Error");
+			return { success: false, error: errorMsg };
+		}
 
-    try {
-      // Get environment variables
-      const platformFee = Number(
-        process.env.NEXT_PUBLIC_TRUSTLESS_PLATFORM_FEE || "1.5",
-      );
-      const adminPk = process.env.NEXT_PUBLIC_TRUSTLESS_ADMIN_PK || "";
-      const skipEscrow =
-        process.env.NEXT_PUBLIC_TRUSTLESS_SKIP_ESCROW === "true";
+		if (data.total_amount <= 0) {
+			const errorMsg = "Project amount must be greater than 0";
+			setError(errorMsg);
+			showError({ message: errorMsg }, "Validation Error");
+			return { success: false, error: errorMsg };
+		}
 
-      if (!adminPk) {
-        throw new Error("Platform admin public key not configured");
-      }
+		setIsLoading(true);
+		setError(null);
 
-      // 🔧 DEVELOPMENT MODE: Skip escrow deployment
-      if (skipEscrow) {
-        console.warn("⚠️ DEVELOPMENT MODE: Skipping escrow deployment");
+		try {
+			// Get environment variables
+			const platformFee = Number(
+				process.env.NEXT_PUBLIC_TRUSTLESS_PLATFORM_FEE || "1.5",
+			);
+			const adminPk = process.env.NEXT_PUBLIC_TRUSTLESS_ADMIN_PK || "";
+			const skipEscrow =
+				process.env.NEXT_PUBLIC_TRUSTLESS_SKIP_ESCROW === "true";
 
-        const supabase = createClient();
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+			if (!adminPk) {
+				throw new Error(
+					"Platform admin public key not configured. Please contact support.",
+				);
+			}
 
-        if (!user) {
-          throw new Error("User not authenticated");
-        }
+			// DEVELOPMENT MODE: Skip escrow deployment
+			if (skipEscrow) {
+				console.warn("⚠️ DEVELOPMENT MODE: Skipping escrow deployment");
 
-        // Save project directly to database without escrow
-        const projectInsert = {
-          contractor_id: user.id,
-          freelancer_id: data.freelancer_id,
-          title: data.title,
-          description: data.description,
-          total_amount: data.total_amount,
-          expected_delivery_date: data.expected_delivery_date,
-          status: "pending",
-          contract_id: `mock-contract-${Date.now()}`, // Mock contract ID
-        } as const;
+				const {
+					data: { user },
+				} = await supabase.auth.getUser();
+				if (!user) {
+					throw new Error("User not authenticated. Please sign in again.");
+				}
 
-        const { data: project, error: projectError } = await supabase
-          .from("projects")
-          .insert(projectInsert as unknown as never)
-          .select()
-          .single();
+				// Save project directly to database
+				const projectInsert = {
+					contractor_id: user.id,
+					freelancer_id: data.freelancer_id,
+					title: data.title,
+					description: data.description,
+					total_amount: data.total_amount,
+					expected_delivery_date: data.expected_delivery_date,
+					status: "pending",
+					contract_id: `mock-contract-${Date.now()}`,
+				} as const;
 
-        if (projectError) throw projectError;
-        if (!project || !("id" in project))
-          throw new Error("Project creation failed");
+				const { data: project, error: projectError } = await supabase
+					.from("projects")
+					.insert(projectInsert as unknown as never)
+					.select()
+					.single();
 
-        const projectId = (project as { id: string }).id;
+				if (projectError) {
+					if (projectError.message.includes("permission")) {
+						throw new Error(
+							"You don't have permission to create projects. Please contact support.",
+						);
+					}
+					throw projectError;
+				}
 
-        // Save milestones
-        const milestonesToInsert = data.milestones.map((milestone) => ({
-          project_id: projectId,
-          title: milestone.title,
-          description: milestone.description,
-          percentage: milestone.percentage,
-          deadline: milestone.deadline,
-          status: "pending",
-        }));
+				if (!project || !("id" in project)) {
+					throw new Error("Project creation failed. Please try again.");
+				}
 
-        const { error: milestonesError } = await supabase
-          .from("milestones")
-          .insert(milestonesToInsert as unknown as never[]);
+				const projectId = (project as { id: string }).id;
 
-        if (milestonesError) throw milestonesError;
+				// Save milestones
+				const milestonesToInsert = data.milestones.map((milestone) => ({
+					project_id: projectId,
+					title: milestone.title,
+					description: milestone.description,
+					percentage: milestone.percentage,
+					deadline: milestone.deadline,
+					status: "pending",
+				}));
 
-        return {
-          success: true,
-          project,
-          contractId: `mock-contract-${Date.now()}`,
-        };
-      }
+				const { error: milestonesError } = await supabase
+					.from("milestones")
+					.insert(milestonesToInsert as unknown as never[]);
 
-      // 1. Verify and fund contractor's account if needed
-      const stellarManager = new StellarWalletManager("testnet");
-      const accountExists = await stellarManager.accountExists(
-        wallet.publicKey,
-      );
+				if (milestonesError) throw milestonesError;
 
-      if (!accountExists) {
-        const funded = await stellarManager.fundTestnetAccount(
-          wallet.publicKey,
-        );
-        if (!funded) {
-          throw new Error(
-            "Failed to fund contractor account. Please ensure you're connected to testnet.",
-          );
-        }
-        // Wait for account to be created on the network
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        console.log("✅ Contractor account funded");
-      } else {
-        console.log("✅ Contractor account already exists");
-      }
+				showSuccess(
+					"Project Created",
+					`"${data.title}" created successfully in development mode`,
+				);
+				return {
+					success: true,
+					project,
+					contractId: `mock-contract-${Date.now()}`,
+				};
+			}
 
-      // 2. Get freelancer's Stellar wallet public key
-      const freelancerWallet = await getUserStellarWallet(data.freelancer_id);
+			// PRODUCTION MODE: Full escrow deployment
+			const stellarManager = new StellarWalletManager("testnet");
 
-      if (!freelancerWallet) {
-        throw new Error("Freelancer wallet not found. Please ensure freelancer has completed onboarding.");
-      }
+			// 1. Verify contractor account
+			const accountExists = await stellarManager.accountExists(
+				wallet.publicKey,
+			);
 
-      const freelancerPublicKey = freelancerWallet;
+			if (!accountExists) {
+				const funded = await stellarManager.fundTestnetAccount(
+					wallet.publicKey,
+				);
+				if (!funded) {
+					throw new Error(
+						"Failed to fund contractor account. Please ensure you're connected to testnet.",
+					);
+				}
+				await new Promise((resolve) => setTimeout(resolve, 5000));
+				console.log("✅ Contractor account funded");
+			} else {
+				console.log("✅ Contractor account already exists");
+			}
 
-      // 3. Setup USDC (Trustless Work requires a trustline asset)
-      const usdcIssuer =
-        "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
+			// 2. Get freelancer wallet
+			const freelancerWallet = await getUserStellarWallet(
+				data.freelancer_id,
+			);
+			if (!freelancerWallet) {
+				throw new Error(
+					"Freelancer wallet not found. Please ensure freelancer has completed onboarding.",
+				);
+			}
 
-      try {
-        await stellarManager.establishTrustline(
-          wallet.secretKey,
-          "USDC",
-          usdcIssuer,
-        );
-      } catch { }
+			// 3. Setup USDC trustline
+			const usdcIssuer =
+				"GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
 
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+			try {
+				await stellarManager.establishTrustline(
+					wallet.secretKey,
+					"USDC",
+					usdcIssuer,
+				);
+			} catch (trustlineError) {
+				console.warn("Trustline setup:", trustlineError);
+			}
 
-      // IMPORTANT: Admin account also needs USDC trustline (he's the receiver)
-      console.warn(`⚠️ Admin account ${adminPk} must have USDC trustline`);
+			await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+			// 4. Swap XLM to USDC
+			const swapAmount = (data.total_amount * 1.1).toFixed(7);
+			const swapped = await stellarManager.swapXLMtoUSDC(
+				wallet.secretKey,
+				swapAmount,
+				usdcIssuer,
+			);
 
-      // Format amount with max 7 decimals (Stellar requirement)
-      const swapAmount = (data.total_amount * 1.1).toFixed(7);
-      const swapped = await stellarManager.swapXLMtoUSDC(
-        wallet.secretKey,
-        swapAmount,
-        usdcIssuer,
-      );
+			if (!swapped) {
+				console.warn("⚠️ Could not obtain USDC automatically");
+			} else {
+				await new Promise((resolve) => setTimeout(resolve, 3000));
+			}
 
-      if (!swapped) {
-        console.warn(
-          "⚠️ Could not obtain USDC automatically (expected in testnet)",
-        );
-        // In production, this would be a hard error
-        // throw new Error("No USDC available");
-      } else {
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-      }
+			// 5. Check balances
+			const contractorBalance = await stellarManager.getBalance(
+				wallet.publicKey,
+			);
+			const contractorHasUSDC = contractorBalance.some(
+				(b) => b.asset === "USDC",
+			);
 
-      // 4. Check balances of all involved accounts
-      const contractorBalance = await stellarManager.getBalance(
-        wallet.publicKey,
-      );
+			if (!contractorHasUSDC) {
+				console.warn("⚠️ Contractor doesn't have USDC");
+			}
 
-      try {
-        await stellarManager.getBalance(adminPk);
-      } catch (error) {
-        console.error("❌ Admin account doesn't exist or has issues:", error);
-      }
+			// 6. Deploy escrow
+			const escrowPayload: any = {
+				signer: wallet.publicKey,
+				engagementId: `project-${Date.now()}`,
+				title: data.title,
+				description: data.description,
+				roles: {
+					approver: wallet.publicKey,
+					serviceProvider: freelancerWallet,
+					platformAddress: wallet.publicKey,
+					release: wallet.publicKey,
+					disputeResolver: wallet.publicKey,
+				},
+				platformFee,
+				milestones: data.milestones.map((m) => ({
+					description: m.title,
+					amount: data.total_amount * (m.percentage / 100),
+					receiver: freelancerWallet,
+				})),
+				trustline: {
+					address: usdcIssuer,
+					symbol: "USDC",
+				},
+				receiverMemo: Date.now() % 1000000,
+			};
 
-      // 5. Validate accounts
-      const contractorHasUSDC = contractorBalance.some(
-        (b) => b.asset === "USDC",
-      );
+			const deployResult = await deployMultiReleaseEscrow(
+				escrowPayload,
+				wallet.secretKey,
+			);
+			const contractId = deployResult.contractId;
 
-      // 6. Deploy escrow contract with USDC
+			// 7. Fund escrow
+			await fundMultiReleaseEscrow(
+				{
+					amount: data.total_amount,
+					contractId,
+					signer: wallet.publicKey,
+				},
+				wallet.secretKey,
+			);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const escrowPayload: any = {
-        signer: wallet.publicKey, // ✅ Moved to first position (matches Scalar example)
-        engagementId: `project-${Date.now()}`,
-        title: data.title,
-        description: data.description,
-        // 🔧 FIX: According to Scalar docs example:
-        // - Use "release" instead of "releaseSigner"
-        // - NO "receiver" in roles (only in milestones)
-        roles: {
-          approver: wallet.publicKey, // Contractor approves milestones
-          serviceProvider: freelancerPublicKey, // Freelancer provides service (Stellar PK)
-          platformAddress: wallet.publicKey, // Using contractor's account for testing (admin needs USDC trustline)
-          release: wallet.publicKey, // ⚠️ "release" NOT "releaseSigner" (per Scalar example)
-          disputeResolver: wallet.publicKey, // Using contractor's account for testing
-        },
-        platformFee, // Must be a number (not string) - Currently 1.5 from env
-        milestones: data.milestones.map((m) => ({
-          description: m.title,
-          amount: data.total_amount * (m.percentage / 100), // Must be a number (not string)
-          receiver: freelancerPublicKey, // Each milestone needs a receiver address (API requirement)
-        })),
-        // 🔧 FIX: According to Scalar docs example, trustline is an OBJECT (not array)
-        trustline: {
-          address: usdcIssuer, // USDC testnet issuer
-          symbol: "USDC",
-        },
-        // 🔧 FIX: Adding receiverMemo field (was missing - might be required by API)
-        // Field used to identify recipient's address in transactions through intermediary account
-        receiverMemo: Date.now() % 1000000, // Generate a unique 6-digit memo
-      };
+			// 8. Save to database
+			const {
+				data: { user },
+			} = await supabase.auth.getUser();
+			if (!user) throw new Error("User not authenticated");
 
-      const deployResult = await deployMultiReleaseEscrow(
-        escrowPayload,
-        wallet.secretKey,
-      );
-      const contractId = deployResult.contractId;
+			const projectInsert = {
+				contractor_id: user.id,
+				freelancer_id: data.freelancer_id,
+				title: data.title,
+				description: data.description,
+				total_amount: data.total_amount,
+				expected_delivery_date: data.expected_delivery_date,
+				status: "active",
+				contract_id: contractId,
+			} as const;
 
-      // 6. Fund escrow
-      await fundMultiReleaseEscrow(
-        {
-          amount: data.total_amount, // Must be a number (not string)
-          contractId,
-          signer: wallet.publicKey,
-        },
-        wallet.secretKey,
-      );
+			const { data: project, error: projectError } = await supabase
+				.from("projects")
+				.insert(projectInsert as unknown as never)
+				.select()
+				.single();
 
-      // 7. Save project to Supabase
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
+			if (projectError) throw projectError;
+			if (!project || !("id" in project))
+				throw new Error("Project creation failed");
 
-      const projectInsert = {
-        contractor_id: user.id,
-        freelancer_id: data.freelancer_id,
-        title: data.title,
-        description: data.description,
-        total_amount: data.total_amount,
-        expected_delivery_date: data.expected_delivery_date,
-        status: "active",
-        contract_id: contractId, // Save the escrow contract ID
-      } as const;
+			const projectId = (project as { id: string }).id;
 
-      const { data: project, error: projectError } = await supabase
-        .from("projects")
-        .insert(projectInsert as unknown as never)
-        .select()
-        .single();
+			// 9. Save milestones
+			const baseTime = Date.now();
+			const milestonesData = data.milestones.map((m, index) => {
+				const milestoneTimestamp = new Date(
+					baseTime + index * 1000,
+				).toISOString();
+				return {
+					project_id: projectId,
+					title: m.title,
+					description: m.description,
+					percentage: m.percentage,
+					deadline: m.deadline,
+					status: "pending",
+					created_at: milestoneTimestamp,
+				};
+			});
 
-      if (projectError) throw projectError;
-      if (!project || !("id" in project))
-        throw new Error("Project creation failed");
+			const { error: milestonesError } = await supabase
+				.from("milestones")
+				.insert(milestonesData as unknown as never[]);
 
-      const projectId = (project as { id: string }).id;
+			if (milestonesError) throw milestonesError;
 
-      // 8. Save milestones with explicit created_at timestamps to preserve order
-      // Each milestone gets a timestamp that respects the array order
-      // This ensures the order in DB matches the order in escrow (index 0, 1, 2...)
-      const baseTime = Date.now();
-      const milestonesData = data.milestones.map((m, index) => {
-        // Create timestamp with incremental seconds to preserve order
-        // First milestone (index 0) gets base time, each subsequent gets +index seconds
-        // This ensures proper ordering even if inserted in batch
-        const milestoneTimestamp = new Date(
-          baseTime + index * 1000,
-        ).toISOString();
-        return {
-          project_id: projectId,
-          title: m.title,
-          description: m.description,
-          percentage: m.percentage,
-          deadline: m.deadline,
-          status: "pending",
-          created_at: milestoneTimestamp, // Explicit timestamp to preserve order
-        };
-      });
+			showSuccess(
+				"Project Created",
+				`"${data.title}" created and funded successfully!`,
+			);
+			setIsLoading(false);
+			return { success: true, project, contractId };
+		} catch (err: unknown) {
+			logError(err, "Create Project");
 
-      const { error: milestonesError } = await supabase
-        .from("milestones")
-        .insert(milestonesData as unknown as never[]);
+			const error = err as {
+				response?: { status: number; data?: { message?: string } };
+				message?: string;
+			};
 
-      if (milestonesError) throw milestonesError;
+			let errorMsg = "Failed to create project";
 
-      setIsLoading(false);
-      return { success: true, project, contractId };
-    } catch (err: unknown) {
-      console.error("❌ Error creating project:", err);
+			if (error.response?.data?.message) {
+				errorMsg = error.response.data.message;
+			} else if (error.message) {
+				errorMsg = error.message;
+			}
 
-      // Log detailed error information from API
-      const error = err as {
-        response?: {
-          status: number;
-          data?: { message?: string };
-          headers?: unknown;
-        };
-        message?: string;
-      };
-      if (error.response) {
-        console.error("📛 API Response Status:", error.response.status);
-        console.error(
-          "📛 API Response Data:",
-          JSON.stringify(error.response.data, null, 2),
-        );
-        console.error("📛 API Response Headers:", error.response.headers);
-      }
+			setError(errorMsg);
+			setIsLoading(false);
 
-      const errorMsg =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to create project";
-      setError(errorMsg);
-      setIsLoading(false);
-      return { success: false, error: errorMsg };
-    }
-  };
+			if (isNetworkError(err)) {
+				showNetworkError(() => createProjectWithEscrow(data));
+			} else if (errorMsg.includes("insufficient balance")) {
+				showError(
+					{
+						message:
+							"Insufficient balance. Please add funds to your wallet.",
+					},
+					"Insufficient Funds",
+				);
+			} else if (errorMsg.includes("not found")) {
+				showError({ message: errorMsg }, "Resource Not Found");
+			} else if (errorMsg.includes("permission")) {
+				showError({ message: errorMsg }, "Permission Denied");
+			} else {
+				showError(err, "Failed to Create Project");
+			}
 
-  return { createProjectWithEscrow, isLoading, error };
+			return { success: false, error: errorMsg };
+		}
+	};
+
+	return { createProjectWithEscrow, isLoading, error };
 };
