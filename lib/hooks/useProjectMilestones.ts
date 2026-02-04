@@ -6,7 +6,10 @@ import { Database } from "@/lib/supabase/types/database.gen";
 import { useErrorToast } from "./useErrorToast";
 import { logError, isNetworkError } from "@/lib/utils/errorHelpers";
 
-type Milestone = Database["public"]["Tables"]["milestones"]["Row"];
+type Milestone = Database["public"]["Tables"]["milestones"]["Row"] & {
+	payment_hash?: string | null;
+	payment_sent_at?: string | null;
+};
 type Project = Database["public"]["Tables"]["projects"]["Row"];
 
 export function useProjectMilestones(projectId: string) {

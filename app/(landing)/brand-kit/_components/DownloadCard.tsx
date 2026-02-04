@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { cubicBezier, motion, type Variants } from 'framer-motion';
 
 interface DownloadCardProps {
   title: string;
@@ -20,22 +20,22 @@ export function DownloadCard({ title, description, basePath, zipPath }: Download
     document.body.removeChild(link);
   };
 
-  const buttonVariants = {
-    hover: { 
+  const buttonVariants: Variants = {
+    hover: {
       scale: 1.05,
-      transition: { type: "spring", stiffness: 400, damping: 10 }
+      transition: { type: 'spring', stiffness: 400, damping: 10 },
     },
-    tap: { 
+    tap: {
       scale: 0.95,
-      transition: { type: "spring", stiffness: 400, damping: 10 }
-    }
+      transition: { type: 'spring', stiffness: 400, damping: 10 },
+    },
   };
 
-  const cardVariants = {
+  const cardVariants: Variants = {
     hover: {
       y: -5,
-      transition: { duration: 0.2, ease: "easeOut" }
-    }
+      transition: { duration: 0.2, ease: cubicBezier(0, 0, 0.58, 1) },
+    },
   };
 
   return (

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, cubicBezier, motion, type Variants } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface AssetPreviewProps {
@@ -15,44 +15,44 @@ interface AssetPreviewProps {
 export function AssetPreview({ darkSrc, lightSrc, alt, className }: AssetPreviewProps) {
   const [activeTab, setActiveTab] = useState<'dark' | 'light'>('dark');
 
-  const tabVariants = {
-    inactive: { 
+  const tabVariants: Variants = {
+    inactive: {
       scale: 0.95,
       opacity: 0.7,
-      transition: { duration: 0.2 }
+      transition: { duration: 0.2 },
     },
-    active: { 
+    active: {
       scale: 1,
       opacity: 1,
-      transition: { duration: 0.2 }
-    }
+      transition: { duration: 0.2 },
+    },
   };
 
-  const previewVariants = {
+  const previewVariants: Variants = {
     dark: {
       backgroundColor: '#0f172a',
-      transition: { duration: 0.3, ease: "easeInOut" }
+      transition: { duration: 0.3, ease: cubicBezier(0.4, 0, 0.2, 1) },
     },
     light: {
       backgroundColor: '#ffffff',
-      transition: { duration: 0.3, ease: "easeInOut" }
-    }
+      transition: { duration: 0.3, ease: cubicBezier(0.4, 0, 0.2, 1) },
+    },
   };
 
-  const logoVariants = {
+  const logoVariants: Variants = {
     hidden: { opacity: 0, scale: 0.8, y: 10 },
-    visible: { 
-      opacity: 1, 
-      scale: 1, 
+    visible: {
+      opacity: 1,
+      scale: 1,
       y: 0,
-      transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }
+      transition: { duration: 0.4, ease: cubicBezier(0.25, 0.46, 0.45, 0.94) },
     },
-    exit: { 
-      opacity: 0, 
-      scale: 0.8, 
+    exit: {
+      opacity: 0,
+      scale: 0.8,
       y: -10,
-      transition: { duration: 0.2 }
-    }
+      transition: { duration: 0.2 },
+    },
   };
 
   return (
