@@ -59,7 +59,7 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 -- ============================================================================
--- 3. TABLES (If Not Exists)
+-- 3. TABLES
 -- ============================================================================
 
 create table if not exists public.continents (
@@ -109,7 +109,9 @@ create table if not exists public.organizations (
   bio text,
   avatar_url text,
   business_type organization_business_type,
+  custom_business_type text, -- NEW
   industry_type organization_industry_type,
+  custom_industry_type text, -- NEW
   legal_country_id bigint references public.countries(id),
   legal_state text,
   legal_city text,
@@ -117,7 +119,10 @@ create table if not exists public.organizations (
   legal_street_number int,
   legal_postal_code text,
   legal_suite text,
-  legal_floor text
+  legal_floor text,
+  -- Soft Delete Support
+  deleted_at timestamp with time zone,
+  deleted_by uuid references auth.users(id)
 );
 
 create table if not exists public.user_organization (
@@ -128,9 +133,14 @@ create table if not exists public.user_organization (
   email text not null,
   role organization_member_role default 'member',
   status organization_member_status default 'pending',
-  joined_at timestamp with time zone
+  joined_at timestamp with time zone,
+  -- Soft Delete Support
+  deleted_at timestamp with time zone,
+  deleted_by uuid references auth.users(id)
 );
 
+-- Note: These profile tables are likely deprecated in favor of 'organizations'
+-- but kept for backward compatibility if needed.
 create table if not exists public.contractor_profiles (
   id uuid references public.profiles(id) primary key,
   contractor_type contractor_type not null,
@@ -153,15 +163,18 @@ create table if not exists public.projects (
   id uuid default uuid_generate_v4() primary key,
   created_at timestamp with time zone default timezone('utc'::text, now()),
   updated_at timestamp with time zone,
-  contractor_id uuid references public.profiles(id) not null,
-  freelancer_id uuid references public.profiles(id),
+  contractor_id uuid references public.profiles(id) not null, -- Note: This acts as 'Requester'
+  freelancer_id uuid references public.profiles(id), -- Note: This acts as 'Provider'
   title text not null,
   description text not null,
   total_amount numeric not null,
   expected_delivery_date date not null,
   status project_status default 'draft',
   contract_id text,
-  contract_url text
+  contract_url text,
+  -- Soft Delete Support
+  deleted_at timestamp with time zone,
+  deleted_by uuid references auth.users(id)
 );
 
 create table if not exists public.milestones (
@@ -171,7 +184,11 @@ create table if not exists public.milestones (
   title text not null,
   description text,
   percentage int not null,
-  status milestone_status default 'pending'
+  status milestone_status default 'pending',
+  -- NEW: Critical columns for project creation and payments
+  deadline date,
+  payment_hash text,
+  payment_sent_at timestamp with time zone
 );
 
 create table if not exists public.contracts (
@@ -216,7 +233,7 @@ create table if not exists public.waitlist (
 -- 4. DATA POPULATION (Safe Inserts)
 -- ============================================================================
 
--- Continents (Check before insert)
+-- Continents
 INSERT INTO public.continents (name, code)
 SELECT 'North America', 'NA' WHERE NOT EXISTS (SELECT 1 FROM public.continents WHERE code = 'NA');
 INSERT INTO public.continents (name, code)
@@ -230,7 +247,7 @@ SELECT 'Africa', 'AF' WHERE NOT EXISTS (SELECT 1 FROM public.continents WHERE co
 INSERT INTO public.continents (name, code)
 SELECT 'Oceania', 'OC' WHERE NOT EXISTS (SELECT 1 FROM public.continents WHERE code = 'OC');
 
--- Countries (Check before insert)
+-- Countries
 INSERT INTO public.countries (name, iso2, iso3, continent_id, currency_code, phone_code)
 SELECT 'United States', 'US', 'USA', id, 'usd', '1' FROM public.continents WHERE code = 'NA' AND NOT EXISTS (SELECT 1 FROM public.countries WHERE iso2 = 'US');
 
@@ -244,9 +261,10 @@ INSERT INTO public.countries (name, iso2, iso3, continent_id, currency_code, pho
 SELECT 'United Kingdom', 'GB', 'GBR', id, 'gbp', '44' FROM public.continents WHERE code = 'EU' AND NOT EXISTS (SELECT 1 FROM public.countries WHERE iso2 = 'GB');
 
 -- ============================================================================
--- 5. FUNCTIONS
+-- 5. FUNCTIONS & TRIGGERS
 -- ============================================================================
 
+-- Function to get organizations for a user
 create or replace function get_user_organizations(p_user_id uuid)
 returns json
 language plpgsql
@@ -268,8 +286,32 @@ begin
 end;
 $$;
 
+-- Function to handle new user signups (Profile creation)
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  insert into public.profiles (id, email)
+  values (new.id, new.email);
+  return new;
+end;
+$$;
+
+-- Trigger for new user creation
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
+
+-- Backfill existing users who might miss a profile
+insert into public.profiles (id, email)
+select id, email from auth.users
+where id not in (select id from public.profiles);
+
 -- ============================================================================
--- 6. STORAGE BUCKETS & POLICIES (No Drop / No Alter)
+-- 6. STORAGE BUCKETS & POLICIES
 -- ============================================================================
 
 -- Create Buckets
@@ -280,8 +322,7 @@ values
   ('evidences', 'evidences', false, 52428800, null)
 on conflict (id) do nothing;
 
--- Create Policies Safely (Check existence first to avoid 42501 error on DROP)
-
+-- Create Policies Safely
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'Public Access to Organization Avatars' AND tablename = 'objects' AND schemaname = 'storage') THEN
@@ -304,52 +345,3 @@ BEGIN
         create policy "Auth Access to Evidences" on storage.objects for all to authenticated using ( bucket_id = 'evidences' ) with check ( bucket_id = 'evidences' );
     END IF;
 END $$;
-
--- New to add
-ALTER TABLE public.organizations
-ADD COLUMN IF NOT EXISTS custom_business_type text,
-ADD COLUMN IF NOT EXISTS custom_industry_type text;
-
--- New to add
--- 1. Create a function to handle new user signups
-create or replace function public.handle_new_user()
-returns trigger
-language plpgsql
-security definer set search_path = public
-as $$
-begin
-  insert into public.profiles (id, email)
-  values (new.id, new.email);
-  return new;
-end;
-$$;
-
--- 2. Create the trigger on auth.users
--- This ensures every FUTURE signup automatically gets a profile
-drop trigger if exists on_auth_user_created on auth.users;
-
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
-
--- 3. FIX YOUR CURRENT USER (Backfill)
--- This inserts a profile for any existing user who is missing one
-insert into public.profiles (id, email)
-select id, email from auth.users
-where id not in (select id from public.profiles);
-
--- New to add
--- 1. Add Soft Delete columns to 'organizations'
-ALTER TABLE public.organizations
-ADD COLUMN IF NOT EXISTS deleted_at timestamp with time zone,
-ADD COLUMN IF NOT EXISTS deleted_by uuid references auth.users(id);
-
--- 2. Add Soft Delete columns to 'user_organization'
-ALTER TABLE public.user_organization
-ADD COLUMN IF NOT EXISTS deleted_at timestamp with time zone,
-ADD COLUMN IF NOT EXISTS deleted_by uuid references auth.users(id);
-
--- 3. (Optional) Fix 'projects' table if it's missing them too, as best practice
-ALTER TABLE public.projects
-ADD COLUMN IF NOT EXISTS deleted_at timestamp with time zone,
-ADD COLUMN IF NOT EXISTS deleted_by uuid references auth.users(id);

@@ -6,13 +6,6 @@ import { Button } from "@/components/ui/button";
 import { MagnetizeButton } from "@/components/ui/magnetize-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSeparator,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -21,7 +14,6 @@ import { ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
@@ -52,10 +44,14 @@ export default function LoginPage() {
     }
   }, [resendCooldown]);
 
-  const getErrorMessage = (error: any): string => {
+  const getErrorMessage = (error: unknown): string => {
     if (!error) return "An error occurred";
-
-    const errorMessage = error.message || error.toString();
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : typeof error === "string"
+          ? error
+          : JSON.stringify(error);
 
     if (
       errorMessage.includes("email rate limit") ||
@@ -100,7 +96,7 @@ export default function LoginPage() {
     return errorMessage || "An error occurred. Please try again.";
   };
 
-  const handleSendOTP = async (e: React.FormEvent) => {
+  const handleSendMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
     const supabase = createClient();
     setIsLoading(true);
@@ -139,34 +135,8 @@ export default function LoginPage() {
       });
       if (error) throw error;
       setResendCooldown(60);
-      setOtp("");
     } catch (error: unknown) {
       setError(getErrorMessage(error));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleVerifyOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const supabase = createClient();
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const { error } = await supabase.auth.verifyOtp({
-        email,
-        token: otp,
-        type: "email",
-      });
-      if (error) throw error;
-      router.push("/onboarding");
-    } catch (error: unknown) {
-      const errorMessage = getErrorMessage(error);
-      setError(errorMessage);
-      if (errorMessage.includes("expired")) {
-        setOtp("");
-      }
     } finally {
       setIsLoading(false);
     }
@@ -268,7 +238,6 @@ export default function LoginPage() {
 
   const handleChangeEmail = () => {
     setOtpSent(false);
-    setOtp("");
     setError(null);
     setResendCooldown(0);
   };
@@ -319,7 +288,7 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent className="mt-3 sm:mt-4 md:mt-5 px-0">
           {!otpSent ? (
-            <form onSubmit={handleSendOTP}>
+            <form onSubmit={handleSendMagicLink}>
               <div className="flex flex-col gap-4 sm:gap-5 md:gap-6">
                 <div className="grid gap-2">
                   <Input
@@ -346,72 +315,48 @@ export default function LoginPage() {
                     particleCount={14}
                     attractRadius={60}
                   >
-                    {isLoading ? "Sending code..." : "Continue"}
+                    {isLoading ? "Sending link..." : "Send magic link"}
                   </MagnetizeButton>
                   <OAuthButtons />
                 </div>
               </div>
             </form>
           ) : (
-            <form onSubmit={handleVerifyOTP}>
-              <div className="flex flex-col gap-3 sm:gap-4">
-                <div className="grid gap-2">
-                  <div className="flex justify-center">
-                    <InputOTP
-                      maxLength={6}
-                      value={otp}
-                      onChange={(value) => setOtp(value)}
-                    >
-                      <InputOTPGroup>
-                        <InputOTPSlot index={0} className="w-10 h-10" />
-                        <InputOTPSlot index={1} className="w-10 h-10" />
-                        <InputOTPSlot index={2} className="w-10 h-10" />
-                      </InputOTPGroup>
-                      <InputOTPSeparator />
-                      <InputOTPGroup>
-                        <InputOTPSlot index={3} className="w-10 h-10" />
-                        <InputOTPSlot index={4} className="w-10 h-10" />
-                        <InputOTPSlot index={5} className="w-10 h-10" />
-                      </InputOTPGroup>
-                    </InputOTP>
-                  </div>
-                </div>
-                {error && (
-                  <p className="text-sm text-destructive break-words text-center px-2">
-                    {error}
-                  </p>
-                )}
-                <div className="flex flex-col items-center gap-1">
-                  {resendCooldown > 0 ? (
-                    <p className="text-center text-xs text-muted-foreground">
-                      Resend code in {resendCooldown}s
-                    </p>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleResendOTP}
-                      disabled={isLoading || resendCooldown > 0}
-                      className="text-xs text-primary underline-offset-4 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Resend code
-                    </button>
-                  )}
-                </div>
-                <div className="flex flex-col gap-3">
-                  <MagnetizeButton
-                    type="submit"
-                    variant="default"
-                    disabled={isLoading || otp.length !== 6}
-                    className="w-full"
-                    particleCount={14}
-                    attractRadius={60}
-                  >
-                    {isLoading ? "Verifying..." : "Verify code"}
-                  </MagnetizeButton>
-                </div>
-                <OAuthButtons />
+            <div className="flex flex-col gap-3 sm:gap-4">
+              <div className="grid gap-2">
+                <p className="text-sm text-muted-foreground">
+                  We sent a magic link to
+                </p>
+                <p className="text-sm font-semibold text-foreground break-words">
+                  {email}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Open it on this device to finish signing in.
+                </p>
               </div>
-            </form>
+              {error && (
+                <p className="text-sm text-destructive break-words text-center px-2">
+                  {error}
+                </p>
+              )}
+              <div className="flex flex-col items-center gap-1">
+                {resendCooldown > 0 ? (
+                  <p className="text-center text-xs text-muted-foreground">
+                    Resend link in {resendCooldown}s
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleResendOTP}
+                    disabled={isLoading || resendCooldown > 0}
+                    className="text-xs text-primary underline-offset-4 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Resend link
+                  </button>
+                )}
+              </div>
+              <OAuthButtons />
+            </div>
           )}
         </CardContent>
       </Card>
