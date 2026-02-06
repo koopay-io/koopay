@@ -48,3 +48,4 @@ supabase/.branches/
 supabase/.temp/
 
 prompts/
+.vscode/
