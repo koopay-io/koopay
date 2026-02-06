@@ -716,6 +716,7 @@ export type Database = {
           description: string
           expected_delivery_date: string
           freelancer_id: string | null
+          freelancer_address: string | null
           id: string
           image_url: string | null
           status: Database["public"]["Enums"]["project_status"] | null
@@ -731,6 +732,7 @@ export type Database = {
           description: string
           expected_delivery_date: string
           freelancer_id?: string | null
+          freelancer_address?: string | null
           id?: string
           image_url?: string | null
           status?: Database["public"]["Enums"]["project_status"] | null
@@ -746,6 +748,7 @@ export type Database = {
           description?: string
           expected_delivery_date?: string
           freelancer_id?: string | null
+          freelancer_address?: string | null
           id?: string
           image_url?: string | null
           status?: Database["public"]["Enums"]["project_status"] | null

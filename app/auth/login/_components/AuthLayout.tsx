@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { OptimizedBackground } from './OptimizedBackground';
 import Image from 'next/image';
@@ -26,11 +26,11 @@ const WORD_DISPLAY_DURATION_MS = 1800;
 const FINAL_WORD = 'everyone';
 
 export function AuthLayout({ children }: AuthLayoutProps) {
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(true);
   const [displayWord, setDisplayWord] = useState(rotatingWords[0]);
   const [isFading, setIsFading] = useState(false);
   const [hasWordAppeared, setHasWordAppeared] = useState(false);
+  const currentWordIndexRef = useRef(0);
 
   useEffect(() => {
     const wordDelay = IMAGE_DELAY_MS + WORD_DELAY_AFTER_IMAGE_MS;
@@ -45,48 +45,42 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   useEffect(() => {
     if (!hasWordAppeared || !isAnimating) return;
 
-    let interval: NodeJS.Timeout;
-    let initialTimer: NodeJS.Timeout;
-
-    initialTimer = setTimeout(() => {
+    let interval: NodeJS.Timeout | null = null;
+    const initialTimer = setTimeout(() => {
       setIsFading(true);
 
       setTimeout(() => {
-        setCurrentWordIndex((prev) => {
-          const nextIndex = prev + 1;
-          const nextWord = rotatingWords[nextIndex];
+        const nextIndex = currentWordIndexRef.current + 1;
+        const nextWord = rotatingWords[nextIndex];
+        currentWordIndexRef.current = nextIndex;
 
-          if (nextWord === FINAL_WORD) {
-            setIsAnimating(false);
-            setDisplayWord(nextWord);
-            setIsFading(false);
-            return nextIndex;
-          }
-
+        if (nextWord === FINAL_WORD) {
+          setIsAnimating(false);
           setDisplayWord(nextWord);
           setIsFading(false);
-          return nextIndex;
-        });
+          return;
+        }
+
+        setDisplayWord(nextWord);
+        setIsFading(false);
 
         interval = setInterval(() => {
           setIsFading(true);
 
           setTimeout(() => {
-            setCurrentWordIndex((prev) => {
-              const nextIndex = prev + 1;
-              const nextWord = rotatingWords[nextIndex];
+            const nextIndex = currentWordIndexRef.current + 1;
+            const nextWord = rotatingWords[nextIndex];
+            currentWordIndexRef.current = nextIndex;
 
-              if (nextWord === FINAL_WORD) {
-                setIsAnimating(false);
-                setDisplayWord(nextWord);
-                setIsFading(false);
-                return nextIndex;
-              }
-
+            if (nextWord === FINAL_WORD) {
+              setIsAnimating(false);
               setDisplayWord(nextWord);
               setIsFading(false);
-              return nextIndex;
-            });
+              return;
+            }
+
+            setDisplayWord(nextWord);
+            setIsFading(false);
           }, 300);
         }, WORD_DISPLAY_DURATION_MS);
       }, 300);

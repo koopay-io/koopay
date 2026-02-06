@@ -70,6 +70,27 @@ function MagnetizeButton({
     }));
   }, [particlesControl, particles]);
 
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      const button = buttonRef.current;
+      if (!button) return;
+
+      const rect = button.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const dx = e.clientX - centerX;
+      const dy = e.clientY - centerY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance <= attractRadius) {
+        if (!isAttracting) void handleInteractionStart();
+      } else {
+        if (isAttracting) void handleInteractionEnd();
+      }
+    },
+    [attractRadius, handleInteractionEnd, handleInteractionStart, isAttracting],
+  );
+
   const particleColor = variant === 'outline' 
     ? 'bg-sky-400/60 dark:bg-sky-300/60' 
     : 'bg-white/40 dark:bg-white/30';
@@ -79,6 +100,7 @@ function MagnetizeButton({
       className="relative inline-flex"
       onMouseEnter={handleInteractionStart}
       onMouseLeave={handleInteractionEnd}
+      onMouseMove={handleMouseMove}
       onTouchStart={handleInteractionStart}
       onTouchEnd={handleInteractionEnd}
     >
@@ -128,4 +150,3 @@ function MagnetizeButton({
 }
 
 export { MagnetizeButton };
-

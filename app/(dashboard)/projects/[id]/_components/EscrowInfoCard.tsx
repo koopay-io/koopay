@@ -6,7 +6,6 @@ import { truncateContractId } from '@/lib/utils/projectHelpers';
 
 interface EscrowInfoCardProps {
   contractId: string;
-  projectId: string;
   fundingStatus?: 'unfunded' | 'funding' | 'funded' | 'error';
   escrowUsdcBalance?: number | null;
   onViewDetails: () => void;
@@ -14,7 +13,6 @@ interface EscrowInfoCardProps {
 
 export function EscrowInfoCard({
   contractId,
-  projectId,
   fundingStatus = 'unfunded',
   escrowUsdcBalance,
   onViewDetails,
@@ -76,4 +74,3 @@ export function EscrowInfoCard({
     </Card>
   );
 }
-

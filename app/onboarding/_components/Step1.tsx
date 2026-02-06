@@ -11,7 +11,7 @@ import { Stepper } from './Stepper';
 
 export function Step1() {
   const router = useRouter();
-  const { organizationType, data, updateData, setMaxStepReached } = useOnboardingContext();
+  const { data, updateData, setMaxStepReached } = useOnboardingContext();
 
   useEffect(() => {
     if (!data.legal_type) {

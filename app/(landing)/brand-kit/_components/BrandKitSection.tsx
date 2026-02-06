@@ -223,7 +223,7 @@ export function BrandKitSection() {
                   animate={{ scale: [1, 1.2, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 />
-                Do's
+				Dos
               </h4>
               <ul className="space-y-2 text-zinc-400/85">
                 <li>• Use the provided logo files without modification</li>
@@ -239,13 +239,13 @@ export function BrandKitSection() {
                   animate={{ scale: [1, 1.2, 1] }}
                   transition={{ duration: 2, repeat: Infinity, delay: 1 }}
                 />
-                Don'ts
+				Donts
               </h4>
               <ul className="space-y-2 text-zinc-400/85">
-                <li>• Don't alter the logo colors or proportions</li>
-                <li>• Don't add effects, shadows, or outlines</li>
-                <li>• Don't use low-resolution or pixelated versions</li>
-                <li>• Don't place logos on busy or conflicting backgrounds</li>
+				<li>• Do not alter the logo colors or proportions</li>
+				<li>• Do not add effects, shadows, or outlines</li>
+				<li>• Do not use low-resolution or pixelated versions</li>
+				<li>• Do not place logos on busy or conflicting backgrounds</li>
               </ul>
             </motion.div>
           </motion.div>

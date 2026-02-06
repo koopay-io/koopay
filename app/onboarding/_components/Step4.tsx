@@ -57,16 +57,6 @@ const step4Schema = z.object({
 
 type Step4FormInput = z.infer<typeof step4Schema>;
 
-type Step4FormData = {
-  bio: string;
-  business_type: z.infer<typeof zOrganizationBusinessTypeEnum>;
-  custom_business_type?: string | null;
-  industry_type: z.infer<typeof zOrganizationIndustryTypeEnum>;
-  custom_industry_type?: string | null;
-};
-
-type FormData = Step4FormData;
-
 const businessTypes = [
   { value: 'freelance', label: 'Freelance' },
   { value: 'agency', label: 'Agency' },

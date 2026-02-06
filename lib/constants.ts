@@ -1,18 +1,17 @@
 // Stellar
-export const USDC_TRUSLINE =
+export const USDC_TRUSTLINE =
   "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
 export const BASE_URL =
   process.env.NEXT_PUBLIC_TRUSTLESS_BASE_URL ||
   "https://dev.api.trustlesswork.com";
 export const ADMIN_PK =
-  process.env.NEXT_PUBLIC_TURSTLESS_ADMIN_PK ||
+  process.env.NEXT_PUBLIC_TRUSTLESS_ADMIN_PK ||
   "GDT26YDR47N3AC2RHMXPW65TM754XTMHTSE7RKSOP6W4NTOAFDERMWT3";
 
 export const STELLAR_NETWORK =
   process.env.NEXT_PUBLIC_STELLAR_NETWORK || "testnet";
-export const TRUSTLESS_API_KEY = process.env.NEXT_PUBLIC_TRUSTLESS_API_KEY!;
 export const TRUSTLESS_PLATFORM_FEE =
-  process.env.NEXT_PUBLIC_PLATFORM_FEE || "1.5";
+  process.env.NEXT_PUBLIC_TRUSTLESS_PLATFORM_FEE || "1.5";
 
 // Supabase
 export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;

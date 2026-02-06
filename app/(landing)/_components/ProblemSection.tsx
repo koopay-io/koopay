@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { AlertCircle, Clock, CreditCard, Users } from "lucide-react";
+import { Clock, CreditCard, Users } from "lucide-react";
 
 export function ProblemSection() {
   const containerRef = React.useRef(null);
@@ -41,7 +41,7 @@ export function ProblemSection() {
       icon: <Users className="w-8 h-8 text-indigo-300" />,
       title: "Ghosting & Initial Distrust",
       description:
-        "Informal agreements without backup. The risk isn't in doing the work, but in getting paid. Both sides start unsure if funds are safe.",
+        "Informal agreements without backup. The risk is not in doing the work, but in getting paid. Both sides start unsure if funds are safe.",
     },
     {
       icon: <CreditCard className="w-8 h-8 text-rose-300" />,
@@ -61,7 +61,7 @@ export function ProblemSection() {
             Problems we fix
           </span>
           <h2 className="mt-6 text-4xl md:text-5xl font-bold text-zinc-50">
-            The Biggest Risk Isn't in Doing the Work, It's in Getting Paid
+				The Biggest Risk Is Not Doing the Work, It Is Getting Paid
           </h2>
           <p className="mt-4 text-xl text-zinc-300/85 max-w-3xl mx-auto">
             In project-based work, freelancers and clients face the same pains over and over: informal agreements, delayed payments, and lack of transparency.

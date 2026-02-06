@@ -43,11 +43,8 @@ import {
 	Trash2,
 	Info,
 	Building2,
-	ChevronsUpDown,
 } from "lucide-react";
-import Image from "next/image";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { TeamSwitcher } from "../_components/TeamSwitcher";
 import {
@@ -270,20 +267,6 @@ export default function AccountPage() {
 		}
 	};
 
-	const handleDeleteAccount = async () => {
-		if (!currentOrganization || !user) return;
-
-		if (
-			!confirm(
-				"Are you sure you want to delete this account? This action cannot be undone.",
-			)
-		) {
-			return;
-		}
-
-		await performDelete();
-	};
-
 	const performDelete = async () => {
 		if (!currentOrganization || !user) return;
 
@@ -362,8 +345,8 @@ export default function AccountPage() {
 				const fileName = `avatar-${Date.now()}.${fileExt}`;
 				const filePath = `${currentOrganization.id}/avatars/${fileName}`;
 
-				const { data: uploadData, error: uploadError } =
-					await supabaseClient.storage
+			const { error: uploadError } =
+				await supabaseClient.storage
 						.from("organizations")
 						.upload(filePath, avatarFile, {
 							cacheControl: "3600",
@@ -438,7 +421,7 @@ export default function AccountPage() {
 				data: TOrganizationRow | null;
 				error: Error | null;
 			};
-			const { data: updatedOrg, error } = updateResult;
+			const { error } = updateResult;
 
 			if (error) throw error;
 

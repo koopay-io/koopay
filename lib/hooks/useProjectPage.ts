@@ -193,17 +193,21 @@ export function useProjectPage(projectId: string) {
 
 			console.log("✅ Step 1/2: Milestone approved");
 
-			// Step 2: Get freelancer wallet
-			if (!project?.freelancer_id) {
-				throw new Error("Project not found or freelancer not assigned");
+			// Step 2: Determine collaborator wallet address
+			let freelancerWallet: string | null =
+				project?.freelancer_address ?? null;
+
+			if (!freelancerWallet) {
+				if (!project?.freelancer_id) {
+					throw new Error("Project not found or collaborator not assigned");
+				}
+
+				freelancerWallet = await getUserStellarWallet(project.freelancer_id);
 			}
 
-			const freelancerWallet = await getUserStellarWallet(
-				project.freelancer_id,
-			);
 			if (!freelancerWallet) {
 				throw new Error(
-					"Freelancer wallet not found. Please ensure freelancer has completed onboarding.",
+					"Collaborator wallet not found. Ask them to provide a Stellar address.",
 				);
 			}
 

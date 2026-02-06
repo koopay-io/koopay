@@ -99,7 +99,6 @@ export default function ProjectPage() {
 							<CurrentMilestone
 								milestone={currentMilestone}
 								expectedDeliveryDate={project.expected_delivery_date}
-								totalAmount={project.total_amount}
 								milestoneCompleted={milestoneCompleted}
 								onMilestoneCompletedChange={setMilestoneCompleted}
 								onUploadEvidenceClick={() =>
@@ -140,27 +139,35 @@ export default function ProjectPage() {
 													).getTime(),
 											)[0];
 
-							return milestoneToShow?.payment_hash &&
-								project.freelancer_id ? (
-								<div className='mb-8'>
-									<h2 className='text-2xl font-bold text-white mb-6'>
-										Payment Details
-									</h2>
-									<PaymentTransactionCard
-										paymentHash={milestoneToShow.payment_hash}
-										amount={
-											project.total_amount *
-											(milestoneToShow.percentage / 100)
-										}
-										recipient={project.freelancer_id}
-										timestamp={
-											milestoneToShow.payment_sent_at ?? null
-										}
-										status='success'
-									/>
-								</div>
-							) : null;
-						})()}
+						return milestoneToShow?.payment_hash &&
+							(project.freelancer_address || project.freelancer_id) ? (
+							<div className='mb-8'>
+								<h2 className='text-2xl font-bold text-white mb-6'>
+									Payment Details
+								</h2>
+								{(() => {
+									const recipient =
+										project.freelancer_address ?? project.freelancer_id;
+									if (!recipient) return null;
+
+									return (
+								<PaymentTransactionCard
+									paymentHash={milestoneToShow.payment_hash}
+									amount={
+										project.total_amount *
+										(milestoneToShow.percentage / 100)
+									}
+									recipient={recipient}
+									timestamp={
+										milestoneToShow.payment_sent_at ?? null
+									}
+									status='success'
+								/>
+									);
+								})()}
+							</div>
+						) : null;
+					})()}
 
 						{/* Milestones Timeline */}
 						<MilestonesTimeline
@@ -184,15 +191,14 @@ export default function ProjectPage() {
 									/>
 								)}
 
-								<EscrowInfoCard
-									contractId={escrowContractId}
-									projectId={projectId}
-									fundingStatus={escrowFundingStatus}
-									escrowUsdcBalance={escrowUsdcBalance}
-									onViewDetails={() =>
-										router.push(`/projects/${projectId}/test-escrow`)
-									}
-								/>
+									<EscrowInfoCard
+										contractId={escrowContractId}
+										fundingStatus={escrowFundingStatus}
+										escrowUsdcBalance={escrowUsdcBalance}
+										onViewDetails={() =>
+											router.push(`/projects/${projectId}/test-escrow`)
+										}
+									/>
 							</>
 						)}
 

@@ -14,6 +14,8 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { Search, Building2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "sonner";
+import type { Database } from "@/lib/supabase/types/database.gen";
 
 // Add avatar_url back to the interface to satisfy the parent component (Collaborator type)
 interface Freelancer {
@@ -21,6 +23,7 @@ interface Freelancer {
   full_name: string;
   position: string;
   avatar_url: string | null;
+  wallet_address?: string;
 }
 
 interface CollaboratorAssignmentModalProps {
@@ -37,9 +40,15 @@ export function CollaboratorAssignmentModal({
   selectedFreelancer,
 }: CollaboratorAssignmentModalProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [manualAddress, setManualAddress] = useState("");
   const [freelancers, setFreelancers] = useState<Freelancer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createClient();
+
+  type OrganizationRow = Database["public"]["Tables"]["organizations"]["Row"];
+  type OrganizationWithUserOrganization = OrganizationRow & {
+    user_organization: Array<{ user_id: string | null }>;
+  };
 
   const fetchFreelancers = useCallback(
     async (searchTerm = "") => {
@@ -65,32 +74,38 @@ export function CollaboratorAssignmentModal({
         }
 
         const { data, error } = await query;
-
         if (error) {
           console.error("Error fetching providers:", error);
           return;
         }
 
-        // Ensure the mapping matches the interface exactly
-        const mappedFreelancers: Freelancer[] = (data || [])
-          .map((org: any) => {
-            const userId = org.user_organization?.[0]?.user_id;
+        const organizations = (data ??
+          []) as OrganizationWithUserOrganization[];
 
-            if (!userId) return null;
+        const mappedFreelancers = organizations.reduce<Freelancer[]>(
+          (acc, org) => {
+            const userId = org.user_organization?.[0]?.user_id;
+            if (!userId) return acc;
+
+            // Check if this user is already in the list before adding
+            if (acc.some((f) => f.id === userId)) {
+              return acc;
+            }
 
             const displayName =
               org.legal_type === "individual" ? org.legal_name : org.name;
 
-            return {
+            acc.push({
               id: userId,
               full_name: displayName,
               position: org.industry_type || "Provider",
-              // Use the org's avatar if available, otherwise null
               avatar_url: org.avatar_url || null,
-            };
-          })
-          // Type predicate ensures TypeScript knows 'f' is a valid Freelancer
-          .filter((f): f is Freelancer => f !== null);
+            });
+
+            return acc;
+          },
+          [],
+        );
 
         setFreelancers(mappedFreelancers);
       } catch (error) {
@@ -113,11 +128,36 @@ export function CollaboratorAssignmentModal({
   useEffect(() => {
     if (isOpen) {
       fetchFreelancers();
+      setManualAddress("");
     }
   }, [isOpen, fetchFreelancers]);
 
   const handleSelectFreelancer = (freelancer: Freelancer) => {
     onSelect(freelancer);
+    onClose();
+  };
+
+  const handleAddManualAddress = () => {
+    const trimmed = manualAddress.trim();
+    if (!trimmed) {
+      toast.error("Enter a Stellar public key");
+      return;
+    }
+
+    if (!/^G[A-Z2-7]{55}$/.test(trimmed)) {
+      toast.error("Invalid Stellar public key");
+      return;
+    }
+
+    const manualFreelancer: Freelancer = {
+      id: "manual",
+      full_name: "External contractor",
+      position: `${trimmed.slice(0, 4)}...${trimmed.slice(-4)}`,
+      avatar_url: null,
+      wallet_address: trimmed,
+    };
+
+    onSelect(manualFreelancer);
     onClose();
   };
 
@@ -140,6 +180,31 @@ export function CollaboratorAssignmentModal({
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 bg-gray-900/50 border-gray-700 text-white placeholder:text-gray-500"
             />
+          </div>
+
+          <div className="rounded-lg border border-gray-800 bg-gray-900/20 p-4 space-y-3">
+            <div>
+              <p className="text-sm font-medium text-white">Add by address</p>
+              <p className="text-xs text-gray-400">
+                If they do not have a Koopay account, paste their Stellar public
+                key.
+              </p>
+            </div>
+
+            <div className="flex gap-2">
+              <Input
+                placeholder="G..."
+                value={manualAddress}
+                onChange={(e) => setManualAddress(e.target.value)}
+                className="font-mono text-sm bg-gray-900/50 border-gray-700 text-white placeholder:text-gray-500"
+              />
+              <Button
+                onClick={handleAddManualAddress}
+                disabled={!manualAddress.trim()}
+              >
+                Add
+              </Button>
+            </div>
           </div>
 
           <div className="max-h-96 overflow-y-auto space-y-2 pr-2">

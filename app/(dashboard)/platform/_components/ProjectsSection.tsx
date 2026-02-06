@@ -122,7 +122,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
         <>
           {/* Mobile: Always show as grid, one column */}
           <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:hidden">
-            {filteredProjects.map((project, index) => (
+			{filteredProjects.map((project) => (
               <ProjectCard
                 key={project.id}
                 {...project}
@@ -135,7 +135,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
           {hasMoreThanThree ? (
             <Carousel className="hidden lg:block w-full">
               <CarouselContent className="-ml-4">
-                {filteredProjects.map((project, index) => (
+				{filteredProjects.map((project) => (
                   <CarouselItem key={project.id} className="pl-4 basis-1/3">
                     <ProjectCard
                       {...project}
@@ -151,7 +151,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
             </Carousel>
           ) : (
             <div className="hidden lg:grid lg:grid-cols-3 gap-4 sm:gap-6">
-              {filteredProjects.map((project, index) => (
+				{filteredProjects.map((project) => (
                 <ProjectCard
                   key={project.id}
                   {...project}

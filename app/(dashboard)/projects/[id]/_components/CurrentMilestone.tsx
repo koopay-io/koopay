@@ -5,7 +5,6 @@ import { Calendar, Settings, Upload } from "lucide-react";
 import {
   formatDate,
   getDaysLeft,
-  getMilestoneAmount,
 } from "@/lib/utils/projectHelpers";
 import { Database } from "@/lib/supabase/types/database.gen";
 
@@ -17,7 +16,6 @@ type Milestone = Database["public"]["Tables"]["milestones"]["Row"] & {
 interface CurrentMilestoneProps {
   milestone: Milestone | null;
   expectedDeliveryDate: string;
-  totalAmount: number;
   milestoneCompleted: boolean;
   onMilestoneCompletedChange: (completed: boolean) => void;
   onUploadEvidenceClick: () => void;
@@ -26,7 +24,6 @@ interface CurrentMilestoneProps {
 export function CurrentMilestone({
   milestone,
   expectedDeliveryDate,
-  totalAmount,
   milestoneCompleted,
   onMilestoneCompletedChange,
   onUploadEvidenceClick,
@@ -44,8 +41,7 @@ export function CurrentMilestone({
     );
   }
 
-  const daysLeft = getDaysLeft(expectedDeliveryDate);
-  const milestoneAmount = getMilestoneAmount(totalAmount, milestone.percentage);
+	const daysLeft = getDaysLeft(expectedDeliveryDate);
 
   return (
     <Card className="bg-blue-600 border-blue-500">

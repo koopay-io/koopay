@@ -97,6 +97,14 @@ class WebGLRenderer {
   private mouseCoords: [number, number] = [0, 0];
   private pointerCoords: number[] = [];
   private nbrOfPointers = 0;
+  private uniforms: {
+    resolution: WebGLUniformLocation | null;
+    time: WebGLUniformLocation | null;
+    move: WebGLUniformLocation | null;
+    touch: WebGLUniformLocation | null;
+    pointerCount: WebGLUniformLocation | null;
+    pointers: WebGLUniformLocation | null;
+  } | null = null;
 
   private vertexSrc = `#version 300 es
 precision highp float;
@@ -211,31 +219,39 @@ void main(){gl_Position=position;}`;
     gl.enableVertexAttribArray(position);
     gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
 
-    (program as any).resolution = gl.getUniformLocation(program, 'resolution');
-    (program as any).time = gl.getUniformLocation(program, 'time');
-    (program as any).move = gl.getUniformLocation(program, 'move');
-    (program as any).touch = gl.getUniformLocation(program, 'touch');
-    (program as any).pointerCount = gl.getUniformLocation(program, 'pointerCount');
-    (program as any).pointers = gl.getUniformLocation(program, 'pointers');
+    this.uniforms = {
+      resolution: gl.getUniformLocation(program, 'resolution'),
+      time: gl.getUniformLocation(program, 'time'),
+      move: gl.getUniformLocation(program, 'move'),
+      touch: gl.getUniformLocation(program, 'touch'),
+      pointerCount: gl.getUniformLocation(program, 'pointerCount'),
+      pointers: gl.getUniformLocation(program, 'pointers'),
+    };
   }
 
   render(now = 0) {
     const gl = this.gl;
     const program = this.program;
 
-    if (!program || gl.getProgramParameter(program, gl.DELETE_STATUS)) return;
+    const uniforms = this.uniforms;
+
+    if (!program || !uniforms || gl.getProgramParameter(program, gl.DELETE_STATUS)) return;
 
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.useProgram(program);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
 
-    gl.uniform2f((program as any).resolution, this.canvas.width, this.canvas.height);
-    gl.uniform1f((program as any).time, now * 1e-3);
-    gl.uniform2f((program as any).move, this.mouseMove[0], this.mouseMove[1]);
-    gl.uniform2f((program as any).touch, this.mouseCoords[0], this.mouseCoords[1]);
-    gl.uniform1i((program as any).pointerCount, this.nbrOfPointers);
-    gl.uniform2fv((program as any).pointers, this.pointerCoords);
+    if (uniforms.resolution)
+      gl.uniform2f(uniforms.resolution, this.canvas.width, this.canvas.height);
+    if (uniforms.time) gl.uniform1f(uniforms.time, now * 1e-3);
+    if (uniforms.move)
+      gl.uniform2f(uniforms.move, this.mouseMove[0], this.mouseMove[1]);
+    if (uniforms.touch)
+      gl.uniform2f(uniforms.touch, this.mouseCoords[0], this.mouseCoords[1]);
+    if (uniforms.pointerCount)
+      gl.uniform1i(uniforms.pointerCount, this.nbrOfPointers);
+    if (uniforms.pointers) gl.uniform2fv(uniforms.pointers, this.pointerCoords);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
 }
@@ -328,17 +344,6 @@ export function ShaderBackground({ className = '' }: ShaderBackgroundProps) {
     }
   };
 
-  const loop = (now: number) => {
-    if (!rendererRef.current || !pointersRef.current) return;
-
-    rendererRef.current.updateMouse(pointersRef.current.first);
-    rendererRef.current.updatePointerCount(pointersRef.current.count);
-    rendererRef.current.updatePointerCoords(pointersRef.current.coords);
-    rendererRef.current.updateMove(pointersRef.current.move);
-    rendererRef.current.render(now);
-    animationFrameRef.current = requestAnimationFrame(loop);
-  };
-
   useEffect(() => {
     if (!canvasRef.current) return;
 
@@ -353,6 +358,17 @@ export function ShaderBackground({ className = '' }: ShaderBackgroundProps) {
       rendererRef.current.init();
 
       resize();
+
+      const loop = (now: number) => {
+        if (!rendererRef.current || !pointersRef.current) return;
+
+        rendererRef.current.updateMouse(pointersRef.current.first);
+        rendererRef.current.updatePointerCount(pointersRef.current.count);
+        rendererRef.current.updatePointerCoords(pointersRef.current.coords);
+        rendererRef.current.updateMove(pointersRef.current.move);
+        rendererRef.current.render(now);
+        animationFrameRef.current = requestAnimationFrame(loop);
+      };
 
       if (rendererRef.current.test(defaultShaderSource) === null) {
         rendererRef.current.updateShader(defaultShaderSource);
@@ -371,7 +387,7 @@ export function ShaderBackground({ className = '' }: ShaderBackgroundProps) {
           rendererRef.current.reset();
         }
       };
-    } catch (error) {
+    } catch {
       console.warn('WebGL not supported, falling back to static background');
     }
   }, []);
@@ -384,4 +400,3 @@ export function ShaderBackground({ className = '' }: ShaderBackgroundProps) {
     />
   );
 }
-

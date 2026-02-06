@@ -2,7 +2,6 @@ import { toast } from "sonner";
 import {
 	parseStellarError,
 	parseAPIError,
-	isNetworkError,
 	extractTransactionHash,
 } from "../utils/errorHelpers";
 
@@ -10,7 +9,7 @@ export function useErrorToast() {
 	/**
 	 * Show error toast with appropriate message
 	 */
-	const showError = (error: any, context?: string) => {
+	const showError = (error: unknown, context?: string) => {
 		const message = parseStellarError(error);
 		const hash = extractTransactionHash(error);
 
@@ -32,7 +31,7 @@ export function useErrorToast() {
 	/**
 	 * Show API error toast
 	 */
-	const showAPIError = (error: any, context?: string) => {
+	const showAPIError = (error: unknown, context?: string) => {
 		const message = parseAPIError(error);
 
 		toast.error(context || "Error", {

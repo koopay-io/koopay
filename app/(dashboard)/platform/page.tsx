@@ -18,7 +18,7 @@ type ProjectWithMilestoneCount =
 export default async function Home() {
 	const { projects, error } = await getProjects();
 	if (error) {
-		console.error("Error fetching projects:", error.message);
+		console.error("Error fetching projects:", error);
 	}
 
 	const formattedProjects: ProjectCardData[] = (projects || []).map(
@@ -71,7 +71,7 @@ async function getProjects() {
 		.select("*, milestones(count)") // Get project data and a count of milestones
 		.or(`contractor_id.eq.${user.id},freelancer_id.eq.${user.id}`) // Get projects for this user
 		.order("created_at", { ascending: false })
-		.limit(10)) as { data: ProjectWithMilestoneCount[] | null; error: any };
+		.limit(10)) as { data: ProjectWithMilestoneCount[] | null; error: unknown };
 
 	return {
 		projects: projectsData || [],

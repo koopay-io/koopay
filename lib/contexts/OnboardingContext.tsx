@@ -165,7 +165,7 @@ export function OnboardingProvider({
 
       const { data: organization, error: orgError } = await supabase
         .from("organizations")
-        .insert(organizationData as any)
+        .insert(organizationData)
         .select()
         .single();
 
@@ -222,7 +222,7 @@ export function OnboardingProvider({
       console.log("User organization data:", userOrganizationData);
       const { error: userOrgError } = await supabase
         .from("user_organization")
-        .insert(userOrganizationData as any);
+        .insert(userOrganizationData);
 
       if (userOrgError) {
         console.error("Error creating user_organization:", userOrgError);
