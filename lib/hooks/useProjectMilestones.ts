@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Database } from "@/lib/supabase/types/database.gen";
 import { useErrorToast } from "./useErrorToast";
 import { logError, isNetworkError } from "@/lib/utils/errorHelpers";
@@ -17,7 +17,7 @@ export function useProjectMilestones(projectId: string) {
 	const [milestones, setMilestones] = useState<Milestone[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const supabase = createClient();
+	const supabase = useMemo(() => createClient(), []);
 	const { showError, showSuccess, showNetworkError, showAPIError } =
 		useErrorToast();
 

@@ -30,13 +30,18 @@ export function useStellarWallet(): UseStellarWalletReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Memoize the wallet manager and supabase client
   const walletManager = useMemo(() => new StellarWalletManager("testnet"), []);
   const supabase = useMemo(() => createClient(), []);
+
   const { showError, showSuccess, showNetworkError, showAPIError } =
     useErrorToast();
 
+  // ✅ FIX 1: Stable wallet loader (Removed toast functions from dependencies)
   const loadWalletFromSupabase = useCallback(async () => {
     try {
+      // Avoid setting global loading state here if possible to prevent flicker
+      // or check if data is already present.
       setError(null);
 
       const {
@@ -44,12 +49,7 @@ export function useStellarWallet(): UseStellarWalletReturn {
         error: userError,
       } = await supabase.auth.getUser();
 
-      if (userError) {
-        console.error("Auth check failed:", userError.message);
-        return;
-      }
-
-      if (!user) {
+      if (userError || !user) {
         setWallet(null);
         return;
       }
@@ -58,18 +58,30 @@ export function useStellarWallet(): UseStellarWalletReturn {
       const walletData = user.user_metadata?.stellar_wallet;
 
       if (walletData) {
-        // Only update state if the wallet actually changed to avoid re-renders
-        setWallet((prev) =>
-          prev?.publicKey === walletData.publicKey ? prev : walletData,
-        );
+        // Prevent state update if wallet hasn't changed
+        setWallet((prev) => {
+          if (prev?.publicKey === walletData.publicKey) return prev;
+          return walletData;
+        });
       }
     } catch (err) {
-      logError(err, "Load Wallet");
+      // Log error but don't cause a loop with toasts on mount
       console.error("Failed to load wallet:", err);
-    } finally {
-      setIsLoading(false);
     }
   }, [supabase]);
+
+  // ✅ FIX 2: Stable balance refresher
+  const refreshBalance = useCallback(async () => {
+    if (!wallet?.publicKey) return;
+
+    try {
+      setError(null);
+      const balances = await walletManager.getBalance(wallet.publicKey);
+      setBalance(balances);
+    } catch (err) {
+      console.error("Balance refresh error", err);
+    }
+  }, [wallet?.publicKey, walletManager]);
 
   const createWallet = useCallback(
     async (userId: string) => {
@@ -104,23 +116,6 @@ export function useStellarWallet(): UseStellarWalletReturn {
     },
     [walletManager, supabase, showError, showSuccess],
   );
-
-  // FIX 2: Removed toast functions from dependency array here too
-  const refreshBalance = useCallback(async () => {
-    if (!wallet?.publicKey) return;
-
-    try {
-      // Avoid setting global loading state for background balance refreshes
-      // setIsLoading(true);
-      setError(null);
-
-      const balances = await walletManager.getBalance(wallet.publicKey);
-      setBalance(balances);
-    } catch (err) {
-      console.error("Balance refresh failed:", err);
-      // Silent fail is better for background poller
-    }
-  }, [wallet?.publicKey, walletManager]);
 
   const sendPayment = useCallback(
     async (
@@ -161,12 +156,12 @@ export function useStellarWallet(): UseStellarWalletReturn {
     [wallet?.secretKey, walletManager, refreshBalance, showError, showSuccess],
   );
 
-  // Load wallet ONLY once on mount
+  // Load wallet on mount
   useEffect(() => {
     loadWalletFromSupabase();
   }, [loadWalletFromSupabase]);
 
-  // Refresh balance when wallet public key changes
+  // Refresh balance when wallet changes
   useEffect(() => {
     if (wallet?.publicKey) {
       refreshBalance();

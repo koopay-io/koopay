@@ -1,4 +1,5 @@
 import { toast } from "sonner";
+import { useCallback } from "react";
 import {
 	parseStellarError,
 	parseAPIError,
@@ -9,7 +10,7 @@ export function useErrorToast() {
 	/**
 	 * Show error toast with appropriate message
 	 */
-	const showError = (error: unknown, context?: string) => {
+	const showError = useCallback((error: unknown, context?: string) => {
 		const message = parseStellarError(error);
 		const hash = extractTransactionHash(error);
 
@@ -26,23 +27,23 @@ export function useErrorToast() {
 					}
 				: undefined,
 		});
-	};
+	}, []);
 
 	/**
 	 * Show API error toast
 	 */
-	const showAPIError = (error: unknown, context?: string) => {
+	const showAPIError = useCallback((error: unknown, context?: string) => {
 		const message = parseAPIError(error);
 
 		toast.error(context || "Error", {
 			description: message,
 		});
-	};
+	}, []);
 
 	/**
 	 * Show network error with retry option
 	 */
-	const showNetworkError = (onRetry?: () => void) => {
+	const showNetworkError = useCallback((onRetry?: () => void) => {
 		toast.error("Connection Error", {
 			description:
 				"Unable to connect. Please check your internet connection.",
@@ -53,16 +54,16 @@ export function useErrorToast() {
 					}
 				: undefined,
 		});
-	};
+	}, []);
 
 	/**
 	 * Show success toast
 	 */
-	const showSuccess = (message: string, description?: string) => {
+	const showSuccess = useCallback((message: string, description?: string) => {
 		toast.success(message, {
 			description,
 		});
-	};
+	}, []);
 
 	return {
 		showError,
