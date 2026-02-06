@@ -15,9 +15,9 @@ import { FundEscrowCard } from "./_components/FundEscrowCard";
 import { useMilestoneEvidence } from "@/lib/hooks/useMilestoneEvidence";
 import { useEffect, useState } from "react";
 import { EvidenceList } from "./_components/EvidenceList";
-import { EvidenceUploadModal } from "@/components/EvidenceUploadModal";
+import { EvidenceUploadModal } from "@/components/modals/EvidenceUploadModal";
 import { PaymentTransactionCard } from "./_components/PaymentTransactionCard";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 
 export default function ProjectPage() {
   const params = useParams();

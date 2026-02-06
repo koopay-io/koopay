@@ -5,73 +5,74 @@ import { DashboardNavbar } from "./_components/DashboardNavbar";
 import { Breadcrumb } from "./_components/Breadcrumb";
 import { redirect } from "next/navigation";
 import {
-	TGetUserOrganizationsResponse,
-	TGetUserOrganizationsParams,
+  TGetUserOrganizationsResponse,
+  TGetUserOrganizationsParams,
 } from "@/lib/validations/shared/functions";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 
 export default async function HomeLayout({
-	children,
+  children,
 }: {
-	children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-	const supabase = await createClient();
+  const supabase = await createClient();
 
-	const {
-		data: { user },
-	} = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-	if (!user) {
-		redirect("/auth/login");
-	}
+  if (!user) {
+    redirect("/auth/login");
+  }
 
-	const rpcResult = (await (
-		supabase.rpc as unknown as (
-			name: string,
-			params: TGetUserOrganizationsParams,
-		) => Promise<{
-			data: TGetUserOrganizationsResponse | null;
-			error: Error | null;
-		}>
-	)("get_user_organizations", {
-		p_user_id: user.id,
-	} as TGetUserOrganizationsParams)) as {
-		data: TGetUserOrganizationsResponse | null;
-		error: Error | null;
-	};
-	const { data: organizationsData, error } = rpcResult;
+  const rpcResult = (await (
+    supabase.rpc as unknown as (
+      name: string,
+      params: TGetUserOrganizationsParams,
+    ) => Promise<{
+      data: TGetUserOrganizationsResponse | null;
+      error: Error | null;
+    }>
+  )("get_user_organizations", {
+    p_user_id: user.id,
+  } as TGetUserOrganizationsParams)) as {
+    data: TGetUserOrganizationsResponse | null;
+    error: Error | null;
+  };
+  const { data: organizationsData, error } = rpcResult;
 
-	if (error) {
-		throw new Error(`Error fetching organizations: ${error.message}`);
-	}
+  if (error) {
+    throw new Error(`Error fetching organizations: ${error.message}`);
+  }
 
-	if (!organizationsData) {
-		throw new Error("No organizations data returned");
-	}
+  if (!organizationsData) {
+    throw new Error("No organizations data returned");
+  }
 
-	const organizationsResponse = organizationsData;
+  const organizationsResponse = organizationsData;
 
-	if (!organizationsResponse || organizationsResponse.total === 0) {
-		redirect("/onboarding");
-	}
+  if (!organizationsResponse || organizationsResponse.total === 0) {
+    redirect("/onboarding");
+  }
 
-	return (
-		<ErrorBoundary>
-			<TrustlessWorkProvider>
-				<GlobalStoreProvider
-					initialState={{
-						user,
-						organizations: organizationsResponse.organizations,
-					}}>
-					<div className='min-h-screen bg-background'>
-						<DashboardNavbar />
-						<main className='container mx-auto px-4 sm:px-6 py-4 sm:py-8'>
-							<Breadcrumb />
-							{children}
-						</main>
-					</div>
-				</GlobalStoreProvider>
-			</TrustlessWorkProvider>
-		</ErrorBoundary>
-	);
+  return (
+    <ErrorBoundary>
+      <TrustlessWorkProvider>
+        <GlobalStoreProvider
+          initialState={{
+            user,
+            organizations: organizationsResponse.organizations,
+          }}
+        >
+          <div className="min-h-screen bg-background">
+            <DashboardNavbar />
+            <main className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+              <Breadcrumb />
+              {children}
+            </main>
+          </div>
+        </GlobalStoreProvider>
+      </TrustlessWorkProvider>
+    </ErrorBoundary>
+  );
 }

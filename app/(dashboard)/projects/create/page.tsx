@@ -10,8 +10,8 @@ import { signTransactionWithSk } from "@/lib/stellar/trustless";
 import { toast } from "sonner";
 
 // Components
-import { MilestoneEditModal } from "@/components/MilestoneEditModal";
-import { CollaboratorAssignmentModal } from "@/components/CollaboratorAssignmentModal";
+import { MilestoneEditModal } from "@/components/modals/MilestoneEditModal";
+import { CollaboratorAssignmentModal } from "@/components/modals/CollaboratorAssignmentModal";
 import { ProjectDetailsForm } from "./_components/ProjectDetailsForm";
 import { ProjectCollaborator } from "./_components/ProjectCollaborator";
 import { ProjectMilestones } from "./_components/ProjectMilestones";

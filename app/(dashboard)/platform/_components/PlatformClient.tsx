@@ -1,7 +1,6 @@
 "use client";
 
-// All your existing client-side imports
-import { DonutChart } from "@/components/DonutChart";
+import { DonutChart } from "@/components/common/DonutChart";
 import { useGlobalStore } from "@/lib/stores/globalStore";
 import { ProfileCard } from "./ProfileCard";
 import { CreateProjectCard } from "./CreateProjectCard";
