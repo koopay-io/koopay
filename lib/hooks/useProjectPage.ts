@@ -14,7 +14,7 @@ import type {
 	ApproveMilestonePayload,
 	ChangeMilestoneStatusPayload,
 } from "@trustless-work/escrow/types";
-import { getUserStellarWallet } from "@/lib/actions/wallet";
+import { createClient } from "@/lib/supabase/client";
 
 /**
  * Custom hook to manage project page state and handlers with improved error handling
@@ -140,20 +140,52 @@ export function useProjectPage(projectId: string) {
 		setApprovalError(null);
 
 		try {
-			// Calculate milestone index
+			if (!project) {
+				throw new Error("Project not found");
+			}
+
+			// Identify the acting user and their role on this project. The escrow
+			// requires each action to be signed by the correct party using the
+			// wallet held in their OWN session:
+			//   - the contractor (approver) signs the approval
+			//   - the freelancer (serviceProvider) signs the status change to "completed"
+			// `getUserStellarWallet` only ever returns a PUBLIC key, so a contractor
+			// can never sign on the freelancer's behalf. Previously the status change
+			// was signed with the current user's key while declaring the freelancer as
+			// serviceProvider, so the signature never matched the serviceProvider and
+			// the escrow rejected it. Each party must therefore act from their own
+			// session.
+			const supabase = createClient();
+			const {
+				data: { user },
+			} = await supabase.auth.getUser();
+			const currentUserId = user?.id;
+
+			const isFreelancer =
+				!!currentUserId && currentUserId === project.freelancer_id;
+			const isContractor =
+				!!currentUserId && currentUserId === project.contractor_id;
+
+			if (!isFreelancer && !isContractor) {
+				throw new Error(
+					"Only the project contractor or freelancer can update this milestone.",
+				);
+			}
+
 			const milestoneIndex = getMilestoneIndex(currentMilestone.id);
 
-			// Check if already approved
 			const escrowMilestones = escrowData?.escrow?.milestones;
-			if (
-				escrowMilestones &&
-				Array.isArray(escrowMilestones) &&
-				escrowMilestones[milestoneIndex]
-			) {
-				const escrowMilestone = escrowMilestones[milestoneIndex] as {
-					flags?: { approved?: boolean };
-				};
-				if (escrowMilestone.flags?.approved === true) {
+			const escrowMilestone =
+				Array.isArray(escrowMilestones) && escrowMilestones[milestoneIndex]
+					? (escrowMilestones[milestoneIndex] as {
+							flags?: { approved?: boolean };
+						})
+					: undefined;
+
+			if (isContractor) {
+				// Contractor approves the milestone (sets flags.approved = true),
+				// signing with their own wallet as the approver.
+				if (escrowMilestone?.flags?.approved === true) {
 					const errorMsg =
 						"This milestone is already approved in the smart contract";
 					setApprovalError(errorMsg);
@@ -161,61 +193,56 @@ export function useProjectPage(projectId: string) {
 					setIsApproving(false);
 					return;
 				}
-			}
 
-			// Step 1: Approve milestone
-			const approvalPayload: ApproveMilestonePayload = {
-				contractId: escrowContractId,
-				milestoneIndex: milestoneIndex.toString(),
-				approver: wallet.publicKey,
-			};
+				const approvalPayload: ApproveMilestonePayload = {
+					contractId: escrowContractId,
+					milestoneIndex: milestoneIndex.toString(),
+					approver: wallet.publicKey,
+				};
 
-			console.log("🔧 Step 1/2: Approving milestone in escrow:", {
-				contractId: escrowContractId,
-				milestoneIndex,
-				milestoneTitle: currentMilestone.title,
-			});
+				const approvalResult = await approveMilestoneInEscrow(
+					approvalPayload,
+					wallet.secretKey,
+				);
 
-			const approvalResult = await approveMilestoneInEscrow(
-				approvalPayload,
-				wallet.secretKey,
-			);
-
-			if (approvalResult && typeof approvalResult === "object") {
-				const status = (approvalResult as { status?: string }).status;
-				if (status === "ERROR") {
-					const errorMsg =
-						(approvalResult as { message?: string }).message ||
-						"Failed to approve milestone";
-					throw new Error(errorMsg);
+				if (approvalResult && typeof approvalResult === "object") {
+					const status = (approvalResult as { status?: string }).status;
+					if (status === "ERROR") {
+						const errorMsg =
+							(approvalResult as { message?: string }).message ||
+							"Failed to approve milestone";
+						throw new Error(errorMsg);
+					}
 				}
+
+				await fetchAllData();
+				await refetchEscrowDetails();
+				setMilestoneCompleted(false);
+
+				showSuccess(
+					"Milestone Approved",
+					`"${currentMilestone.title}" has been approved`,
+				);
+				return;
 			}
 
-			console.log("✅ Step 1/2: Milestone approved");
-
-			// Step 2: Get freelancer wallet
-			if (!project?.freelancer_id) {
-				throw new Error("Project not found or freelancer not assigned");
-			}
-
-			const freelancerWallet = await getUserStellarWallet(
-				project.freelancer_id,
-			);
-			if (!freelancerWallet) {
+			// Freelancer marks the milestone as completed. The escrow requires the
+			// serviceProvider to sign this transaction, so we sign with the
+			// freelancer's own session wallet and declare their own public key as the
+			// serviceProvider. Guard against a wallet that doesn't match the
+			// serviceProvider registered in the escrow.
+			if (serviceProvider && serviceProvider !== wallet.publicKey) {
 				throw new Error(
-					"Freelancer wallet not found. Please ensure freelancer has completed onboarding.",
+					"Your wallet does not match the service provider registered in this escrow.",
 				);
 			}
 
-			// Step 3: Change milestone status
 			const statusChangePayload: ChangeMilestoneStatusPayload = {
 				contractId: escrowContractId,
 				milestoneIndex: milestoneIndex.toString(),
 				newStatus: "completed",
-				serviceProvider: freelancerWallet,
+				serviceProvider: wallet.publicKey,
 			};
-
-			console.log("🔧 Step 2/2: Changing milestone status to 'completed'");
 
 			const statusChangeResult = await changeMilestoneStatusInEscrow(
 				statusChangePayload,
@@ -232,8 +259,6 @@ export function useProjectPage(projectId: string) {
 				}
 			}
 
-			console.log("✅ Step 2/2: Milestone status changed");
-
 			// Extract transaction hash from result
 			const txHash = extractTransactionHash(statusChangeResult);
 
@@ -249,12 +274,7 @@ export function useProjectPage(projectId: string) {
 
 			showSuccess(
 				"Milestone Completed",
-				`"${currentMilestone.title}" has been approved and payment released`,
-			);
-
-			console.log(
-				"✅ Milestone completed successfully",
-				txHash ? `(tx: ${txHash})` : "",
+				`"${currentMilestone.title}" has been marked as completed`,
 			);
 		} catch (error) {
 			logError(error, "Complete Milestone");
