@@ -20,7 +20,7 @@ export function DownloadCard({ title, description, basePath, zipPath }: Download
     document.body.removeChild(link);
   };
 
-  const buttonVariants = {
+  const buttonVariants: any = {
     hover: { 
       scale: 1.05,
       transition: { type: "spring", stiffness: 400, damping: 10 }
@@ -31,7 +31,7 @@ export function DownloadCard({ title, description, basePath, zipPath }: Download
     }
   };
 
-  const cardVariants = {
+  const cardVariants: any = {
     hover: {
       y: -5,
       transition: { duration: 0.2, ease: "easeOut" }
@@ -41,7 +41,7 @@ export function DownloadCard({ title, description, basePath, zipPath }: Download
   return (
     <motion.div 
       className="rounded-3xl border border-white/12 bg-slate-900/60 p-6 backdrop-blur shadow-[0_25px_80px_-60px_rgba(79,70,229,0.75)]"
-      variants={cardVariants}
+      variants={cardVariants as any}
       whileHover="hover"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -73,7 +73,7 @@ export function DownloadCard({ title, description, basePath, zipPath }: Download
         <motion.button
           onClick={() => handleDownload('ZIP', zipPath)}
           className="px-4 py-2 bg-gradient-1 hover:brightness-110 text-white text-sm font-medium rounded-xl transition-all duration-200 flex items-center gap-2"
-          variants={buttonVariants}
+          variants={buttonVariants as any}
           whileHover="hover"
           whileTap="tap"
         >
@@ -93,7 +93,7 @@ export function DownloadCard({ title, description, basePath, zipPath }: Download
         <motion.button
           onClick={() => handleDownload('SVG', `${basePath}-dark.svg`)}
           className="px-4 py-2 bg-slate-800/60 hover:bg-slate-700/60 border border-white/15 rounded-xl text-zinc-200 text-sm font-medium transition-colors duration-200 flex items-center gap-2"
-          variants={buttonVariants}
+          variants={buttonVariants as any}
           whileHover="hover"
           whileTap="tap"
         >
@@ -113,7 +113,7 @@ export function DownloadCard({ title, description, basePath, zipPath }: Download
         <motion.button
           onClick={() => handleDownload('PNG', `${basePath}-dark.png`)}
           className="px-4 py-2 bg-slate-800/60 hover:bg-slate-700/60 border border-white/15 rounded-xl text-zinc-200 text-sm font-medium transition-colors duration-200 flex items-center gap-2"
-          variants={buttonVariants}
+          variants={buttonVariants as any}
           whileHover="hover"
           whileTap="tap"
         >

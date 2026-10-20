@@ -15,7 +15,7 @@ interface AssetPreviewProps {
 export function AssetPreview({ darkSrc, lightSrc, alt, className }: AssetPreviewProps) {
   const [activeTab, setActiveTab] = useState<'dark' | 'light'>('dark');
 
-  const tabVariants = {
+  const tabVariants: any = {
     inactive: { 
       scale: 0.95,
       opacity: 0.7,
@@ -28,7 +28,7 @@ export function AssetPreview({ darkSrc, lightSrc, alt, className }: AssetPreview
     }
   };
 
-  const previewVariants = {
+  const previewVariants: any = {
     dark: {
       backgroundColor: '#0f172a',
       transition: { duration: 0.3, ease: "easeInOut" }
@@ -39,7 +39,7 @@ export function AssetPreview({ darkSrc, lightSrc, alt, className }: AssetPreview
     }
   };
 
-  const logoVariants = {
+  const logoVariants: any = {
     hidden: { opacity: 0, scale: 0.8, y: 10 },
     visible: { 
       opacity: 1, 
@@ -73,7 +73,7 @@ export function AssetPreview({ darkSrc, lightSrc, alt, className }: AssetPreview
               ? 'bg-slate-800/60 text-zinc-100'
               : 'text-zinc-400 hover:text-zinc-200'
           )}
-          variants={tabVariants}
+          variants={tabVariants as any}
           animate={activeTab === 'dark' ? 'active' : 'inactive'}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -95,7 +95,7 @@ export function AssetPreview({ darkSrc, lightSrc, alt, className }: AssetPreview
               ? 'bg-slate-800/60 text-zinc-100'
               : 'text-zinc-400 hover:text-zinc-200'
           )}
-          variants={tabVariants}
+          variants={tabVariants as any}
           animate={activeTab === 'light' ? 'active' : 'inactive'}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -115,14 +115,14 @@ export function AssetPreview({ darkSrc, lightSrc, alt, className }: AssetPreview
       <div className="p-8">
         <motion.div
           className="rounded-2xl p-8 flex items-center justify-center min-h-[120px]"
-          variants={previewVariants}
+          variants={previewVariants as any}
           animate={activeTab}
         >
           <div className={cn('relative', className)}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
-                variants={logoVariants}
+                variants={logoVariants as any}
                 initial="hidden"
                 animate="visible"
                 exit="exit"

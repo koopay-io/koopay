@@ -9,7 +9,10 @@ import {
 } from "@/lib/utils/projectHelpers";
 import { Database } from "@/lib/supabase/types/database.gen";
 
-type Milestone = Database["public"]["Tables"]["milestones"]["Row"];
+type Milestone = Database["public"]["Tables"]["milestones"]["Row"] & {
+  payment_hash?: string | null;
+  payment_sent_at?: string | null;
+};
 
 interface CurrentMilestoneProps {
   milestone: Milestone | null;

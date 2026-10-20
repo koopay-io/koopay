@@ -6,7 +6,7 @@ import { DownloadCard } from './DownloadCard';
 import { AssetPreview } from './AssetPreview';
 
 export function BrandKitSection() {
-  const containerVariants = {
+  const containerVariants: any = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -17,7 +17,7 @@ export function BrandKitSection() {
     },
   };
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { opacity: 0, y: 30 },
     visible: {
       opacity: 1,
@@ -29,7 +29,7 @@ export function BrandKitSection() {
     },
   };
 
-  const sectionVariants = {
+  const sectionVariants: any = {
     hidden: { opacity: 0, y: 50 },
     visible: {
       opacity: 1,
@@ -46,20 +46,20 @@ export function BrandKitSection() {
       className="relative pt-32 pb-20"
       initial="hidden"
       animate="visible"
-      variants={containerVariants}
+      variants={containerVariants as any}
     >
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
-        <motion.div className="text-center mb-16" variants={itemVariants}>
+        <motion.div className="text-center mb-16" variants={itemVariants as any}>
           <motion.h1 
             className="text-4xl md:text-6xl font-bold text-zinc-100 mb-6"
-            variants={itemVariants}
+            variants={itemVariants as any}
           >
             Brand Kit
           </motion.h1>
           <motion.p 
             className="text-xl text-zinc-400/85 max-w-3xl mx-auto leading-relaxed"
-            variants={itemVariants}
+            variants={itemVariants as any}
           >
             Download Koopay brand assets for your projects. All assets are available in multiple formats 
             and optimized for both dark and light backgrounds.
@@ -67,16 +67,16 @@ export function BrandKitSection() {
         </motion.div>
 
         {/* Brand Assets Grid */}
-        <motion.div className="grid gap-12 lg:gap-16" variants={containerVariants}>
+        <motion.div className="grid gap-12 lg:gap-16" variants={containerVariants as any}>
           {/* Wordmark Logo Section */}
           <motion.div 
             className="grid lg:grid-cols-2 gap-8 items-center"
-            variants={sectionVariants}
+            variants={sectionVariants as any}
             whileInView="visible"
             initial="hidden"
             viewport={{ once: true, margin: "-100px" }}
           >
-            <motion.div variants={itemVariants}>
+            <motion.div variants={itemVariants as any}>
               <h2 className="text-3xl font-semibold text-zinc-100 mb-4">
                 Wordmark Logo
               </h2>
@@ -91,7 +91,7 @@ export function BrandKitSection() {
                 zipPath="/brand-kit/wordmark-logo.zip"
               />
             </motion.div>
-            <motion.div variants={itemVariants}>
+            <motion.div variants={itemVariants as any}>
               <AssetPreview
                 darkSrc="/brand-kit/wordmark-logo/wordmark-logo-dark.svg"
                 lightSrc="/brand-kit/wordmark-logo/wordmark-logo-light.svg"
@@ -104,12 +104,12 @@ export function BrandKitSection() {
           {/* Logo Section */}
           <motion.div 
             className="grid lg:grid-cols-2 gap-8 items-center"
-            variants={sectionVariants}
+            variants={sectionVariants as any}
             whileInView="visible"
             initial="hidden"
             viewport={{ once: true, margin: "-100px" }}
           >
-            <motion.div className="lg:order-2" variants={itemVariants}>
+            <motion.div className="lg:order-2" variants={itemVariants as any}>
               <h2 className="text-3xl font-semibold text-zinc-100 mb-4">
                 Logo
               </h2>
@@ -124,7 +124,7 @@ export function BrandKitSection() {
                 zipPath="/brand-kit/logo.zip"
               />
             </motion.div>
-            <motion.div className="lg:order-1" variants={itemVariants}>
+            <motion.div className="lg:order-1" variants={itemVariants as any}>
               <AssetPreview
                 darkSrc="/brand-kit/logo/logo-dark.svg"
                 lightSrc="/brand-kit/logo/logo-light.svg"
@@ -137,12 +137,12 @@ export function BrandKitSection() {
           {/* Brand Guidelines Section */}
           <motion.div 
             className="grid lg:grid-cols-2 gap-8 items-center"
-            variants={sectionVariants}
+            variants={sectionVariants as any}
             whileInView="visible"
             initial="hidden"
             viewport={{ once: true, margin: "-100px" }}
           >
-            <motion.div variants={itemVariants}>
+            <motion.div variants={itemVariants as any}>
               <h2 className="text-3xl font-semibold text-zinc-100 mb-4">
                 Brand Guidelines
               </h2>
@@ -178,7 +178,7 @@ export function BrandKitSection() {
             </motion.div>
             <motion.div 
               className="flex items-center justify-center p-12 rounded-3xl border border-white/12 bg-slate-900/60 backdrop-blur shadow-[0_25px_80px_-60px_rgba(79,70,229,0.75)]"
-              variants={itemVariants}
+              variants={itemVariants as any}
               whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
             >
               <div className="text-center">
@@ -200,7 +200,7 @@ export function BrandKitSection() {
         {/* Usage Guidelines */}
         <motion.div 
           className="mt-20 rounded-3xl border border-white/12 bg-slate-900/60 p-8 backdrop-blur shadow-[0_25px_80px_-60px_rgba(79,70,229,0.75)]"
-          variants={sectionVariants}
+          variants={sectionVariants as any}
           whileInView="visible"
           initial="hidden"
           viewport={{ once: true, margin: "-100px" }}
@@ -208,15 +208,15 @@ export function BrandKitSection() {
         >
           <motion.h3 
             className="text-2xl font-semibold text-zinc-100 mb-6"
-            variants={itemVariants}
+            variants={itemVariants as any}
           >
             Usage Guidelines
           </motion.h3>
           <motion.div 
             className="grid md:grid-cols-2 gap-8"
-            variants={containerVariants}
+            variants={containerVariants as any}
           >
-            <motion.div variants={itemVariants}>
+            <motion.div variants={itemVariants as any}>
               <h4 className="font-semibold text-zinc-200 mb-3 flex items-center gap-2">
                 <motion.div 
                   className="w-2 h-2 rounded-full bg-emerald-400"
@@ -232,7 +232,7 @@ export function BrandKitSection() {
                 <li>• Ensure logos are legible at all sizes</li>
               </ul>
             </motion.div>
-            <motion.div variants={itemVariants}>
+            <motion.div variants={itemVariants as any}>
               <h4 className="font-semibold text-zinc-200 mb-3 flex items-center gap-2">
                 <motion.div 
                   className="w-2 h-2 rounded-full bg-rose-400"

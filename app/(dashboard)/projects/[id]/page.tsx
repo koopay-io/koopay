@@ -35,10 +35,16 @@ export default function ProjectPage() {
 		milestoneCompleted,
 		setMilestoneCompleted,
 		handleViewContract,
+		handleMilestoneApprove,
 		handleMilestoneComplete,
 		router,
 		isApproving,
 		approvalError,
+		transactionHash,
+		isContractor,
+		isFreelancer,
+		isMilestoneApproved,
+		isMilestoneCompleted,
 	} = useProjectPage(projectId);
 
 	const [isEvidenceModalOpen, setIsEvidenceModalOpen] = useState(false);
@@ -60,36 +66,46 @@ export default function ProjectPage() {
 	}
 
 	if (!project) {
-		return <ErrorState />;
+		return (
+			<ErrorState message="El proyecto que buscas no existe o ha sido eliminado." />
+		);
 	}
 
 	return (
 		<ErrorBoundary>
-			<div className='min-h-screen bg-black'>
-				{/* Main Content */}
-				<main className='px-6 py-8'>
-					<div className='max-w-7xl mx-auto'>
-						{/* Back Button */}
-						<div className='flex items-center gap-4 mb-8'>
+			<div className="min-h-screen bg-slate-950">
+				{/* Top Navigation */}
+				<header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-10">
+					<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+						<div className="flex items-center gap-4">
 							<Button
-								variant='ghost'
-								onClick={() => router.back()}
-								className='text-white hover:bg-white/20 hover:text-white gap-2 transition-all'>
-								<ArrowLeft className='h-4 w-4' />
-								Back
+								variant="ghost"
+								size="sm"
+								onClick={() => router.push("/dashboard")}
+								className="text-slate-400 hover:text-white"
+							>
+								<ArrowLeft className="h-4 w-4 mr-2" />
+								Volver
 							</Button>
-
-							<Button
-								variant='ghost'
-								onClick={() => router.push("/platform")}
-								className='text-white/60 hover:text-white hover:bg-white/10 gap-2 transition-all'>
-								<Home className='h-4 w-4' />
-								Go to Platform
-							</Button>
+							<div className="h-4 w-px bg-slate-700" />
+							<div className="flex items-center gap-2 text-sm text-slate-400">
+								<Home className="h-4 w-4" />
+								<span>/</span>
+								<span>Proyectos</span>
+								<span>/</span>
+								<span className="text-white font-medium">
+									{project.title}
+								</span>
+							</div>
 						</div>
+					</div>
+				</header>
 
+				{/* Main Content */}
+				<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+					<div className="space-y-8">
 						{/* Project Overview */}
-						<div className='grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12'>
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
 							<ProjectOverview
 								title={project.title}
 								description={project.description}
@@ -109,8 +125,8 @@ export default function ProjectPage() {
 						</div>
 
 						{/* Evidence */}
-						<div className='mb-8'>
-							<h2 className='text-2xl font-bold text-white mb-6'>
+						<div className="mb-8">
+							<h2 className="text-2xl font-bold text-white mb-6">
 								Evidence
 							</h2>
 							<EvidenceList
@@ -142,8 +158,8 @@ export default function ProjectPage() {
 
 							return milestoneToShow?.payment_hash &&
 								project.freelancer_id ? (
-								<div className='mb-8'>
-									<h2 className='text-2xl font-bold text-white mb-6'>
+								<div className="mb-8">
+									<h2 className="text-2xl font-bold text-white mb-6">
 										Payment Details
 									</h2>
 									<PaymentTransactionCard
@@ -156,7 +172,7 @@ export default function ProjectPage() {
 										timestamp={
 											milestoneToShow.payment_sent_at ?? null
 										}
-										status='success'
+										status="success"
 									/>
 								</div>
 							) : null;
@@ -196,40 +212,115 @@ export default function ProjectPage() {
 							</>
 						)}
 
-						{/* Save Changes Button */}
-						<div className='flex flex-col items-end gap-4'>
+						{/* Save Changes / Actions Area */}
+						<div className="flex flex-col items-end gap-4">
 							{approvalError && (
-								<div className='bg-red-900/20 border border-red-700 text-red-400 px-4 py-2 rounded text-sm'>
+								<div className="bg-red-900/20 border border-red-700 text-red-400 px-4 py-2 rounded text-sm">
 									Error: {approvalError}
 								</div>
 							)}
 
-							<div className='flex gap-4'>
+							{transactionHash && (
+								<div className="bg-emerald-950/40 border border-emerald-700 text-emerald-300 px-4 py-2 rounded text-sm flex items-center gap-2">
+									<span>Stellar Transaction Hash:</span>
+									<a
+										href={`https://stellar.expert/explorer/testnet/tx/${transactionHash}`}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="underline font-mono text-xs hover:text-emerald-200"
+									>
+										{transactionHash.slice(0, 10)}...{transactionHash.slice(-8)}
+									</a>
+								</div>
+							)}
+
+							<div className="flex flex-wrap gap-4 items-center">
 								<Button
 									onClick={handleViewContract}
-									variant='secondary'
-									className='hover:brightness-110 hover:shadow-lg transition-all'
-									disabled={isApproving}>
-									<FileText className='h-5 w-5' />
+									variant="secondary"
+									className="hover:brightness-110 hover:shadow-lg transition-all"
+									disabled={isApproving}
+								>
+									<FileText className="h-5 w-5" />
 									Ver Contrato
 								</Button>
 
-								<Button
-									onClick={handleMilestoneComplete}
-									disabled={!milestoneCompleted || isApproving}
-									className='bg-blue-500 hover:brightness-110 hover:shadow-lg text-white px-8 py-3 text-lg gap-2 disabled:opacity-50 transition-all'>
-									{isApproving ? (
-										<>
-											<div className='h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin' />
-											Aprobando en Smart Contract...
-										</>
-									) : (
-										<>
-											<Check className='h-5 w-5' />
-											Guardar cambios
-										</>
-									)}
-								</Button>
+								{/* Role: Contractor */}
+								{isContractor && (
+									<Button
+										onClick={handleMilestoneApprove}
+										disabled={isMilestoneApproved || isApproving}
+										className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 text-lg gap-2 disabled:opacity-50 transition-all"
+									>
+										{isApproving ? (
+											<>
+												<div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+												Aprobando en Smart Contract...
+											</>
+										) : isMilestoneApproved ? (
+											<>
+												<Check className="h-5 w-5" />
+												Hito Aprobado en Contrato
+											</>
+										) : (
+											<>
+												<Check className="h-5 w-5" />
+												Aprobar Hito
+											</>
+										)}
+									</Button>
+								)}
+
+								{/* Role: Freelancer */}
+								{isFreelancer && (
+									<Button
+										onClick={handleMilestoneComplete}
+										disabled={!isMilestoneApproved || isMilestoneCompleted || isApproving}
+										className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 text-lg gap-2 disabled:opacity-50 transition-all"
+									>
+										{isApproving ? (
+											<>
+												<div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+												Liberando Pago en Smart Contract...
+											</>
+										) : isMilestoneCompleted ? (
+											<>
+												<Check className="h-5 w-5" />
+												Pago Liberado
+											</>
+										) : isMilestoneApproved ? (
+											<>
+												<Check className="h-5 w-5" />
+												Marcar como Completado & Liberar Pago
+											</>
+										) : (
+											<>
+												Esperando Aprobación del Contratista
+											</>
+										)}
+									</Button>
+								)}
+
+								{/* Fallback for general / unassigned view */}
+								{!isContractor && !isFreelancer && (
+									<Button
+										onClick={handleMilestoneComplete}
+										disabled={!milestoneCompleted || isApproving}
+										className="bg-blue-500 hover:brightness-110 hover:shadow-lg text-white px-8 py-3 text-lg gap-2 disabled:opacity-50 transition-all"
+									>
+										{isApproving ? (
+											<>
+												<div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+												Procesando en Smart Contract...
+											</>
+										) : (
+											<>
+												<Check className="h-5 w-5" />
+												Guardar cambios
+											</>
+										)}
+									</Button>
+								)}
 							</div>
 						</div>
 					</div>
